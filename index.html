@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>半導体スタンプラリーMAP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f0f4f8;
+      --accent-sky: #0ea5e9; /* sky-500 */
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --bar-width-pct: 78%; /* ★ 進捗バーを短めに */
+      --dot-size: 28px;     /* ★ マーカー＆現在地ドット 大きめ */
+      --dot-border: 4px;    /* ★ ドット外枠 太め */
+      --chip-size: 64px;    /* ★ グリッドのロゴ画像サイズ */
+    }
+    html { font-family: 'Inter', sans-serif; }
+    body {
+      background-color: var(--bg-light);
+      background-image:
+        radial-gradient(at 10% 20%, hsla(210, 80%, 95%, 0.7) 0px, transparent 50%),
+        radial-gradient(at 80% 15%, hsla(200, 70%, 90%, 0.6) 0px, transparent 50%),
+        radial-gradient(at 20% 90%, hsla(220, 75%, 92%, 0.5) 0px, transparent 50%),
+        radial-gradient(at 90% 85%, hsla(190, 60%, 90%, 0.6) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      overscroll-behavior: none;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #app { flex: 1; display: flex; flex-direction: column; }
+    main { flex: 1; overflow-y: auto; position: relative; }
+
+    .page { display: none; width: 100%; position: relative; }
+    .page.active { display: block; }
+
+    /* --- LiquidGlass Card --- */
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow:
+        inset 0 2px 2px rgba(255, 255, 255, 0.8),
+        0 16px 40px rgba(37, 37, 85, 0.12);
+    }
+
+    /* --- Floating Navigation (LiquidGlass Base) --- */
+    .floating-nav {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      box-shadow:
+        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+        0 16px 40px rgba(37, 37, 85, 0.18);
+      position: relative;
+      border-radius: 1.5rem;
+    }
+
+    /* --- Nav Indicator --- */
+    #nav-indicator {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      height: 75%;
+      border-radius: 0.75rem;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.28)),
+        linear-gradient(180deg, rgba(14,165,233,0.10), rgba(14,165,233,0.00));
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.48);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.85),
+        inset 0 -10px 18px rgba(14,165,233,0.08),
+        0 8px 24px rgba(14,165,233,0.28);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: -1;
+    }
+    #nav-indicator::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      opacity: .7;
+    }
+
+    .nav-btn { z-index: 1; }
+    .nav-btn.active { color: #0c4a6e; }
+
+    /* --- Chip (Stamp) 画像版 --- */
+    .chip {
+      width: var(--chip-size);
+      height: var(--chip-size);
+      border-radius: 20px;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      background: #fff;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(0, 150, 200, 0.15);
+      overflow: hidden; /* ★ 1:1トリミング */
+      transition: box-shadow .3s ease;
+    }
+    .chip.on { box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 0 24px rgba(52, 211, 153, .55); }
+    .chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .chip-name { max-width: 88px; height: 2.4em; margin-top: 6px; font-size: 11px; line-height: 1.2; color: #0f172a; text-align: center; font-weight: 600; white-space: normal; display: flex; align-items: center; justify-content: center; }
+
+    /* --- Bottom Sheet --- */
+    .bottom-sheet-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+    .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform .4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .bottom-sheet.is-open { transform: translateY(0); }
+    .bottom-sheet.is-open + .bottom-sheet-backdrop { opacity: 1; pointer-events: auto; }
+
+    /* --- Ripple --- */
+    .ripple { position: relative; overflow: hidden; }
+    .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: ripple-anim .6s linear; }
+    @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+    /* --- List Anim --- */
+    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
+    @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
+
+    /* --- Progress Bar with Bubbles --- */
+    .progress-area { position: relative; padding-top: 7rem; margin-top: 1rem; overflow: visible; }
+    #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
+
+    .reward-bubble { position: absolute; bottom: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 90px; pointer-events: none; }
+    #reward-bubble-4 { left: 50%; }
+    #reward-bubble-8 { left: 100%; transform: translateX(-50%); }
+
+    .reward-bubble-content { width: 100%; min-height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; margin-top: 6px; }
+    .reward-bubble-stem { display:none; }
+
+    .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
+    #progress-bar { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #34d399, #10b981, var(--accent-sky), #3b82f6); transition: width .5s ease-in-out; }
+
+    /* --- Fixed markers (4 & 8) --- */
+    .marker-dot { position: absolute; top: 50%; width: var(--dot-size); height: var(--dot-size); background: #fff; border: var(--dot-border) solid #cbd5e1; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 4px rgba(0,0,0,.08); z-index: 12; display: grid; place-items: center; }
+    .marker-dot .label { font-size: 14px; font-weight: 800; color: #334155; user-select: none; line-height: 1; }
+    .marker-dot.is-active { border-color: #3b82f6; background: #3b82f6; box-shadow: 0 0 14px rgba(59,130,246,.6), 0 2px 8px rgba(0,0,0,.15); }
+    .marker-dot.is-active .label { color: #fff; }
+
+    /* --- Current position dot --- */
+    #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
+
+    .map-wrap{aspect-ratio:2/3;}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+        <svg class="w-10 h-10 shadow-lg" viewBox="0 0 64 64" aria-label="Semiconductor" role="img">
+          <defs>
+            <linearGradient id="waferGrad" x1="0" x2="1">
+              <stop offset="0" stop-color="#a5f3fc"/>
+              <stop offset="1" stop-color="#60a5fa"/>
+            </linearGradient>
+          </defs>
+          <circle cx="32" cy="32" r="28" fill="url(#waferGrad)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <g stroke="rgba(255,255,255,0.6)" stroke-width="1">
+            <path d="M8 20 H56M8 32 H56M8 44 H56"/>
+            <path d="M20 8 V56M32 8 V56M44 8 V56"/>
+          </g>
+          <path d="M58 30 A28 28 0 0 1 58 34" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+        </svg>
+        <div>
+          <h1 id="header-title" class="text-lg font-semibold text-sky-800">進捗ホーム</h1>
+          <p class="text-xs text-sky-700">半導体スタンプラリーMAP</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 pb-28">
+      <div id="page-home" class="page active p-4 space-y-6">
+        <div class="liquid-glass rounded-3xl p-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
+            <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0/8</span>
+          </div>
+          <div class="progress-area">
+            <div id="progress-wrapper">
+              <!-- Bubbles -->
+              <div id="reward-bubble-4" class="reward-bubble">
+                <div class="reward-bubble-content liquid-glass border-slate-300">💎</div>
+              </div>
+              <div id="reward-bubble-8" class="reward-bubble">
+                <div class="reward-bubble-content liquid-glass border-amber-300">👑</div>
+              </div>
+              <!-- Track -->
+              <div id="progress-track" class="progress-track">
+                <div id="progress-bar" style="width:0%"></div>
+                <div id="marker-4" class="marker-dot" style="left:50%"><span class="label">4</span></div>
+                <div id="marker-8" class="marker-dot" style="left:100%"><span class="label">8</span></div>
+                <div id="progress-dot"></div>
+              </div>
+            </div>
+          </div>
+          <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600">スタンプをタップして詳細を確認しよう。</p>
+        </div>
+        <div class="liquid-glass rounded-3xl p-4">
+          <div class="grid grid-cols-4 gap-y-4" id="stamp-grid"></div>
+        </div>
+      </div>
+
+      <div id="page-map" class="page">
+        <div class="map-wrap w-full max-w-[1200px] mx-auto">
+          <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
+            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+            <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
+          </svg>
+        </div>
+      </div>
+
+      <div id="page-list" class="page p-2">
+        <ul id="booth-list" class="space-y-2"></ul>
+      </div>
+    </main>
+
+    <div id="booth-sheet" class="bottom-sheet">
+      <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
+        <div class="p-4 border-b border-white/50 flex items-start gap-3">
+          <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
+            <div id="booth-sheet-tags" class="mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <button id="get-stamp-btn" data-id="" class="px-4 py-2 text-sm rounded-2xl bg-sky-500 text-white ripple shadow-md">スタンプGET</button>
+        </div>
+        <div class="p-4 space-y-4 text-sm">
+          <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
+          <div class="text-slate-600 space-y-2">
+            <div><strong class="font-medium text-slate-800">スタンプ条件：</strong><span id="booth-sheet-condition">-</span></div>
+            <div><strong class="font-medium text-slate-800">ノベルティ：</strong><span id="booth-sheet-giveaway">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-sheet-backdrop"></div>
+
+    <div class="fixed bottom-0 left-0 right-0 z-40 p-3">
+      <nav class="h-16 grid grid-cols-3 items-center floating-nav rounded-3xl">
+        <div id="nav-indicator"></div>
+        <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
+        <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
+        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">一覧</span></button>
+      </nav>
+    </div>
+  </div>
+
+<script>
+// --- DATA & STATE ---
+const IMG_DEFAULT = 'logo.jpg';
+const BOOTH_ANCHORS = {
+  A: { x: 0.20, y: 0.30 }, B: { x: 0.80, y: 0.30 }, C: { x: 0.30, y: 0.38 },
+  D: { x: 0.70, y: 0.38 }, E: { x: 0.27, y: 0.51 }, F: { x: 0.73, y: 0.51 },
+  G: { x: 0.27, y: 0.65 }, H: { x: 0.73, y: 0.65 }
+};
+
+const BOOTH_DATA = [
+  { id: 'A', name: '東京エレクトロン宮城株式会社', img: IMG_DEFAULT, icon: '⚡', desc: '最先端のプラズマエッチング装置を展示。微細加工技術の最前線をご覧ください。', tags:['エッチング', '製造装置', 'プラズマ'], giveaway:'TELオリジナルウエハーストラップ', condition:'エッチング工程に関するクイズに正解' },
+  { id: 'B', name: 'TOPPAN株式会社', img: IMG_DEFAULT, icon: '🖼️', desc: '半導体回路の原版「フォトマスク」の世界へようこそ。EUVマスクの最新技術を紹介します。', tags:['フォトマスク', 'EUV', 'リソグラフィ'], giveaway:'フォトマスクデザイン定規', condition:'ミニチュアマスクの重ね合わせ体験' },
+  { id: 'C', name: 'ラピスセミコンダクタ宮城工場', img: IMG_DEFAULT, icon: '💡', desc: '超低消費電力MCUとカスタムLSIソリューション。身近なIoTデバイスを動かす技術を解説します。', tags:['LSI', 'MCU', 'IoT'], giveaway:'オリジナルICチップキーホルダー', condition:'IoTデバイスのデモを体験' },
+  { id: 'D', name: '株式会社NTKセラテック', img: IMG_DEFAULT, icon: '🔥', desc: '製造装置を支えるファインセラミックス部品。静電チャックやヒーターの実物を展示。', tags:['セラミックス', '装置部品', '静電チャック'], giveaway:'セラミック製コースター', condition:'セラミックスの熱伝導実験に参加' },
+  { id: 'E', name: '日本ファインセラミックス株式会社', img: IMG_DEFAULT, icon: '🏺', desc: '高純度・高精度なセラミックス製品。半導体の品質は、私たちの素材技術から生まれます。', tags:['材料', 'セラミックス', '高純度'], giveaway:'ミニチュアセラミックプレート', condition:'製品サンプルに触れてみる' },
+  { id: 'F', name: '東北大蔵電気株式会社', img: IMG_DEFAULT, icon: '🌡️', desc: '成膜プロセスを精密に制御する水晶振動子式膜厚計や各種コントローラーを展示。', tags:['計測', '成膜', 'コントローラー'], giveaway:'液晶温度計カード', condition:'膜厚計のデモンストレーションを見学' },
+  { id: 'G', name: 'アドバンテストコンポーネント株式会社', img: IMG_DEFAULT, icon: '🔬', desc: '半導体の品質を守る最終関門。プローブカードとテストソケットの精密技術をご覧ください。', tags:['テスト', '検査', 'プローブカード'], giveaway:'回路図デザインの付箋', condition:'プローブカードの拡大モデルを操作' },
+  { id: 'H', name: 'Mioテクノロジー株式会社', img: IMG_DEFAULT, icon: '⚙️', desc: 'μm単位の超精密加工技術。製造装置の心臓部を支えるコンポーネントを製造しています。', tags:['精密加工', '部品', 'コンポーネント'], giveaway:'精密加工メタル定規', condition:'加工サンプルの顕微鏡観察' }
+];
+const state = { stamps: new Set(), activePage: 'home', prevCount: 0 };
+
+// --- DOM ELEMENTS ---
+const $app = {
+  header: document.getElementById('header'),
+  headerTitle: document.getElementById('header-title'),
+  pages: document.querySelectorAll('.page'),
+  nav: document.querySelector('.floating-nav'),
+  navIndicator: document.getElementById('nav-indicator'),
+  navButtons: document.querySelectorAll('.nav-btn'),
+  stampGrid: document.getElementById('stamp-grid'),
+  boothList: document.getElementById('booth-list'),
+  progress: {
+    badge: document.getElementById('progress-badge'),
+    bar: document.getElementById('progress-bar'),
+    wrapper: document.getElementById('progress-wrapper'),
+    msg: document.getElementById('progress-msg'),
+    bubble4: document.getElementById('reward-bubble-4'),
+    bubble8: document.getElementById('reward-bubble-8'),
+    dot: document.getElementById('progress-dot'),
+    marker4: document.getElementById('marker-4'),
+    marker8: document.getElementById('marker-8'),
+  },
+  map: {
+    svg: document.getElementById('svg-map'),
+    bg: document.getElementById('bg-image'),
+    iconsGroup: document.getElementById('booth-icons')
+  },
+  sheet: {
+    el: document.getElementById('booth-sheet'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop'),
+    icon: document.getElementById('booth-sheet-icon'),
+    title: document.getElementById('booth-sheet-title'),
+    tags: document.getElementById('booth-sheet-tags'),
+    desc: document.getElementById('booth-sheet-desc'),
+    condition: document.getElementById('booth-sheet-condition'),
+    giveaway: document.getElementById('booth-sheet-giveaway'),
+    getStampBtn: document.getElementById('get-stamp-btn'),
+  }
+};
+
+// --- RENDER FUNCTIONS ---
+function renderAll() {
+  renderStampGrid();
+  renderProgress();
+  updateActivePage();
+  layoutBoothIcons();
+}
+
+function renderStampGrid() {
+  $app.stampGrid.innerHTML = '';
+  BOOTH_DATA.forEach(b => {
+    const on = state.stamps.has(b.id);
+    const cell = document.createElement('div');
+    cell.className = 'flex flex-col items-center';
+    cell.innerHTML = `
+      <div class="chip ${on ? 'on' : ''}" data-id="${b.id}">
+        <img src="${b.img}" alt="${b.name}">
+      </div>
+      <div class="chip-name" title="${b.name}">${b.name}</div>`;
+    cell.addEventListener('click', () => { toggleStamp(b.id); });
+    $app.stampGrid.appendChild(cell);
+  });
+}
+
+function renderBoothList() {
+  $app.boothList.innerHTML = '';
+  BOOTH_DATA.forEach((b, i) => {
+    const li = document.createElement('li');
+    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim';
+    li.style.animationDelay = `${i * 50}ms`;
+    li.innerHTML = `
+      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
+        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-cover" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-semibold text-slate-800">${b.name}</div>
+        <div class="text-xs text-slate-500 truncate">${b.desc}</div>
+      </div>
+      <div class="text-2xl text-slate-300">${state.stamps.has(b.id) ? '✅' : '⚪️'}</div>`;
+    li.addEventListener('click', () => openBoothSheet(b));
+    $app.boothList.appendChild(li);
+  });
+}
+
+function renderProgress() {
+  const n = state.stamps.size;
+  const total = BOOTH_DATA.length;
+  const progressPercent = (n / total) * 100;
+
+  $app.progress.badge.textContent = `${n}/${total}`;
+  $app.progress.bar.style.width = `${progressPercent}%`;
+  $app.progress.dot.style.left = `${progressPercent}%`;
+
+  $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
+  $app.progress.bubble8.classList.toggle('is-achieved', n >= 8);
+  if (n === total) {
+    $app.progress.msg.textContent = '🎉 全ての特典をゲット！おめでとうございます！';
+  } else if (n >= 4) {
+    $app.progress.msg.textContent = `💎 特典ゲット！次の特典まであと${total - n}個！`;
+  } else {
+    $app.progress.msg.textContent = `あと${Math.max(0, 4 - n)}個で最初の特典をゲット！`;
+  }
+
+  // 4/8では現在地ドットを隠す・マーカーは到達以降ずっと色を保持
+  const onMilestone = (n === 4 || n === 8);
+  $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
+  $app.progress.marker4.classList.toggle('is-active', n >= 4);
+  $app.progress.marker8.classList.toggle('is-active', n >= 8);
+
+  state.prevCount = n;
+  syncBubbleHeights();
+}
+
+function updateActivePage() {
+  $app.pages.forEach(p => {
+    const isActive = p.id === `page-${state.activePage}`;
+    p.classList.toggle('active', isActive);
+    p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+    p.style.visibility = isActive ? 'visible' : 'hidden';
+  });
+
+  let activeBtn = null;
+  $app.navButtons.forEach(btn => {
+    const isActive = btn.dataset.page === state.activePage;
+    btn.classList.toggle('active', isActive);
+    if (isActive) activeBtn = btn;
+  });
+  if (activeBtn) {
+    const btnW = activeBtn.offsetWidth;
+    const indW = Math.max(56, Math.round(btnW * 0.66));
+    const left = activeBtn.offsetLeft + (btnW - indW) / 2;
+    $app.navIndicator.style.width = `${indW}px`;
+    $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
+  }
+  const pageTitles = { home: '進捗ホーム', map: '会場マップ', list: 'ブース一覧' };
+  $app.headerTitle.textContent = pageTitles[state.activePage];
+
+  if (state.activePage === 'list') { renderBoothList(); }
+
+  const isMap = state.activePage === 'map';
+  $app.map.iconsGroup?.setAttribute('pointer-events', isMap ? 'auto' : 'none');
+  if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
+}
+
+function openBoothSheet(booth) {
+  $app.sheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
+  $app.sheet.title.textContent = booth.name;
+  $app.sheet.desc.textContent = booth.desc;
+  $app.sheet.condition.textContent = booth.condition;
+  $app.sheet.giveaway.textContent = booth.giveaway;
+  $app.sheet.getStampBtn.dataset.id = booth.id;
+  const hasStamp = state.stamps.has(booth.id);
+  $app.sheet.getStampBtn.textContent = hasStamp ? 'キャンセル' : 'スタンプGET';
+  $app.sheet.getStampBtn.classList.toggle('bg-red-500', hasStamp);
+  $app.sheet.getStampBtn.classList.toggle('bg-sky-500', !hasStamp);
+  $app.sheet.tags.innerHTML = '';
+  booth.tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs';
+    span.textContent = t;
+    $app.sheet.tags.appendChild(span);
+  });
+  $app.sheet.el.classList.add('is-open');
+}
+
+function closeBoothSheet() { $app.sheet.el.classList.remove('is-open'); }
+function toggleStamp(id) { state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id); renderAll(); }
+
+function init() {
+  $app.navButtons.forEach(btn => btn.addEventListener('click', () => { state.activePage = btn.dataset.page; updateActivePage(); }));
+  $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
+  $app.sheet.getStampBtn.addEventListener('click', (e) => { toggleStamp(e.target.dataset.id); closeBoothSheet(); });
+  document.addEventListener('click', e => {
+    const rippleTarget = e.target.closest('.ripple');
+    if (!rippleTarget) return;
+    const rect = rippleTarget.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const diameter = Math.max(rippleTarget.clientWidth, rippleTarget.clientHeight);
+    const radius = diameter / 2;
+    ripple.style.width = ripple.style.height = `${diameter}px`;
+    ripple.style.left = `${e.clientX - rect.left - radius}px`;
+    ripple.style.top = `${e.clientY - rect.top - radius}px`;
+    ripple.classList.add('ripple-effect');
+    rippleTarget.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+  window.addEventListener('resize', () => { layoutBoothIcons(); syncBubbleHeights(); });
+  renderAll();
+}
+init();
+
+function layoutBoothIcons() {
+  const g = $app.map.iconsGroup; if (!g) return; g.innerHTML = '';
+  const vb = $app.map.svg.viewBox.baseVal;
+  const marginFactorX = 0.02; const marginFactorY = 0.02;
+  const usableW = vb.width * (1 - marginFactorX * 2);
+  const usableH = vb.height * (1 - marginFactorY * 2);
+  const offsetX = vb.x + vb.width * marginFactorX;
+  const offsetY = vb.y + vb.height * marginFactorY;
+  const base = Math.min(vb.width, vb.height);
+  const size = Math.max(72, Math.min(200, Math.round(base * 0.09))); // ★ ロゴ画像の一辺
+
+  Object.keys(BOOTH_ANCHORS).forEach(id => {
+    const a = BOOTH_ANCHORS[id];
+    const cx = offsetX + a.x * usableW;
+    const cy = offsetY + a.y * usableH;
+    const x = cx - size / 2;
+    const y = cy - size / 2;
+
+    const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
+    const img = document.createElementNS('http://www.w3.org/2000/svg','image');
+    img.setAttribute('x', x);
+    img.setAttribute('y', y);
+    img.setAttribute('width', size);
+    img.setAttribute('height', size);
+    img.setAttribute('href', booth.img);
+    img.setAttribute('preserveAspectRatio', 'xMidYMid slice'); // ★ 1:1トリミング表示
+    img.setAttribute('cursor', 'pointer');
+    img.dataset.id = id;
+    g.appendChild(img);
+  });
+
+  g.querySelectorAll('image').forEach(el => el.addEventListener('click', () => {
+    const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
+    if (booth) openBoothSheet(booth);
+  }));
+}
+
+function syncBubbleHeights(){
+  const b4 = document.querySelector('#reward-bubble-4 .reward-bubble-content');
+  const b8 = document.querySelector('#reward-bubble-8 .reward-bubble-content');
+  if (!b4 || !b8) return; const h = Math.max(50, b4.getBoundingClientRect().height); b8.style.minHeight = h + 'px';
+}
+window.addEventListener('resize', syncBubbleHeights);
+window.addEventListener('load', syncBubbleHeights);
+</script>
+</body>
+</html>
