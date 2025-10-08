@@ -593,17 +593,34 @@ function renderUserQr(uuid) {
   $app.qr.box.innerHTML = '';
   $app.qr.uuid.textContent = uuid;
 
-  QRCode.toCanvas(uuid, { width: 260, margin: 2 }, (err, canvas) => {
-    if (err) { console.error(err); showToast('QR生成に失敗しました'); return; }
-    $app.qr.box.appendChild(canvas);
-    try {
-      const dataUrl = canvas.toDataURL('image/png');
-      $app.qr.dl.setAttribute('href', dataUrl);
-      $app.qr.dl.setAttribute('download', `user-qr-${uuid}.png`);
-    } catch (e) {
-      console.warn('toDataURL failed', e);
-    }
-  });
+  try {
+    // QRCodeJSライブラリを使用
+    new QRCode($app.qr.box, {
+      text: uuid,
+      width: 260,
+      height: 260,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // ダウンロードリンクの設定（生成後に少し待つ）
+    setTimeout(() => {
+      const canvas = $app.qr.box.querySelector('canvas');
+      if (canvas) {
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          $app.qr.dl.setAttribute('href', dataUrl);
+          $app.qr.dl.setAttribute('download', `user-qr-${uuid}.png`);
+        } catch (e) {
+          console.warn('toDataURL failed', e);
+        }
+      }
+    }, 100);
+  } catch (err) {
+    console.error(err);
+    showToast('QR生成に失敗しました');
+  }
 }
 
 /******************* Auth Storage *******************/
