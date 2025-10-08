@@ -393,10 +393,36 @@
 const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co"; // 置換
 const SUPABASE_ANON_KEY = "YOUR-ANON-KEY"; // 置換
 
-// クライアント生成
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false }
-});
+const SUPABASE_URL_PLACEHOLDER_TOKEN = "YOUR-PROJECT-REF";
+const SUPABASE_KEY_PLACEHOLDER_TOKEN = "YOUR-ANON-KEY";
+
+function isSupabaseCredentialUnset(value, token) {
+  if (!value) return true;
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  return trimmed === token || trimmed.includes(token);
+}
+
+const IS_SUPABASE_CONFIGURED = !isSupabaseCredentialUnset(SUPABASE_URL, SUPABASE_URL_PLACEHOLDER_TOKEN)
+  && !isSupabaseCredentialUnset(SUPABASE_ANON_KEY, SUPABASE_KEY_PLACEHOLDER_TOKEN);
+
+let supabase = null;
+if (IS_SUPABASE_CONFIGURED) {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false }
+  });
+} else {
+  console.warn('Supabase のURL/Anonキーが未設定のため、認証機能は無効化されています。');
+}
+
+function getSupabaseClientOrThrow() {
+  if (!IS_SUPABASE_CONFIGURED || !supabase) {
+    const err = new Error('Supabase credentials are not configured.');
+    err.code = 'SUPABASE_NOT_CONFIGURED';
+    throw err;
+  }
+  return supabase;
+}
 
 // 推奨テーブル構成（SQL例）
 // create table if not exists app_users (
@@ -541,16 +567,18 @@ function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 
 /******************* Supabase Accessors *******************/
 async function sbInsertUser({name, school, department}) {
+  const client = getSupabaseClientOrThrow();
   // RPC経由（RLSでテーブル直アクセス不可のため）
-  const { data, error } = await supabase
+  const { data, error } = await client
     .rpc('register_user', { p_name: name, p_school: school, p_department: department });
   if (error) throw error;
   return data; // app_users の1行（id, name, school, department, created_at）
 }
 
 async function sbFindUserByNameAndSchool({name, school}) {
+  const client = getSupabaseClientOrThrow();
   // RPC経由で1件取得。存在しなければ null
-  const { data, error } = await supabase
+  const { data, error } = await client
     .rpc('login_user', { p_name: name, p_school: school });
   if (error) throw error;
   return data; // 見つからなければ null
@@ -856,6 +884,10 @@ async function handleSignin(e){
     showToast('登録が完了しました。ようこそ！');
   } catch(err){
     console.error(err);
+    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
+      $app.auth.signinError.textContent = '現在サインイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
+      return;
+    }
     $app.auth.signinError.textContent = '登録に失敗しました。ネットワークや設定をご確認ください。';
   }
 }
@@ -883,6 +915,10 @@ async function handleLogin(e){
     showToast('ログインしました。');
   } catch(err){
     console.error(err);
+    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
+      $app.auth.loginError.textContent = '現在ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
+      return;
+    }
     $app.auth.loginError.textContent = 'ログインに失敗しました。';
   }
 }
@@ -905,6 +941,8 @@ function showToast(msg) {
 function init() {
   // ナビ
   $app.navButtons.forEach(btn => btn.addEventListener('click', () => { state.activePage = btn.dataset.page; updateActivePage(); }));
+
+  applySupabaseAvailabilityState();
 
   // ブースシート操作
   $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
@@ -957,6 +995,27 @@ function init() {
   renderAll();
 }
 init();
+
+function applySupabaseAvailabilityState() {
+  if (IS_SUPABASE_CONFIGURED) return;
+  const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
+  const note = document.getElementById('signin-note');
+  if (note) {
+    note.textContent = '※サインイン機能を有効にするには、SupabaseのURLと匿名キーを設定してください。';
+  }
+  [$app.auth.signinError, $app.auth.loginError].forEach(el => {
+    if (el) el.textContent = disabledMessage;
+  });
+  [$app.auth.signinForm, $app.auth.loginForm].forEach(form => {
+    if (!form) return;
+    form.querySelectorAll('input, button[type="submit"]').forEach(el => {
+      el.disabled = true;
+      if (el.tagName === 'BUTTON') {
+        el.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  });
+}
 
 function layoutBoothIcons() {
   const g = $app.map.iconsGroup; if (!g) return; g.innerHTML = '';
