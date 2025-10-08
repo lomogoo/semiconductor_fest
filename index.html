@@ -16,13 +16,13 @@
   <style>
     :root {
       --bg-light: #f0f4f8;
-      --accent-sky: #0ea5e9; /* sky-500 */
+      --accent-sky: #0ea5e9;
       --text-main: #1e293b;
       --text-sub: #64748b;
-      --bar-width-pct: 78%; /* ★ 進捗バーを短めに */
-      --dot-size: 28px;     /* ★ マーカー＆現在地ドット 大きめ */
-      --dot-border: 4px;    /* ★ ドット外枠 太め */
-      --chip-size: 64px;    /* ★ グリッドのロゴ画像サイズ */
+      --bar-width-pct: 78%;
+      --dot-size: 28px;
+      --dot-border: 4px;
+      --chip-size: 64px;
     }
     html { font-family: 'Inter', sans-serif; }
     body {
@@ -46,7 +46,6 @@
     .page { display: none; width: 100%; position: relative; }
     .page.active { display: block; }
 
-    /* --- LiquidGlass Card --- */
     .liquid-glass {
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(32px) saturate(180%);
@@ -57,7 +56,6 @@
         0 16px 40px rgba(37, 37, 85, 0.12);
     }
 
-    /* --- Floating Navigation (LiquidGlass Base) --- */
     .floating-nav {
       background: rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(32px) saturate(180%);
@@ -70,7 +68,6 @@
       border-radius: 1.5rem;
     }
 
-    /* --- Nav Indicator --- */
     #nav-indicator {
       position: absolute;
       top: 50%;
@@ -105,7 +102,6 @@
     .nav-btn { z-index: 1; }
     .nav-btn.active { color: #0c4a6e; }
 
-    /* --- Chip (Stamp) 画像版 --- */
     .chip {
       width: var(--chip-size);
       height: var(--chip-size);
@@ -113,7 +109,7 @@
       border: 1.5px solid rgba(255,255,255,0.7);
       background: #fff;
       box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(0, 150, 200, 0.15);
-      overflow: hidden; /* ★ 1:1トリミング */
+      overflow: hidden;
       transition: box-shadow .3s ease;
     }
     .chip.on { box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 0 24px rgba(52, 211, 153, .55); }
@@ -121,21 +117,18 @@
 
     .chip-name { max-width: 88px; height: 2.4em; margin-top: 6px; font-size: 11px; line-height: 1.2; color: #0f172a; text-align: center; font-weight: 600; white-space: normal; display: flex; align-items: center; justify-content: center; }
 
-    /* --- Bottom Sheet --- */
     .bottom-sheet-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
     .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform .4s cubic-bezier(0.4, 0, 0.2, 1); }
     .bottom-sheet.is-open { transform: translateY(0); }
     .bottom-sheet.is-open + .bottom-sheet-backdrop { opacity: 1; pointer-events: auto; }
 
-    /* --- Ripple --- */
     .ripple { position: relative; overflow: hidden; }
     .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: ripple-anim .6s linear; }
     @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-    /* --- List Anim --- */\n    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
+    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
-    /* --- Progress Bar with Bubbles --- */
     .progress-area { position: relative; padding-top: 7rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
@@ -144,23 +137,19 @@
     #reward-bubble-8 { left: 100%; transform: translateX(-50%); }
 
     .reward-bubble-content { width: 100%; min-height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; margin-top: 6px; }
-    .reward-bubble-stem { display:none; }
 
     .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
     #progress-bar { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #34d399, #10b981, var(--accent-sky), #3b82f6); transition: width .5s ease-in-out; }
 
-    /* --- Fixed markers (4 & 8) --- */
     .marker-dot { position: absolute; top: 50%; width: var(--dot-size); height: var(--dot-size); background: #fff; border: var(--dot-border) solid #cbd5e1; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 4px rgba(0,0,0,.08); z-index: 12; display: grid; place-items: center; }
     .marker-dot .label { font-size: 14px; font-weight: 800; color: #334155; user-select: none; line-height: 1; }
     .marker-dot.is-active { border-color: #3b82f6; background: #3b82f6; box-shadow: 0 0 14px rgba(59,130,246,.6), 0 2px 8px rgba(0,0,0,.15); }
     .marker-dot.is-active .label { color: #fff; }
 
-    /* --- Current position dot --- */
     #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
 
-    .map-wrap{aspect-ratio:2/3; margin-top: .25rem;} /* ヘッダーに少し寄せる */
+    .map-wrap { aspect-ratio:2/3; margin-top: .25rem; }
 
-    /* --- QR スキャナUI --- */
     .scanner-video { width: 100%; height: auto; border-radius: 1rem; background: #000; }
     .scan-guide { position: absolute; inset: 0; pointer-events: none; }
     .scan-corner { position: absolute; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.9); }
@@ -171,7 +160,6 @@
 
     .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 60; }
 
-    /* ===== Auth Gate (ポップアップ) ===== */
     .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(6px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; }
@@ -179,7 +167,7 @@
   </style>
 </head>
 <body>
-  <!-- ===== Auth: Backdrop and Launch Panel ===== -->
+  <!-- Auth: Backdrop and Launch Panel -->
   <div id="auth-backdrop" class="auth-backdrop"></div>
   <div id="auth-launch" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
@@ -192,7 +180,7 @@
     </div>
   </div>
 
-  <!-- ===== Signin Modal ===== -->
+  <!-- Signin Modal -->
   <div id="signin-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
@@ -219,7 +207,7 @@
     </div>
   </div>
 
-  <!-- ===== Login Modal ===== -->
+  <!-- Login Modal -->
   <div id="login-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
@@ -241,25 +229,24 @@
     </div>
   </div>
 
-  <!-- ===== User QR Modal ===== -->
-<div id="qr-modal" class="auth-modal">
-  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)]">
-    <div class="p-4 border-b border-white/50 flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-slate-800">あなたのQRコード</h3>
-      <button id="close-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
-    </div>
-    <div class="p-5 flex flex-col items-center gap-3">
-      <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
-      <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
-      <div class="flex gap-2">
-        <button id="copy-uuid" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">UUIDをコピー</button>
-        <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
+  <!-- User QR Modal -->
+  <div id="qr-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)]">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-slate-800">あなたのQRコード</h3>
+        <button id="close-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
-      <p class="text-xs text-slate-500">※このQRは Supabaseの <code>app_users.id</code>（UUID）をエンコードしています。</p>
+      <div class="p-5 flex flex-col items-center gap-3">
+        <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
+        <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
+        <div class="flex gap-2">
+          <button id="copy-uuid" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">UUIDをコピー</button>
+          <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
+        </div>
+        <p class="text-xs text-slate-500">※このQRは Supabaseの <code>app_users.id</code>（UUID）をエンコードしています。</p>
+      </div>
     </div>
   </div>
-</div>
-
 
   <div id="app" class="opacity-0 pointer-events-none select-none">
     <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
@@ -295,14 +282,12 @@
           </div>
           <div class="progress-area">
             <div id="progress-wrapper">
-              <!-- Bubbles -->
               <div id="reward-bubble-4" class="reward-bubble">
                 <div class="reward-bubble-content liquid-glass border-slate-300">💎</div>
               </div>
               <div id="reward-bubble-8" class="reward-bubble">
                 <div class="reward-bubble-content liquid-glass border-amber-300">👑</div>
               </div>
-              <!-- Track -->
               <div id="progress-track" class="progress-track">
                 <div id="progress-bar" style="width:0%"></div>
                 <div id="marker-4" class="marker-dot" style="left:50%"><span class="label">4</span></div>
@@ -325,7 +310,6 @@
             <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
           </svg>
         </div>
-        <!-- 横長カード型 スキャン起動ボタン（マップと下部ナビの間） -->
         <div class="max-w-[1200px] mx-auto">
           <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
             <div class="flex items-center gap-3">
@@ -365,7 +349,7 @@
         </div>
       </div>
     </div>
-    <div class="bottom-sheet-backdrop"></div>
+    <div class="bottom-sheet-backdrop" data-target="booth"></div>
 
     <!-- QRスキャナ シート -->
     <div id="scan-sheet" class="bottom-sheet">
@@ -395,6 +379,7 @@
         </div>
       </div>
     </div>
+    <div class="bottom-sheet-backdrop" data-target="scan"></div>
 
     <div id="toast" class="toast hidden">
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
@@ -412,9 +397,8 @@
 
 <script>
 /******************* Supabase 接続設定 *******************/
-// ★ Supabaseのプロジェクト値を設定してください
-const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co"; // 置換
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk"; // 置換
+const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
 const IS_SUPABASE_CONFIGURED =
   typeof SUPABASE_URL === "string" && SUPABASE_URL.trim() !== "" &&
@@ -438,16 +422,6 @@ function getSupabaseClientOrThrow() {
   return supabase;
 }
 
-// 推奨テーブル構成（SQL例）
-// create table if not exists app_users (
-//   id uuid primary key default gen_random_uuid(),
-//   name text not null,
-//   school text not null,
-//   department text not null,
-//   created_at timestamptz default now()
-// );
-// create index on app_users (name, school);
-
 /******************* DATA & STATE *******************/
 const IMG_DEFAULT = 'logo.jpg';
 const BOOTH_ANCHORS = {
@@ -467,16 +441,14 @@ const BOOTH_DATA = [
   { id: 'H', name: 'Mioテクノロジー株式会社', img: IMG_DEFAULT, icon: '⚙️', desc: 'μm単位の超精密加工技術。製造装置の心臓部を支えるコンポーネントを製造しています。', tags:['精密加工', '部品', 'コンポーネント'], giveaway:'精密加工メタル定規', condition:'加工サンプルの顕微鏡観察' }
 ];
 
-// 既存のタップ取得機能は維持
 const state = { stamps: new Set(), activePage: 'home', prevCount: 0, user: null };
 
-// --- QRダミーコードのホワイトリスト ---
 const QR_WHITELIST = {
   'handoutai_a': 'A', 'handoutai_b': 'B', 'handoutai_c': 'C', 'handoutai_d': 'D',
   'handoutai_e': 'E', 'handoutai_f': 'F', 'handoutai_g': 'G', 'handoutai_h': 'H'
 };
 
-// --- DOM ELEMENTS ---
+/******************* DOM ELEMENTS *******************/
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
@@ -505,7 +477,7 @@ const $app = {
   },
   sheet: {
     el: document.getElementById('booth-sheet'),
-    backdrop: document.querySelector('.bottom-sheet-backdrop'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
     icon: document.getElementById('booth-sheet-icon'),
     title: document.getElementById('booth-sheet-title'),
     tags: document.getElementById('booth-sheet-tags'),
@@ -516,6 +488,7 @@ const $app = {
   },
   scan: {
     sheet: document.getElementById('scan-sheet'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="scan"]'),
     video: document.getElementById('scan-video'),
     status: document.getElementById('scan-status'),
     torchBtn: document.getElementById('torch-btn'),
@@ -549,48 +522,59 @@ const $app = {
     dl: document.getElementById('download-qr'),
     closeBtn: document.getElementById('close-qr')
   }
-
 };
 
 /******************* Auth UI Helpers *******************/
 function showAuthGate() {
   $app.auth.backdrop.classList.add('show');
   $app.auth.launch.classList.add('show');
-  // アプリの操作を無効化
   const root = document.getElementById('app');
   root.classList.add('opacity-0', 'pointer-events-none', 'select-none');
 }
+
 function hideAuthGate() {
   $app.auth.backdrop.classList.remove('show');
   $app.auth.launch.classList.remove('show');
 }
+
 function openAuthModal(kind) {
   hideAuthGate();
   $app.auth.backdrop.classList.add('show');
   const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
   target.classList.add('show');
 }
+
 function closeAuthModal(kind) {
   const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
   target.classList.remove('show');
-  $app.auth.backdrop.classList.remove('show');
+  // 他のモーダルが開いていなければbackdropを閉じる
+  if (!$app.auth.signin.classList.contains('show') && 
+      !$app.auth.login.classList.contains('show') &&
+      !$app.qr.modal.classList.contains('show')) {
+    $app.auth.backdrop.classList.remove('show');
+  }
 }
   
 function enableAppUI(user) {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
-  $app.userPill.classList.add('cursor-pointer'); // クリックできる見た目
+  $app.userPill.classList.add('cursor-pointer');
   $app.userPill.innerHTML =
     `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
        👤 ${user.name}（${user.school} / ${user.department}）
        <span class="ml-1 text-sky-700">/ タップで自分のQR</span>
      </button>`;
+  
+  // Auth完了後に初期レイアウトを実行
+  setTimeout(() => {
+    layoutBoothIcons();
+    syncBubbleHeights();
+  }, 100);
 }
 
 function openQrModal() {
   if (!state.user?.id) { showToast('ログインしてください'); return; }
-  // 既存の暗転を流用
   $app.auth.backdrop.classList.add('show');
   $app.qr.modal.classList.add('show');
   renderUserQr(state.user.id);
@@ -598,7 +582,7 @@ function openQrModal() {
 
 function closeQrModal() {
   $app.qr.modal.classList.remove('show');
-  // 他のモーダルが出ていなければ backdrop も消す
+  // 他のモーダルが開いていなければbackdropを閉じる
   if (!$app.auth.signin.classList.contains('show') &&
       !$app.auth.login.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
@@ -606,28 +590,23 @@ function closeQrModal() {
 }
 
 function renderUserQr(uuid) {
-  // クリアして再生成
   $app.qr.box.innerHTML = '';
   $app.qr.uuid.textContent = uuid;
 
-  // QRコード生成（canvas）
   QRCode.toCanvas(uuid, { width: 260, margin: 2 }, (err, canvas) => {
     if (err) { console.error(err); showToast('QR生成に失敗しました'); return; }
     $app.qr.box.appendChild(canvas);
-    // ダウンロードリンク設定
     try {
       const dataUrl = canvas.toDataURL('image/png');
       $app.qr.dl.setAttribute('href', dataUrl);
       $app.qr.dl.setAttribute('download', `user-qr-${uuid}.png`);
     } catch (e) {
-      // Safariの制限などで失敗しても致命ではない
       console.warn('toDataURL failed', e);
     }
   });
 }
 
-
-/******************* Auth Storage (client-side) *******************/
+/******************* Auth Storage *******************/
 const LS_KEY_USER = 'app_user';
 function saveLocalUser(u){ localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); }
 function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_USER)||'null'); } catch { return null; } }
@@ -636,20 +615,18 @@ function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 /******************* Supabase Accessors *******************/
 async function sbInsertUser({name, school, department}) {
   const client = getSupabaseClientOrThrow();
-  // RPC経由（RLSでテーブル直アクセス不可のため）
   const { data, error } = await client
     .rpc('register_user', { p_name: name, p_school: school, p_department: department });
   if (error) throw error;
-  return data; // app_users の1行（id, name, school, department, created_at）
+  return data;
 }
 
 async function sbFindUserByNameAndSchool({name, school}) {
   const client = getSupabaseClientOrThrow();
-  // RPC経由で1件取得。存在しなければ null
   const { data, error } = await client
     .rpc('login_user', { p_name: name, p_school: school });
   if (error) throw error;
-  return data; // 見つからなければ null
+  return data;
 }
 
 /******************* RENDER FUNCTIONS *******************/
@@ -707,6 +684,7 @@ function renderProgress() {
 
   $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
   $app.progress.bubble8.classList.toggle('is-achieved', n >= 8);
+  
   if (n === total) {
     $app.progress.msg.textContent = '🎉 全ての特典をゲット！おめでとうございます！';
   } else if (n >= 4) {
@@ -736,8 +714,10 @@ function updateActivePage() {
   $app.navButtons.forEach(btn => {
     const isActive = btn.dataset.page === state.activePage;
     btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
     if (isActive) activeBtn = btn;
   });
+  
   if (activeBtn) {
     const btnW = activeBtn.offsetWidth;
     const indW = Math.max(56, Math.round(btnW * 0.66));
@@ -745,6 +725,7 @@ function updateActivePage() {
     $app.navIndicator.style.width = `${indW}px`;
     $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
   }
+  
   const pageTitles = { home: '進捗ホーム', map: '会場マップ', list: 'ブース一覧' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
 
@@ -762,10 +743,12 @@ function openBoothSheet(booth) {
   $app.sheet.condition.textContent = booth.condition;
   $app.sheet.giveaway.textContent = booth.giveaway;
   $app.sheet.getStampBtn.dataset.id = booth.id;
+  
   const hasStamp = state.stamps.has(booth.id);
   $app.sheet.getStampBtn.textContent = hasStamp ? 'キャンセル' : 'スタンプGET';
   $app.sheet.getStampBtn.classList.toggle('bg-red-500', hasStamp);
   $app.sheet.getStampBtn.classList.toggle('bg-sky-500', !hasStamp);
+  
   $app.sheet.tags.innerHTML = '';
   booth.tags.forEach(t => {
     const span = document.createElement('span');
@@ -773,13 +756,21 @@ function openBoothSheet(booth) {
     span.textContent = t;
     $app.sheet.tags.appendChild(span);
   });
+  
   $app.sheet.el.classList.add('is-open');
+  $app.sheet.backdrop.classList.add('is-open');
 }
 
-function closeBoothSheet() { $app.sheet.el.classList.remove('is-open'); }
-function toggleStamp(id) { state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id); renderAll(); }
+function closeBoothSheet() {
+  $app.sheet.el.classList.remove('is-open');
+  $app.sheet.backdrop.classList.remove('is-open');
+}
 
-// 共通: スタンプ付与処理
+function toggleStamp(id) {
+  state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id);
+  renderAll();
+}
+
 function grantStampByBoothId(boothId) {
   if (!boothId) return false;
   const booth = BOOTH_DATA.find(b => b.id === boothId);
@@ -791,7 +782,7 @@ function grantStampByBoothId(boothId) {
   return true;
 }
 
-/******************* QR: スキャナ制御 *******************/
+/******************* QR Scanner *******************/
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
@@ -800,12 +791,14 @@ let barcodeDetector = ('BarcodeDetector' in window) ? new BarcodeDetector({ form
 
 async function openScanner() {
   $app.scan.sheet.classList.add('is-open');
+  $app.scan.backdrop.classList.add('is-open');
   await startCamera();
 }
 
 function closeScanner() {
   stopCamera();
   $app.scan.sheet.classList.remove('is-open');
+  $app.scan.backdrop.classList.remove('is-open');
 }
 
 async function startCamera() {
@@ -822,7 +815,6 @@ async function startCamera() {
     $app.scan.video.srcObject = scanStream;
     await $app.scan.video.play();
 
-    // トーチ対応チェック
     trackWithTorch = null;
     const [track] = scanStream.getVideoTracks();
     const caps = track.getCapabilities?.();
@@ -849,6 +841,7 @@ function stopCamera() {
     scanStream = null;
   }
   $app.scan.torchBtn.dataset.on = '0';
+  $app.scan.torchBtn.classList.remove('bg-amber-200');
 }
 
 async function toggleTorch() {
@@ -874,7 +867,7 @@ async function scanLoop() {
       const barcodes = await barcodeDetector.detect($app.scan.video);
       if (barcodes && barcodes.length > 0) {
         const text = (barcodes[0].rawValue || '').trim();
-        if (await handleScanResult(text)) return; // trueなら停止
+        if (await handleScanResult(text)) return;
       }
     } catch (e) { /* ignore */ }
   }
@@ -898,7 +891,6 @@ async function handleScanResult(text) {
 
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-// --- Deep Link: ネイティブカメラからの読み取りでアプリ起動時に付与 ---
 function handleDeepLinkAward() {
   const url = new URL(window.location.href);
   let code = url.searchParams.get('qr');
@@ -920,14 +912,12 @@ function handleDeepLinkAward() {
 
 /******************* Auth Flow *******************/
 async function ensureAuth() {
-  // 1) 既存ローカル
   const local = loadLocalUser();
   if (local && local.id) {
     state.user = local;
     enableAppUI(state.user);
     return true;
   }
-  // 2) 未ログイン: 起動パネル
   showAuthGate();
   return false;
 }
@@ -991,7 +981,7 @@ async function handleLogin(e){
   }
 }
 
-/******************* UIユーティリティ *******************/
+/******************* UI Utilities *******************/
 function showToast(msg) {
   const el = $app.toast;
   const box = el.firstElementChild;
@@ -1005,104 +995,14 @@ function showToast(msg) {
   }, 1800);
 }
 
-/******************* 初期化 *******************/
-function init() {
-  // ナビ
-  $app.navButtons.forEach(btn => btn.addEventListener('click', () => { state.activePage = btn.dataset.page; updateActivePage(); }));
-
-  applySupabaseAvailabilityState();
-
-  // ブースシート操作
-  $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
-  $app.sheet.getStampBtn.addEventListener('click', (e) => { toggleStamp(e.target.dataset.id); closeBoothSheet(); });
-
-  // Ripple
-  document.addEventListener('click', e => {
-    const rippleTarget = e.target.closest('.ripple');
-    if (!rippleTarget) return;
-    const rect = rippleTarget.getBoundingClientRect();
-    const ripple = document.createElement('span');
-    const diameter = Math.max(rippleTarget.clientWidth, rippleTarget.clientHeight);
-    const radius = diameter / 2;
-    ripple.style.width = ripple.style.height = `${diameter}px`;
-    ripple.style.left = `${e.clientX - rect.left - radius}px`;
-    ripple.style.top = `${e.clientY - rect.top - radius}px`;
-    ripple.classList.add('ripple-effect');
-    rippleTarget.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-  });
-
-  // レイアウト
-  window.addEventListener('resize', () => { layoutBoothIcons(); syncBubbleHeights(); });
-
-  // QR起動
-  $app.scan.openCard.addEventListener('click', openScanner);
-  $app.scan.closeBtn.addEventListener('click', closeScanner);
-  $app.scan.torchBtn.addEventListener('click', toggleTorch);
-  $app.scan.switchBtn.addEventListener('click', switchCamera);
-
-  // Deep Link からの付与
-  handleDeepLinkAward();
-
-  // ===== Auth: 起動時チェック =====
-  ensureAuth().then(ok => {
-    if (ok) {
-      // すぐアプリを有効化
-      enableAppUI(state.user);
-    }
-  });
-
-  // Auth: Launch Buttons
-  $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
-  $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
-  document.querySelectorAll('[data-close="signin"]').forEach(el => el.addEventListener('click', () => closeAuthModal('signin')));
-  document.querySelectorAll('[data-close="login"]').forEach(el => el.addEventListener('click', () => closeAuthModal('login')));
-  $app.auth.signinForm.addEventListener('submit', handleSignin);
-  $app.auth.loginForm.addEventListener('submit', handleLogin);
-
-  renderAll();
-
-    // プロフィール（ユーザーピル）→ QR表示
-  $app.userPill.addEventListener('click', openQrModal);
-  $app.qr.closeBtn.addEventListener('click', closeQrModal);
-  $app.qr.copy.addEventListener('click', async () => {
-    if (!state.user?.id) return;
-    try {
-      await navigator.clipboard.writeText(state.user.id);
-      showToast('UUIDをコピーしました');
-    } catch {
-      showToast('コピーに失敗しました');
-    }
-  });
-
-}
-init();
-
-function applySupabaseAvailabilityState() {
-  if (IS_SUPABASE_CONFIGURED) return;
-  const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-  const note = document.getElementById('signin-note');
-  if (note) {
-    note.textContent = '※サインイン機能を有効にするには、SupabaseのURLと匿名キーを設定してください。';
-  }
-  [$app.auth.signinError, $app.auth.loginError].forEach(el => {
-    if (el) el.textContent = disabledMessage;
-  });
-  [$app.auth.signinForm, $app.auth.loginForm].forEach(form => {
-    if (!form) return;
-    form.querySelectorAll('input, button[type="submit"]').forEach(el => {
-      el.disabled = true;
-      if (el.tagName === 'BUTTON') {
-        el.classList.add('opacity-50', 'cursor-not-allowed');
-      }
-    });
-  });
-}
-
 function layoutBoothIcons() {
-  const g = $app.map.iconsGroup; if (!g) return; g.innerHTML = '';
+  const g = $app.map.iconsGroup;
+  if (!g) return;
+  g.innerHTML = '';
+  
   const vb = $app.map.svg.viewBox.baseVal;
-  const marginFactorX = 0.02; const marginFactorY = 0.02;
+  const marginFactorX = 0.02;
+  const marginFactorY = 0.02;
   const usableW = vb.width * (1 - marginFactorX * 2);
   const usableH = vb.height * (1 - marginFactorY * 2);
   const offsetX = vb.x + vb.width * marginFactorX;
@@ -1126,6 +1026,8 @@ function layoutBoothIcons() {
     img.setAttribute('href', booth.img);
     img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     img.setAttribute('cursor', 'pointer');
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', booth.name);
     img.dataset.id = id;
     g.appendChild(img);
   });
@@ -1139,10 +1041,133 @@ function layoutBoothIcons() {
 function syncBubbleHeights(){
   const b4 = document.querySelector('#reward-bubble-4 .reward-bubble-content');
   const b8 = document.querySelector('#reward-bubble-8 .reward-bubble-content');
-  if (!b4 || !b8) return; const h = Math.max(50, b4.getBoundingClientRect().height); b8.style.minHeight = h + 'px';
+  if (!b4 || !b8) return;
+  const h = Math.max(50, b4.getBoundingClientRect().height);
+  b8.style.minHeight = h + 'px';
 }
-window.addEventListener('resize', syncBubbleHeights);
-window.addEventListener('load', syncBubbleHeights);
+
+function applySupabaseAvailabilityState() {
+  if (IS_SUPABASE_CONFIGURED) return;
+  
+  const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
+  const note = document.getElementById('signin-note');
+  if (note) {
+    note.textContent = '※サインイン機能を有効にするには、SupabaseのURLと匿名キーを設定してください。';
+  }
+  
+  [$app.auth.signinError, $app.auth.loginError].forEach(el => {
+    if (el) el.textContent = disabledMessage;
+  });
+  
+  [$app.auth.signinForm, $app.auth.loginForm].forEach(form => {
+    if (!form) return;
+    form.querySelectorAll('input, button[type="submit"]').forEach(el => {
+      el.disabled = true;
+      if (el.tagName === 'BUTTON') {
+        el.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  });
+}
+
+/******************* Initialization *******************/
+function init() {
+  // Navigation
+  $app.navButtons.forEach(btn => btn.addEventListener('click', () => {
+    state.activePage = btn.dataset.page;
+    updateActivePage();
+  }));
+
+  applySupabaseAvailabilityState();
+
+  // Booth sheet
+  if ($app.sheet.backdrop) {
+    $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
+  }
+  $app.sheet.getStampBtn.addEventListener('click', (e) => {
+    toggleStamp(e.target.dataset.id);
+    closeBoothSheet();
+  });
+
+  // Ripple effect
+  document.addEventListener('click', e => {
+    const rippleTarget = e.target.closest('.ripple');
+    if (!rippleTarget) return;
+    const rect = rippleTarget.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const diameter = Math.max(rippleTarget.clientWidth, rippleTarget.clientHeight);
+    const radius = diameter / 2;
+    ripple.style.width = ripple.style.height = `${diameter}px`;
+    ripple.style.left = `${e.clientX - rect.left - radius}px`;
+    ripple.style.top = `${e.clientY - rect.top - radius}px`;
+    ripple.classList.add('ripple-effect');
+    rippleTarget.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+
+  // Layout
+  window.addEventListener('resize', () => {
+    layoutBoothIcons();
+    syncBubbleHeights();
+  });
+
+  // QR Scanner
+  $app.scan.openCard.addEventListener('click', openScanner);
+  $app.scan.closeBtn.addEventListener('click', closeScanner);
+  $app.scan.torchBtn.addEventListener('click', toggleTorch);
+  $app.scan.switchBtn.addEventListener('click', switchCamera);
+  if ($app.scan.backdrop) {
+    $app.scan.backdrop.addEventListener('click', closeScanner);
+  }
+
+  // Deep Link
+  handleDeepLinkAward();
+
+  // Auth
+  ensureAuth().then(ok => {
+    if (ok) {
+      enableAppUI(state.user);
+    }
+  });
+
+  // Auth Buttons
+  $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
+  $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
+  document.querySelectorAll('[data-close="signin"]').forEach(el => 
+    el.addEventListener('click', () => closeAuthModal('signin'))
+  );
+  document.querySelectorAll('[data-close="login"]').forEach(el => 
+    el.addEventListener('click', () => closeAuthModal('login'))
+  );
+  $app.auth.signinForm.addEventListener('submit', handleSignin);
+  $app.auth.loginForm.addEventListener('submit', handleLogin);
+
+  // User QR
+  $app.userPill.addEventListener('click', openQrModal);
+  $app.qr.closeBtn.addEventListener('click', closeQrModal);
+  $app.qr.copy.addEventListener('click', async () => {
+    if (!state.user?.id) return;
+    try {
+      await navigator.clipboard.writeText(state.user.id);
+      showToast('UUIDをコピーしました');
+    } catch {
+      showToast('コピーに失敗しました');
+    }
+  });
+
+  // Auth backdrop click to close QR modal
+  $app.auth.backdrop.addEventListener('click', (e) => {
+    if (e.target === $app.auth.backdrop && $app.qr.modal.classList.contains('show')) {
+      closeQrModal();
+    }
+  });
+
+  // Initial render
+  renderAll();
+}
+
+// Start the app
+init();
 </script>
 </body>
 </html>
