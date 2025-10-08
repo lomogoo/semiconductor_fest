@@ -390,8 +390,8 @@
 <script>
 /******************* Supabase 接続設定 *******************/
 // ★ Supabaseのプロジェクト値を設定してください
-const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co"; // 置換
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk"; // 置換
+const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co"; // 置換
+const SUPABASE_ANON_KEY = "YOUR-ANON-KEY"; // 置換
 
 // クライアント生成
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -541,25 +541,19 @@ function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 
 /******************* Supabase Accessors *******************/
 async function sbInsertUser({name, school, department}) {
+  // RPC経由（RLSでテーブル直アクセス不可のため）
   const { data, error } = await supabase
-    .from('app_users')
-    .insert({ name, school, department })
-    .select('*')
-    .single();
+    .rpc('register_user', { p_name: name, p_school: school, p_department: department });
   if (error) throw error;
-  return data; // { id, name, school, department, created_at }
+  return data; // app_users の1行（id, name, school, department, created_at）
 }
 
 async function sbFindUserByNameAndSchool({name, school}) {
+  // RPC経由で1件取得。存在しなければ null
   const { data, error } = await supabase
-    .from('app_users')
-    .select('*')
-    .eq('name', name)
-    .eq('school', school)
-    .limit(1)
-    .maybeSingle();
+    .rpc('login_user', { p_name: name, p_school: school });
   if (error) throw error;
-  return data; // or null
+  return data; // 見つからなければ null
 }
 
 /******************* RENDER FUNCTIONS *******************/
