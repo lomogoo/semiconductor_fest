@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>半導体スタンプラリーMAP</title>
+  <title>半導体スタンプラリーMAP（Auth対応）</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-light: #f0f4f8;
@@ -127,8 +129,7 @@
     .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: ripple-anim .6s linear; }
     @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-    /* --- List Anim --- */
-    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
+    /* --- List Anim --- */\n    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
     /* --- Progress Bar with Bubbles --- */
@@ -154,11 +155,90 @@
     /* --- Current position dot --- */
     #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
 
-    .map-wrap{aspect-ratio:2/3;}
+    .map-wrap{aspect-ratio:2/3; margin-top: .25rem;} /* ヘッダーに少し寄せる */
+
+    /* --- QR スキャナUI --- */
+    .scanner-video { width: 100%; height: auto; border-radius: 1rem; background: #000; }
+    .scan-guide { position: absolute; inset: 0; pointer-events: none; }
+    .scan-corner { position: absolute; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.9); }
+    .scan-corner.tl { top: 12%; left: 10%; border-right: none; border-bottom: none; }
+    .scan-corner.tr { top: 12%; right: 10%; border-left: none; border-bottom: none; }
+    .scan-corner.bl { bottom: 12%; left: 10%; border-right: none; border-top: none; }
+    .scan-corner.br { bottom: 12%; right: 10%; border-left: none; border-top: none; }
+
+    .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 60; }
+
+    /* ===== Auth Gate (ポップアップ) ===== */
+    .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(6px); z-index: 80; display:none; }
+    .auth-backdrop.show { display:block; }
+    .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; }
+    .auth-modal.show { display:flex; }
   </style>
 </head>
 <body>
-  <div id="app">
+  <!-- ===== Auth: Backdrop and Launch Panel ===== -->
+  <div id="auth-backdrop" class="auth-backdrop"></div>
+  <div id="auth-launch" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
+      <h2 class="text-xl font-semibold text-slate-800">ご利用前にサインイン/ログイン</h2>
+      <p class="text-sm text-slate-600 mt-1">初めての方は「サインイン」で氏名・学校名・学部/学科を登録してください。既に登録済みの方は「ログイン」へ。</p>
+      <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">サインイン</button>
+        <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">ログイン</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Signin Modal ===== -->
+  <div id="signin-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
+      <div class="p-5 border-b border-white/50 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-slate-800">サインイン（初回登録）</h3>
+        <button data-close="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <form id="signin-form" class="p-5 space-y-4">
+        <div>
+          <label class="text-sm text-slate-700">氏名</label>
+          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北 太郎" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-700">学校名</label>
+          <input id="si-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北大学" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-700">学部・学科</label>
+          <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：工学部 電気情報物理工学科" />
+        </div>
+        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録して入場</button>
+        <p id="signin-note" class="text-xs text-slate-500">※この登録情報はSupabaseのDBに保存され、ユーザーには一意のUUIDが付与されます。</p>
+        <p id="signin-error" class="text-sm text-red-600"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Login Modal ===== -->
+  <div id="login-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
+      <div class="p-5 border-b border-white/50 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-slate-800">ログイン（登録済み）</h3>
+        <button data-close="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <form id="login-form" class="p-5 space-y-4">
+        <div>
+          <label class="text-sm text-slate-700">氏名</label>
+          <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-700">学校名</label>
+          <input id="li-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した学校名" />
+        </div>
+        <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
+        <p id="login-error" class="text-sm text-red-600"></p>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" class="opacity-0 pointer-events-none select-none">
     <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
         <svg class="w-10 h-10 shadow-lg" viewBox="0 0 64 64" aria-label="Semiconductor" role="img">
@@ -179,6 +259,7 @@
           <h1 id="header-title" class="text-lg font-semibold text-sky-800">進捗ホーム</h1>
           <p class="text-xs text-sky-700">半導体スタンプラリーMAP</p>
         </div>
+        <div id="user-pill" class="ml-auto text-xs text-slate-700 hidden"></div>
       </div>
     </header>
 
@@ -214,12 +295,25 @@
         </div>
       </div>
 
-      <div id="page-map" class="page">
+      <div id="page-map" class="page p-3 pt-2 space-y-3">
         <div class="map-wrap w-full max-w-[1200px] mx-auto">
           <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
             <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
             <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
           </svg>
+        </div>
+        <!-- 横長カード型 スキャン起動ボタン（マップと下部ナビの間） -->
+        <div class="max-w-[1200px] mx-auto">
+          <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
+              <div class="text-left">
+                <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
+                <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
+              </div>
+            </div>
+            <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
+          </button>
         </div>
       </div>
 
@@ -228,6 +322,7 @@
       </div>
     </main>
 
+    <!-- ブース詳細シート -->
     <div id="booth-sheet" class="bottom-sheet">
       <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
         <div class="p-4 border-b border-white/50 flex items-start gap-3">
@@ -249,6 +344,39 @@
     </div>
     <div class="bottom-sheet-backdrop"></div>
 
+    <!-- QRスキャナ シート -->
+    <div id="scan-sheet" class="bottom-sheet">
+      <div class="liquid-glass rounded-t-3xl overflow-hidden">
+        <div class="p-4 border-b border-white/50 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📷</span>
+            <h4 class="font-semibold text-lg text-slate-800">QRスキャン</h4>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="torch-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">ライト</button>
+            <button id="close-scan-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+          </div>
+        </div>
+        <div class="relative p-4 pb-2">
+          <video id="scan-video" class="scanner-video" autoplay playsinline muted></video>
+          <div class="scan-guide">
+            <div class="scan-corner tl"></div>
+            <div class="scan-corner tr"></div>
+            <div class="scan-corner bl"></div>
+            <div class="scan-corner br"></div>
+          </div>
+        </div>
+        <div class="px-4 pb-4 flex items-center justify-between text-sm text-slate-600">
+          <span id="scan-status">カメラを初期化中…</span>
+          <button id="switch-camera-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">カメラ切替</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden">
+      <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
+    </div>
+
     <div class="fixed bottom-0 left-0 right-0 z-40 p-3">
       <nav class="h-16 grid grid-cols-3 items-center floating-nav rounded-3xl">
         <div id="nav-indicator"></div>
@@ -260,7 +388,27 @@
   </div>
 
 <script>
-// --- DATA & STATE ---
+/******************* Supabase 接続設定 *******************/
+// ★ Supabaseのプロジェクト値を設定してください
+const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co"; // 置換
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk"; // 置換
+
+// クライアント生成
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false }
+});
+
+// 推奨テーブル構成（SQL例）
+// create table if not exists app_users (
+//   id uuid primary key default gen_random_uuid(),
+//   name text not null,
+//   school text not null,
+//   department text not null,
+//   created_at timestamptz default now()
+// );
+// create index on app_users (name, school);
+
+/******************* DATA & STATE *******************/
 const IMG_DEFAULT = 'logo.jpg';
 const BOOTH_ANCHORS = {
   A: { x: 0.20, y: 0.30 }, B: { x: 0.80, y: 0.30 }, C: { x: 0.30, y: 0.38 },
@@ -278,12 +426,21 @@ const BOOTH_DATA = [
   { id: 'G', name: 'アドバンテストコンポーネント株式会社', img: IMG_DEFAULT, icon: '🔬', desc: '半導体の品質を守る最終関門。プローブカードとテストソケットの精密技術をご覧ください。', tags:['テスト', '検査', 'プローブカード'], giveaway:'回路図デザインの付箋', condition:'プローブカードの拡大モデルを操作' },
   { id: 'H', name: 'Mioテクノロジー株式会社', img: IMG_DEFAULT, icon: '⚙️', desc: 'μm単位の超精密加工技術。製造装置の心臓部を支えるコンポーネントを製造しています。', tags:['精密加工', '部品', 'コンポーネント'], giveaway:'精密加工メタル定規', condition:'加工サンプルの顕微鏡観察' }
 ];
-const state = { stamps: new Set(), activePage: 'home', prevCount: 0 };
+
+// 既存のタップ取得機能は維持
+const state = { stamps: new Set(), activePage: 'home', prevCount: 0, user: null };
+
+// --- QRダミーコードのホワイトリスト ---
+const QR_WHITELIST = {
+  'handoutai_a': 'A', 'handoutai_b': 'B', 'handoutai_c': 'C', 'handoutai_d': 'D',
+  'handoutai_e': 'E', 'handoutai_f': 'F', 'handoutai_g': 'G', 'handoutai_h': 'H'
+};
 
 // --- DOM ELEMENTS ---
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
+  userPill: document.getElementById('user-pill'),
   pages: document.querySelectorAll('.page'),
   nav: document.querySelector('.floating-nav'),
   navIndicator: document.getElementById('nav-indicator'),
@@ -316,10 +473,96 @@ const $app = {
     condition: document.getElementById('booth-sheet-condition'),
     giveaway: document.getElementById('booth-sheet-giveaway'),
     getStampBtn: document.getElementById('get-stamp-btn'),
-  }
+  },
+  scan: {
+    sheet: document.getElementById('scan-sheet'),
+    video: document.getElementById('scan-video'),
+    status: document.getElementById('scan-status'),
+    torchBtn: document.getElementById('torch-btn'),
+    switchBtn: document.getElementById('switch-camera-btn'),
+    openCard: document.getElementById('scan-card'),
+    closeBtn: document.getElementById('close-scan-btn'),
+  },
+  auth: {
+    backdrop: document.getElementById('auth-backdrop'),
+    launch: document.getElementById('auth-launch'),
+    signin: document.getElementById('signin-modal'),
+    login: document.getElementById('login-modal'),
+    openSignin: document.getElementById('open-signin'),
+    openLogin: document.getElementById('open-login'),
+    signinForm: document.getElementById('signin-form'),
+    loginForm: document.getElementById('login-form'),
+    siName: document.getElementById('si-name'),
+    siSchool: document.getElementById('si-school'),
+    siDept: document.getElementById('si-dept'),
+    liName: document.getElementById('li-name'),
+    liSchool: document.getElementById('li-school'),
+    signinError: document.getElementById('signin-error'),
+    loginError: document.getElementById('login-error'),
+  },
+  toast: document.getElementById('toast')
 };
 
-// --- RENDER FUNCTIONS ---
+/******************* Auth UI Helpers *******************/
+function showAuthGate() {
+  $app.auth.backdrop.classList.add('show');
+  $app.auth.launch.classList.add('show');
+  // アプリの操作を無効化
+  const root = document.getElementById('app');
+  root.classList.add('opacity-0', 'pointer-events-none', 'select-none');
+}
+function hideAuthGate() {
+  $app.auth.backdrop.classList.remove('show');
+  $app.auth.launch.classList.remove('show');
+}
+function openAuthModal(kind) {
+  hideAuthGate();
+  $app.auth.backdrop.classList.add('show');
+  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
+  target.classList.add('show');
+}
+function closeAuthModal(kind) {
+  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
+  target.classList.remove('show');
+  $app.auth.backdrop.classList.remove('show');
+}
+function enableAppUI(user) {
+  const root = document.getElementById('app');
+  root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
+  $app.userPill.classList.remove('hidden');
+  $app.userPill.innerHTML = `<span class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200">👤 ${user.name}（${user.school} / ${user.department}）</span>`;
+}
+
+/******************* Auth Storage (client-side) *******************/
+const LS_KEY_USER = 'app_user';
+function saveLocalUser(u){ localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); }
+function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_USER)||'null'); } catch { return null; } }
+function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
+
+/******************* Supabase Accessors *******************/
+async function sbInsertUser({name, school, department}) {
+  const { data, error } = await supabase
+    .from('app_users')
+    .insert({ name, school, department })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data; // { id, name, school, department, created_at }
+}
+
+async function sbFindUserByNameAndSchool({name, school}) {
+  const { data, error } = await supabase
+    .from('app_users')
+    .select('*')
+    .eq('name', name)
+    .eq('school', school)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data; // or null
+}
+
+/******************* RENDER FUNCTIONS *******************/
 function renderAll() {
   renderStampGrid();
   renderProgress();
@@ -382,7 +625,6 @@ function renderProgress() {
     $app.progress.msg.textContent = `あと${Math.max(0, 4 - n)}個で最初の特典をゲット！`;
   }
 
-  // 4/8では現在地ドットを隠す・マーカーは到達以降ずっと色を保持
   const onMilestone = (n === 4 || n === 8);
   $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
   $app.progress.marker4.classList.toggle('is-active', n >= 4);
@@ -447,10 +689,234 @@ function openBoothSheet(booth) {
 function closeBoothSheet() { $app.sheet.el.classList.remove('is-open'); }
 function toggleStamp(id) { state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id); renderAll(); }
 
+// 共通: スタンプ付与処理
+function grantStampByBoothId(boothId) {
+  if (!boothId) return false;
+  const booth = BOOTH_DATA.find(b => b.id === boothId);
+  if (!booth) return false;
+  const firstTime = !state.stamps.has(boothId);
+  state.stamps.add(boothId);
+  renderAll();
+  showToast(firstTime ? `✅ 「${booth.name}」のスタンプを獲得！` : `ℹ️ 「${booth.name}」は取得済みです`);
+  return true;
+}
+
+/******************* QR: スキャナ制御 *******************/
+let scanStream = null;
+let useBackCamera = true;
+let trackWithTorch = null;
+let scanning = false;
+let barcodeDetector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+
+async function openScanner() {
+  $app.scan.sheet.classList.add('is-open');
+  await startCamera();
+}
+
+function closeScanner() {
+  stopCamera();
+  $app.scan.sheet.classList.remove('is-open');
+}
+
+async function startCamera() {
+  try {
+    $app.scan.status.textContent = 'カメラを起動中…';
+    const constraints = {
+      audio: false,
+      video: {
+        facingMode: useBackCamera ? { ideal: 'environment' } : 'user',
+        width: { ideal: 1280 }, height: { ideal: 720 }
+      }
+    };
+    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+    $app.scan.video.srcObject = scanStream;
+    await $app.scan.video.play();
+
+    // トーチ対応チェック
+    trackWithTorch = null;
+    const [track] = scanStream.getVideoTracks();
+    const caps = track.getCapabilities?.();
+    if (caps && 'torch' in caps) {
+      trackWithTorch = track;
+      $app.scan.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+    } else {
+      $app.scan.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+    }
+
+    $app.scan.status.textContent = barcodeDetector ? 'QRコードを枠内に写してください' : 'この端末はネイティブQR非対応です（最新Chrome推奨）';
+    scanning = true;
+    requestAnimationFrame(scanLoop);
+  } catch (err) {
+    console.error(err);
+    $app.scan.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+  }
+}
+
+function stopCamera() {
+  scanning = false;
+  if (scanStream) {
+    scanStream.getTracks().forEach(t => t.stop());
+    scanStream = null;
+  }
+  $app.scan.torchBtn.dataset.on = '0';
+}
+
+async function toggleTorch() {
+  if (!trackWithTorch) return;
+  const on = $app.scan.torchBtn.dataset.on === '1';
+  try {
+    await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
+    $app.scan.torchBtn.dataset.on = on ? '0' : '1';
+    $app.scan.torchBtn.classList.toggle('bg-amber-200');
+  } catch (e) { console.warn('Torch not available', e); }
+}
+
+async function switchCamera() {
+  useBackCamera = !useBackCamera;
+  stopCamera();
+  await startCamera();
+}
+
+async function scanLoop() {
+  if (!scanning) return;
+  if (barcodeDetector && $app.scan.video.readyState >= 2) {
+    try {
+      const barcodes = await barcodeDetector.detect($app.scan.video);
+      if (barcodes && barcodes.length > 0) {
+        const text = (barcodes[0].rawValue || '').trim();
+        if (await handleScanResult(text)) return; // trueなら停止
+      }
+    } catch (e) { /* ignore */ }
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+async function handleScanResult(text) {
+  if (!text) return false;
+  const lowered = text.toLowerCase();
+  const boothId = QR_WHITELIST[lowered];
+  if (!boothId) {
+    showToast('未対応のQRコードです');
+    await wait(800);
+    return false;
+  }
+  grantStampByBoothId(boothId);
+  await wait(500);
+  closeScanner();
+  return true;
+}
+
+function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+// --- Deep Link: ネイティブカメラからの読み取りでアプリ起動時に付与 ---
+function handleDeepLinkAward() {
+  const url = new URL(window.location.href);
+  let code = url.searchParams.get('qr');
+  if (!code && url.hash) {
+    const m = url.hash.match(/qr=([^&]+)/);
+    if (m) code = decodeURIComponent(m[1]);
+  }
+  if (!code) return;
+  const boothId = QR_WHITELIST[String(code).toLowerCase()];
+  if (boothId) {
+    grantStampByBoothId(boothId);
+    url.searchParams.delete('qr');
+    const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
+    history.replaceState({}, '', clean || '/');
+  } else {
+    showToast('未対応のQRコードです');
+  }
+}
+
+/******************* Auth Flow *******************/
+async function ensureAuth() {
+  // 1) 既存ローカル
+  const local = loadLocalUser();
+  if (local && local.id) {
+    state.user = local;
+    enableAppUI(state.user);
+    return true;
+  }
+  // 2) 未ログイン: 起動パネル
+  showAuthGate();
+  return false;
+}
+
+async function handleSignin(e){
+  e.preventDefault();
+  $app.auth.signinError.textContent = '';
+  const name = $app.auth.siName.value.trim();
+  const school = $app.auth.siSchool.value.trim();
+  const department = $app.auth.siDept.value.trim();
+  if (!name || !school || !department) {
+    $app.auth.signinError.textContent = '未入力の項目があります。';
+    return;
+  }
+  try {
+    const rec = await sbInsertUser({ name, school, department });
+    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
+    saveLocalUser(user);
+    state.user = user;
+    closeAuthModal('signin');
+    enableAppUI(user);
+    showToast('登録が完了しました。ようこそ！');
+  } catch(err){
+    console.error(err);
+    $app.auth.signinError.textContent = '登録に失敗しました。ネットワークや設定をご確認ください。';
+  }
+}
+
+async function handleLogin(e){
+  e.preventDefault();
+  $app.auth.loginError.textContent = '';
+  const name = $app.auth.liName.value.trim();
+  const school = $app.auth.liSchool.value.trim();
+  if (!name || !school) {
+    $app.auth.loginError.textContent = '氏名と学校名を入力してください。';
+    return;
+  }
+  try {
+    const rec = await sbFindUserByNameAndSchool({ name, school });
+    if (!rec) {
+      $app.auth.loginError.textContent = '該当ユーザーが見つかりません。サインインをお試しください。';
+      return;
+    }
+    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
+    saveLocalUser(user);
+    state.user = user;
+    closeAuthModal('login');
+    enableAppUI(user);
+    showToast('ログインしました。');
+  } catch(err){
+    console.error(err);
+    $app.auth.loginError.textContent = 'ログインに失敗しました。';
+  }
+}
+
+/******************* UIユーティリティ *******************/
+function showToast(msg) {
+  const el = $app.toast;
+  const box = el.firstElementChild;
+  box.textContent = msg;
+  el.classList.remove('hidden');
+  el.classList.add('animate-bounce');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
+    el.classList.add('hidden');
+    el.classList.remove('animate-bounce');
+  }, 1800);
+}
+
+/******************* 初期化 *******************/
 function init() {
+  // ナビ
   $app.navButtons.forEach(btn => btn.addEventListener('click', () => { state.activePage = btn.dataset.page; updateActivePage(); }));
+
+  // ブースシート操作
   $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
   $app.sheet.getStampBtn.addEventListener('click', (e) => { toggleStamp(e.target.dataset.id); closeBoothSheet(); });
+
+  // Ripple
   document.addEventListener('click', e => {
     const rippleTarget = e.target.closest('.ripple');
     if (!rippleTarget) return;
@@ -465,7 +931,35 @@ function init() {
     rippleTarget.appendChild(ripple);
     setTimeout(() => ripple.remove(), 600);
   });
+
+  // レイアウト
   window.addEventListener('resize', () => { layoutBoothIcons(); syncBubbleHeights(); });
+
+  // QR起動
+  $app.scan.openCard.addEventListener('click', openScanner);
+  $app.scan.closeBtn.addEventListener('click', closeScanner);
+  $app.scan.torchBtn.addEventListener('click', toggleTorch);
+  $app.scan.switchBtn.addEventListener('click', switchCamera);
+
+  // Deep Link からの付与
+  handleDeepLinkAward();
+
+  // ===== Auth: 起動時チェック =====
+  ensureAuth().then(ok => {
+    if (ok) {
+      // すぐアプリを有効化
+      enableAppUI(state.user);
+    }
+  });
+
+  // Auth: Launch Buttons
+  $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
+  $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
+  document.querySelectorAll('[data-close="signin"]').forEach(el => el.addEventListener('click', () => closeAuthModal('signin')));
+  document.querySelectorAll('[data-close="login"]').forEach(el => el.addEventListener('click', () => closeAuthModal('login')));
+  $app.auth.signinForm.addEventListener('submit', handleSignin);
+  $app.auth.loginForm.addEventListener('submit', handleLogin);
+
   renderAll();
 }
 init();
@@ -479,7 +973,7 @@ function layoutBoothIcons() {
   const offsetX = vb.x + vb.width * marginFactorX;
   const offsetY = vb.y + vb.height * marginFactorY;
   const base = Math.min(vb.width, vb.height);
-  const size = Math.max(72, Math.min(200, Math.round(base * 0.09))); // ★ ロゴ画像の一辺
+  const size = Math.max(72, Math.min(200, Math.round(base * 0.09)));
 
   Object.keys(BOOTH_ANCHORS).forEach(id => {
     const a = BOOTH_ANCHORS[id];
@@ -495,7 +989,7 @@ function layoutBoothIcons() {
     img.setAttribute('width', size);
     img.setAttribute('height', size);
     img.setAttribute('href', booth.img);
-    img.setAttribute('preserveAspectRatio', 'xMidYMid slice'); // ★ 1:1トリミング表示
+    img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     img.setAttribute('cursor', 'pointer');
     img.dataset.id = id;
     g.appendChild(img);
