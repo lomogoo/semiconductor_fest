@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
   <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- QR生成用（軽量） -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
   <style>
     :root {
       --bg-light: #f0f4f8;
@@ -237,6 +240,26 @@
       </form>
     </div>
   </div>
+
+  <!-- ===== User QR Modal ===== -->
+<div id="qr-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)]">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-slate-800">あなたのQRコード</h3>
+      <button id="close-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+    </div>
+    <div class="p-5 flex flex-col items-center gap-3">
+      <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
+      <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
+      <div class="flex gap-2">
+        <button id="copy-uuid" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">UUIDをコピー</button>
+        <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
+      </div>
+      <p class="text-xs text-slate-500">※このQRは Supabaseの <code>app_users.id</code>（UUID）をエンコードしています。</p>
+    </div>
+  </div>
+</div>
+
 
   <div id="app" class="opacity-0 pointer-events-none select-none">
     <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
@@ -517,7 +540,16 @@ const $app = {
     signinError: document.getElementById('signin-error'),
     loginError: document.getElementById('login-error'),
   },
-  toast: document.getElementById('toast')
+  toast: document.getElementById('toast'),
+  qr: {
+    modal: document.getElementById('qr-modal'),
+    box: document.getElementById('qr-box'),
+    uuid: document.getElementById('qr-uuid'),
+    copy: document.getElementById('copy-uuid'),
+    dl: document.getElementById('download-qr'),
+    closeBtn: document.getElementById('close-qr')
+  }
+
 };
 
 /******************* Auth UI Helpers *******************/
@@ -543,12 +575,57 @@ function closeAuthModal(kind) {
   target.classList.remove('show');
   $app.auth.backdrop.classList.remove('show');
 }
+  
 function enableAppUI(user) {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
-  $app.userPill.innerHTML = `<span class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200">👤 ${user.name}（${user.school} / ${user.department}）</span>`;
+  $app.userPill.classList.add('cursor-pointer'); // クリックできる見た目
+  $app.userPill.innerHTML =
+    `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
+       👤 ${user.name}（${user.school} / ${user.department}）
+       <span class="ml-1 text-sky-700">/ タップで自分のQR</span>
+     </button>`;
 }
+
+function openQrModal() {
+  if (!state.user?.id) { showToast('ログインしてください'); return; }
+  // 既存の暗転を流用
+  $app.auth.backdrop.classList.add('show');
+  $app.qr.modal.classList.add('show');
+  renderUserQr(state.user.id);
+}
+
+function closeQrModal() {
+  $app.qr.modal.classList.remove('show');
+  // 他のモーダルが出ていなければ backdrop も消す
+  if (!$app.auth.signin.classList.contains('show') &&
+      !$app.auth.login.classList.contains('show')) {
+    $app.auth.backdrop.classList.remove('show');
+  }
+}
+
+function renderUserQr(uuid) {
+  // クリアして再生成
+  $app.qr.box.innerHTML = '';
+  $app.qr.uuid.textContent = uuid;
+
+  // QRコード生成（canvas）
+  QRCode.toCanvas(uuid, { width: 260, margin: 2 }, (err, canvas) => {
+    if (err) { console.error(err); showToast('QR生成に失敗しました'); return; }
+    $app.qr.box.appendChild(canvas);
+    // ダウンロードリンク設定
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      $app.qr.dl.setAttribute('href', dataUrl);
+      $app.qr.dl.setAttribute('download', `user-qr-${uuid}.png`);
+    } catch (e) {
+      // Safariの制限などで失敗しても致命ではない
+      console.warn('toDataURL failed', e);
+    }
+  });
+}
+
 
 /******************* Auth Storage (client-side) *******************/
 const LS_KEY_USER = 'app_user';
@@ -984,6 +1061,20 @@ function init() {
   $app.auth.loginForm.addEventListener('submit', handleLogin);
 
   renderAll();
+
+    // プロフィール（ユーザーピル）→ QR表示
+  $app.userPill.addEventListener('click', openQrModal);
+  $app.qr.closeBtn.addEventListener('click', closeQrModal);
+  $app.qr.copy.addEventListener('click', async () => {
+    if (!state.user?.id) return;
+    try {
+      await navigator.clipboard.writeText(state.user.id);
+      showToast('UUIDをコピーしました');
+    } catch {
+      showToast('コピーに失敗しました');
+    }
+  });
+
 }
 init();
 
