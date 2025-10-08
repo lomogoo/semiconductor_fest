@@ -393,19 +393,10 @@
 const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co"; // 置換
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk"; // 置換
 
-const SUPABASE_URL_PLACEHOLDER_TOKEN = "https://fsaeuowdijoeqhnrqazx.supabase.coF";
-const SUPABASE_KEY_PLACEHOLDER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
-
-function isSupabaseCredentialUnset(value, token) {
-  if (!value) return true;
-  const trimmed = value.trim();
-  if (!trimmed) return true;
-  return trimmed === token || trimmed.includes(token);
-}
-
-const IS_SUPABASE_CONFIGURED = !isSupabaseCredentialUnset(SUPABASE_URL, SUPABASE_URL_PLACEHOLDER_TOKEN)
-  && !isSupabaseCredentialUnset(SUPABASE_ANON_KEY, SUPABASE_KEY_PLACEHOLDER_TOKEN);
-
+const IS_SUPABASE_CONFIGURED =
+  typeof SUPABASE_URL === "string" && SUPABASE_URL.trim() !== "" &&
+  typeof SUPABASE_ANON_KEY === "string" && SUPABASE_ANON_KEY.trim() !== "";
+  
 let supabase = null;
 if (IS_SUPABASE_CONFIGURED) {
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
