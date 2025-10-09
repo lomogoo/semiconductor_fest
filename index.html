@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>半導体スタンプラリーMAP（Auth対応）</title>
+  <title>みやぎ半導体キャリアフェス</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -324,8 +324,8 @@
           <path d="M58 30 A28 28 0 0 1 58 34" stroke="#0ea5e9" stroke-width="3" fill="none"/>
         </svg>
         <div>
-          <h1 id="header-title" class="text-lg font-semibold text-sky-800">進捗ホーム</h1>
-          <p class="text-xs text-sky-700">半導体スタンプラリーMAP</p>
+          <h1 id="header-title" class="text-lg font-semibold text-sky-800">ホーム</h1>
+          <p class="text-xs text-sky-700">みやぎ半導体キャリアフェス</p>
         </div>
         <div id="user-pill" class="ml-auto text-xs text-slate-700 hidden"></div>
       </div>
@@ -599,8 +599,7 @@ function enableAppUI(user) {
   $app.userPill.classList.add('cursor-pointer');
   $app.userPill.innerHTML =
     `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
-       👤 ${user.name}（${user.school} / ${user.department}）
-       <span class="ml-1 text-sky-700">/ タップで自分のQR</span>
+       ${user.name}（${user.school}）
      </button>`;
   
   // Auth完了後に初期レイアウトを実行
@@ -780,7 +779,7 @@ function updateActivePage() {
     $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
   }
   
-  const pageTitles = { home: '進捗ホーム', map: '会場マップ', list: 'ブース一覧' };
+  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'コンテンツ' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
 
   if (state.activePage === 'list') { renderBoothList(); }
