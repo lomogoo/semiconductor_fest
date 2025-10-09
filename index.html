@@ -148,7 +148,7 @@
 
     #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
 
-    .map-wrap { aspect-ratio:2/3; margin-top: .25rem; }
+    .map-wrap { aspect-ratio:2/3; margin-top: 0; }
 
     .scanner-video { width: 100%; height: auto; border-radius: 1rem; background: #000; }
     .scan-guide { position: absolute; inset: 0; pointer-events: none; }
@@ -361,29 +361,29 @@
         </div>
       </div>
 
-      <div id="page-map" class="page p-3 pt-2 space-y-3">
-        <!-- カメラ起動ボタン -->
-        <div class="max-w-[1200px] mx-auto">
-          <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
-              <div class="text-left">
-                <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
-                <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
-              </div>
-            </div>
-            <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
-          </button>
-        </div>
-        
-        <!-- マップ -->
-        <div class="map-wrap w-full max-w-[1200px] mx-auto">
-          <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
-            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
-            <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
-          </svg>
+<div id="page-map" class="page p-3 pt-2 space-y-2">
+  <!-- カメラ起動ボタン -->
+  <div class="max-w-[1200px] mx-auto">
+    <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
+        <div class="text-left">
+          <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
+          <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
         </div>
       </div>
+      <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
+    </button>
+  </div>
+  
+  <!-- マップ -->
+  <div class="map-wrap w-full max-w-[1200px] mx-auto">
+    <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
+      <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+      <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
+    </svg>
+  </div>
+</div>
 
       <div id="page-list" class="page p-2">
         <ul id="booth-list" class="space-y-2"></ul>
