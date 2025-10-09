@@ -172,10 +172,10 @@
   <div id="auth-launch" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
       <h2 class="text-xl font-semibold text-slate-800">ご利用前にサインイン/ログイン</h2>
-      <p class="text-sm text-slate-600 mt-1">初めての方は「サインイン」で氏名・学校名・学部/学科を登録してください。既に登録済みの方は「ログイン」へ。</p>
+      <p class="text-sm text-slate-600 mt-1">当日受付の方は「サインイン」で氏名・学校名・学部/学科を登録してください。事前申込済みの方は「ログイン」へ。</p>
       <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">サインイン</button>
-        <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">ログイン</button>
+        <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">当日受付の方</button>
+        <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">事前申込済みの方</button>
       </div>
     </div>
   </div>
@@ -184,7 +184,7 @@
   <div id="signin-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">サインイン（初回登録）</h3>
+        <h3 class="text-lg font-semibold text-slate-800">受付</h3>
         <button data-close="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
       <form id="signin-form" class="p-5 space-y-4">
@@ -200,8 +200,7 @@
           <label class="text-sm text-slate-700">学部・学科</label>
           <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：工学部 電気情報物理工学科" />
         </div>
-        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録して入場</button>
-        <p id="signin-note" class="text-xs text-slate-500">※この登録情報はSupabaseのDBに保存され、ユーザーには一意のUUIDが付与されます。</p>
+        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
         <p id="signin-error" class="text-sm text-red-600"></p>
       </form>
     </div>
@@ -211,7 +210,7 @@
   <div id="login-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">ログイン（登録済み）</h3>
+        <h3 class="text-lg font-semibold text-slate-800">事前申込済みの方</h3>
         <button data-close="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
       <form id="login-form" class="p-5 space-y-4">
@@ -224,6 +223,7 @@
           <input id="li-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した学校名" />
         </div>
         <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
+        <p id="signin-note" class="text-xs" text-slate-500>※事前にGoogleフォームに入力した内容でお答えください。
         <p id="login-error" class="text-sm text-red-600"></p>
       </form>
     </div>
@@ -240,10 +240,8 @@
         <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
         <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
         <div class="flex gap-2">
-          <button id="copy-uuid" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">UUIDをコピー</button>
           <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
         </div>
-        <p class="text-xs text-slate-500">※このQRは Supabaseの <code>app_users.id</code>（UUID）をエンコードしています。</p>
       </div>
     </div>
   </div>
