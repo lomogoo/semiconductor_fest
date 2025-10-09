@@ -164,6 +164,36 @@
     .auth-backdrop.show { display:block; }
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; }
     .auth-modal.show { display:flex; }
+
+    .fullscreen-scanner {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #000;
+      display: none;
+      flex-direction: column;
+    }
+    .fullscreen-scanner.active {
+      display: flex;
+    }
+    .fullscreen-scanner video {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fullscreen-scanner-controls {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 101;
+    }
   </style>
 </head>
 <body>
@@ -181,7 +211,6 @@
   </div>
 
   <!-- Signin Modal -->
-<!-- Signin Modal -->
   <div id="signin-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
@@ -196,15 +225,15 @@
       <form id="signin-form" class="p-5 space-y-4">
         <div>
           <label class="text-sm text-slate-700">氏名</label>
-          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北 太郎" />
+          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
         </div>
         <div>
           <label class="text-sm text-slate-700">学校名</label>
-          <input id="si-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北大学" />
+          <input id="si-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北大学" />
         </div>
         <div>
           <label class="text-sm text-slate-700">学部・学科</label>
-          <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：工学部 電気情報物理工学科" />
+          <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:工学部 電気情報物理工学科" />
         </div>
         <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
         <p id="signin-error" class="text-sm text-red-600"></p>
@@ -233,7 +262,7 @@
           <input id="li-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した学校名" />
         </div>
         <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
-        <p id="signin-note" class="text-xs" text-slate-500>※事前にGoogleフォームに入力した内容でお答えください。
+        <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
         <p id="login-error" class="text-sm text-red-600"></p>
       </form>
     </div>
@@ -253,6 +282,27 @@
           <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Scanner -->
+  <div id="fullscreen-scanner" class="fullscreen-scanner">
+    <div class="fullscreen-scanner-controls">
+      <button id="fullscreen-close" class="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold">✕ 閉じる</button>
+      <div class="flex gap-2">
+        <button id="fullscreen-torch" class="px-3 py-2 rounded-xl bg-white/20 text-white border border-white/40">💡</button>
+        <button id="fullscreen-switch" class="px-3 py-2 rounded-xl bg-white/20 text-white border border-white/40">🔄</button>
+      </div>
+    </div>
+    <video id="fullscreen-video" autoplay playsinline muted></video>
+    <div class="scan-guide">
+      <div class="scan-corner tl"></div>
+      <div class="scan-corner tr"></div>
+      <div class="scan-corner bl"></div>
+      <div class="scan-corner br"></div>
+    </div>
+    <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: white; text-align: center; background: rgba(0,0,0,0.6); padding: 0.5rem 1rem; border-radius: 1rem;">
+      <span id="fullscreen-status">QRコードを枠内に写してください</span>
     </div>
   </div>
 
@@ -312,12 +362,7 @@
       </div>
 
       <div id="page-map" class="page p-3 pt-2 space-y-3">
-        <div class="map-wrap w-full max-w-[1200px] mx-auto">
-          <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
-            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
-            <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
-          </svg>
-        </div>
+        <!-- カメラ起動ボタン -->
         <div class="max-w-[1200px] mx-auto">
           <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
             <div class="flex items-center gap-3">
@@ -329,6 +374,14 @@
             </div>
             <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
           </button>
+        </div>
+        
+        <!-- マップ -->
+        <div class="map-wrap w-full max-w-[1200px] mx-auto">
+          <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
+            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+            <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
+          </svg>
         </div>
       </div>
 
@@ -359,36 +412,6 @@
     </div>
     <div class="bottom-sheet-backdrop" data-target="booth"></div>
 
-    <!-- QRスキャナ シート -->
-    <div id="scan-sheet" class="bottom-sheet">
-      <div class="liquid-glass rounded-t-3xl overflow-hidden">
-        <div class="p-4 border-b border-white/50 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">📷</span>
-            <h4 class="font-semibold text-lg text-slate-800">QRスキャン</h4>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="torch-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">ライト</button>
-            <button id="close-scan-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
-          </div>
-        </div>
-        <div class="relative p-4 pb-2">
-          <video id="scan-video" class="scanner-video" autoplay playsinline muted></video>
-          <div class="scan-guide">
-            <div class="scan-corner tl"></div>
-            <div class="scan-corner tr"></div>
-            <div class="scan-corner bl"></div>
-            <div class="scan-corner br"></div>
-          </div>
-        </div>
-        <div class="px-4 pb-4 flex items-center justify-between text-sm text-slate-600">
-          <span id="scan-status">カメラを初期化中…</span>
-          <button id="switch-camera-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">カメラ切替</button>
-        </div>
-      </div>
-    </div>
-    <div class="bottom-sheet-backdrop" data-target="scan"></div>
-
     <div id="toast" class="toast hidden">
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
     </div>
@@ -397,7 +420,8 @@
       <nav class="h-16 grid grid-cols-3 items-center floating-nav rounded-3xl">
         <div id="nav-indicator"></div>
         <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
-        <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
+        <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span>
+</button>
         <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">一覧</span></button>
       </nav>
     </div>
@@ -495,14 +519,15 @@ const $app = {
     getStampBtn: document.getElementById('get-stamp-btn'),
   },
   scan: {
-    sheet: document.getElementById('scan-sheet'),
-    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="scan"]'),
-    video: document.getElementById('scan-video'),
-    status: document.getElementById('scan-status'),
-    torchBtn: document.getElementById('torch-btn'),
-    switchBtn: document.getElementById('switch-camera-btn'),
     openCard: document.getElementById('scan-card'),
-    closeBtn: document.getElementById('close-scan-btn'),
+  },
+  fullscreenScanner: {
+    container: document.getElementById('fullscreen-scanner'),
+    video: document.getElementById('fullscreen-video'),
+    status: document.getElementById('fullscreen-status'),
+    closeBtn: document.getElementById('fullscreen-close'),
+    torchBtn: document.getElementById('fullscreen-torch'),
+    switchBtn: document.getElementById('fullscreen-switch'),
   },
   auth: {
     backdrop: document.getElementById('auth-backdrop'),
@@ -526,7 +551,6 @@ const $app = {
     modal: document.getElementById('qr-modal'),
     box: document.getElementById('qr-box'),
     uuid: document.getElementById('qr-uuid'),
-    copy: document.getElementById('copy-uuid'),
     dl: document.getElementById('download-qr'),
     closeBtn: document.getElementById('close-qr')
   }
@@ -561,6 +585,11 @@ function closeAuthModal(kind) {
       !$app.qr.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
+}
+
+function backToAuthGate(kind) {
+  closeAuthModal(kind);
+  showAuthGate();
 }
   
 function enableAppUI(user) {
@@ -673,7 +702,7 @@ function renderStampGrid() {
         <img src="${b.img}" alt="${b.name}">
       </div>
       <div class="chip-name" title="${b.name}">${b.name}</div>`;
-    cell.addEventListener('click', () => { toggleStamp(b.id); });
+    cell.addEventListener('click', () => { openBoothSheet(b); });
     $app.stampGrid.appendChild(cell);
   });
 }
@@ -807,28 +836,26 @@ function grantStampByBoothId(boothId) {
   return true;
 }
 
-/******************* QR Scanner *******************/
+/******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
 let barcodeDetector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
 
-async function openScanner() {
-  $app.scan.sheet.classList.add('is-open');
-  $app.scan.backdrop.classList.add('is-open');
+async function openFullscreenScanner() {
+  $app.fullscreenScanner.container.classList.add('active');
   await startCamera();
 }
 
-function closeScanner() {
+function closeFullscreenScanner() {
   stopCamera();
-  $app.scan.sheet.classList.remove('is-open');
-  $app.scan.backdrop.classList.remove('is-open');
+  $app.fullscreenScanner.container.classList.remove('active');
 }
 
 async function startCamera() {
   try {
-    $app.scan.status.textContent = 'カメラを起動中…';
+    $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
     const constraints = {
       audio: false,
       video: {
@@ -837,25 +864,25 @@ async function startCamera() {
       }
     };
     scanStream = await navigator.mediaDevices.getUserMedia(constraints);
-    $app.scan.video.srcObject = scanStream;
-    await $app.scan.video.play();
+    $app.fullscreenScanner.video.srcObject = scanStream;
+    await $app.fullscreenScanner.video.play();
 
     trackWithTorch = null;
     const [track] = scanStream.getVideoTracks();
     const caps = track.getCapabilities?.();
     if (caps && 'torch' in caps) {
       trackWithTorch = track;
-      $app.scan.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+      $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
     } else {
-      $app.scan.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+      $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
     }
 
-    $app.scan.status.textContent = barcodeDetector ? 'QRコードを枠内に写してください' : 'この端末はネイティブQR非対応です（最新Chrome推奨）';
+    $app.fullscreenScanner.status.textContent = barcodeDetector ? 'QRコードを枠内に写してください' : 'この端末はネイティブQR非対応です（最新Chrome推奨）';
     scanning = true;
     requestAnimationFrame(scanLoop);
   } catch (err) {
     console.error(err);
-    $app.scan.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+    $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
   }
 }
 
@@ -865,17 +892,17 @@ function stopCamera() {
     scanStream.getTracks().forEach(t => t.stop());
     scanStream = null;
   }
-  $app.scan.torchBtn.dataset.on = '0';
-  $app.scan.torchBtn.classList.remove('bg-amber-200');
+  $app.fullscreenScanner.torchBtn.dataset.on = '0';
+  $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
 }
 
 async function toggleTorch() {
   if (!trackWithTorch) return;
-  const on = $app.scan.torchBtn.dataset.on === '1';
+  const on = $app.fullscreenScanner.torchBtn.dataset.on === '1';
   try {
     await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
-    $app.scan.torchBtn.dataset.on = on ? '0' : '1';
-    $app.scan.torchBtn.classList.toggle('bg-amber-200');
+    $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
+    $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
   } catch (e) { console.warn('Torch not available', e); }
 }
 
@@ -887,9 +914,9 @@ async function switchCamera() {
 
 async function scanLoop() {
   if (!scanning) return;
-  if (barcodeDetector && $app.scan.video.readyState >= 2) {
+  if (barcodeDetector && $app.fullscreenScanner.video.readyState >= 2) {
     try {
-      const barcodes = await barcodeDetector.detect($app.scan.video);
+      const barcodes = await barcodeDetector.detect($app.fullscreenScanner.video);
       if (barcodes && barcodes.length > 0) {
         const text = (barcodes[0].rawValue || '').trim();
         if (await handleScanResult(text)) return;
@@ -910,7 +937,7 @@ async function handleScanResult(text) {
   }
   grantStampByBoothId(boothId);
   await wait(500);
-  closeScanner();
+  closeFullscreenScanner();
   return true;
 }
 
@@ -1075,10 +1102,6 @@ function applySupabaseAvailabilityState() {
   if (IS_SUPABASE_CONFIGURED) return;
   
   const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-  const note = document.getElementById('signin-note');
-  if (note) {
-    note.textContent = '※サインイン機能を有効にするには、SupabaseのURLと匿名キーを設定してください。';
-  }
   
   [$app.auth.signinError, $app.auth.loginError].forEach(el => {
     if (el) el.textContent = disabledMessage;
@@ -1136,14 +1159,11 @@ function init() {
     syncBubbleHeights();
   });
 
-  // QR Scanner
-  $app.scan.openCard.addEventListener('click', openScanner);
-  $app.scan.closeBtn.addEventListener('click', closeScanner);
-  $app.scan.torchBtn.addEventListener('click', toggleTorch);
-  $app.scan.switchBtn.addEventListener('click', switchCamera);
-  if ($app.scan.backdrop) {
-    $app.scan.backdrop.addEventListener('click', closeScanner);
-  }
+  // QR Scanner (Fullscreen)
+  $app.scan.openCard.addEventListener('click', openFullscreenScanner);
+  $app.fullscreenScanner.closeBtn.addEventListener('click', closeFullscreenScanner);
+  $app.fullscreenScanner.torchBtn.addEventListener('click', toggleTorch);
+  $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
 
   // Deep Link
   handleDeepLinkAward();
@@ -1158,11 +1178,11 @@ function init() {
   // Auth Buttons
   $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
   $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
-  document.querySelectorAll('[data-close="signin"]').forEach(el => 
-    el.addEventListener('click', () => closeAuthModal('signin'))
+  document.querySelectorAll('[data-back="signin"]').forEach(el => 
+    el.addEventListener('click', () => backToAuthGate('signin'))
   );
-  document.querySelectorAll('[data-close="login"]').forEach(el => 
-    el.addEventListener('click', () => closeAuthModal('login'))
+  document.querySelectorAll('[data-back="login"]').forEach(el => 
+    el.addEventListener('click', () => backToAuthGate('login'))
   );
   $app.auth.signinForm.addEventListener('submit', handleSignin);
   $app.auth.loginForm.addEventListener('submit', handleLogin);
@@ -1170,15 +1190,6 @@ function init() {
   // User QR
   $app.userPill.addEventListener('click', openQrModal);
   $app.qr.closeBtn.addEventListener('click', closeQrModal);
-  $app.qr.copy.addEventListener('click', async () => {
-    if (!state.user?.id) return;
-    try {
-      await navigator.clipboard.writeText(state.user.id);
-      showToast('UUIDをコピーしました');
-    } catch {
-      showToast('コピーに失敗しました');
-    }
-  });
 
   // Auth backdrop click to close QR modal
   $app.auth.backdrop.addEventListener('click', (e) => {
