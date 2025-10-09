@@ -181,12 +181,18 @@
   </div>
 
   <!-- Signin Modal -->
+<!-- Signin Modal -->
   <div id="signin-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">受付</h3>
-        <button data-close="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+        <button data-back="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
+          <span>←</span>
+          <span>戻る</span>
+        </button>
+        <h3 class="text-lg font-semibold text-slate-800">当日受付の方</h3>
+        <div class="w-16"></div>
       </div>
+      
       <form id="signin-form" class="p-5 space-y-4">
         <div>
           <label class="text-sm text-slate-700">氏名</label>
@@ -210,8 +216,12 @@
   <div id="login-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">事前申込済みの方</h3>
-        <button data-close="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+        <button data-back="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
+          <span>←</span>
+          <span>戻る</span>
+        </button>
+        <h3 class="text-lg font-semibold text-slate-800">ログイン（登録済み）</h3>
+        <div class="w-16"></div>
       </div>
       <form id="login-form" class="p-5 space-y-4">
         <div>
