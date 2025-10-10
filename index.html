@@ -664,14 +664,25 @@ function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_US
 function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 
 /******************* Supabase Accessors *******************/
+/******************* Supabase Accessors *******************/
+// 置き換え：当日受付（サインイン）→ on_site でINSERT
 async function sbInsertUser({name, school, department}) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
-    .rpc('register_user', { p_name: name, p_school: school, p_department: department });
+    .from('app_users')
+    .insert({
+      name,
+      school,
+      department,
+      registration_type: 'on_site'   // ←ここがポイント
+    })
+    .select()
+    .single();
   if (error) throw error;
   return data;
 }
 
+// 既存のログインはそのままでOK（事前申込ユーザー検索）
 async function sbFindUserByNameAndSchool({name, school}) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
@@ -679,7 +690,6 @@ async function sbFindUserByNameAndSchool({name, school}) {
   if (error) throw error;
   return data;
 }
-
 /******************* RENDER FUNCTIONS *******************/
 function renderAll() {
   renderStampGrid();
@@ -971,31 +981,56 @@ async function ensureAuth() {
   return false;
 }
 
-async function handleSignin(e){
+/******************* Auth Flow *******************/
+async function handleSignin(e) {
   e.preventDefault();
   $app.auth.signinError.textContent = '';
+  
   const name = $app.auth.siName.value.trim();
   const school = $app.auth.siSchool.value.trim();
   const department = $app.auth.siDept.value.trim();
+  
   if (!name || !school || !department) {
     $app.auth.signinError.textContent = '未入力の項目があります。';
     return;
   }
+
   try {
-    const rec = await sbInsertUser({ name, school, department });
-    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
+    // ← Supabase Function呼び出し
+    const res = await fetch("https://fsaeuowdijoeqhnrqazx.supabase.co/functions/v1/onsite-intake", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        name,
+        school,
+        department
+      })
+    });
+
+    if (!res.ok) throw new Error(`Function呼び出し失敗: ${res.status}`);
+    const data = await res.json();
+
+    // Functionの返すJSONが { id, name, school, department } を含む前提
+    const user = {
+      id: data.id,
+      name: data.name,
+      school: data.school,
+      department: data.department
+    };
+
     saveLocalUser(user);
     state.user = user;
+
     closeAuthModal('signin');
     enableAppUI(user);
     showToast('登録が完了しました。ようこそ！');
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
-      $app.auth.signinError.textContent = '現在サインイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-      return;
-    }
-    $app.auth.signinError.textContent = '登録に失敗しました。ネットワークや設定をご確認ください。';
+    $app.auth.signinError.textContent = '登録に失敗しました。ネットワークまたは設定を確認してください。';
   }
 }
 
