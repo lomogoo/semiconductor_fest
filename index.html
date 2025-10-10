@@ -982,55 +982,47 @@ async function ensureAuth() {
 }
 
 /******************* Auth Flow *******************/
-async function handleSignin(e) {
+const FUNC_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co/functions/v1/onsite-intake";
+
+async function handleSignin(e){
   e.preventDefault();
   $app.auth.signinError.textContent = '';
-  
+
   const name = $app.auth.siName.value.trim();
   const school = $app.auth.siSchool.value.trim();
   const department = $app.auth.siDept.value.trim();
-  
   if (!name || !school || !department) {
     $app.auth.signinError.textContent = '未入力の項目があります。';
     return;
   }
 
   try {
-    // ← Supabase Function呼び出し
-    const res = await fetch("https://fsaeuowdijoeqhnrqazx.supabase.co/functions/v1/onsite-intake", {
+    const res = await fetch(FUNC_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
       },
-      body: JSON.stringify({
-        name,
-        school,
-        department
-      })
+      body: JSON.stringify({ name, school, department })
     });
 
-    if (!res.ok) throw new Error(`Function呼び出し失敗: ${res.status}`);
-    const data = await res.json();
+    const body = await res.json().catch(()=>({}));
+    if (!res.ok || body.ok === false) {
+      const msg = body.error || `Function呼び出し失敗: ${res.status}`;
+      throw new Error(msg);
+    }
 
-    // Functionの返すJSONが { id, name, school, department } を含む前提
-    const user = {
-      id: data.id,
-      name: data.name,
-      school: data.school,
-      department: data.department
-    };
-
+    const data = body.user ?? body; // どちらの形式でも受け取れるように
+    const user = { id: data.id, name: data.name, school: data.school, department: data.department };
     saveLocalUser(user);
     state.user = user;
-
     closeAuthModal('signin');
     enableAppUI(user);
     showToast('登録が完了しました。ようこそ！');
   } catch (err) {
     console.error(err);
-    $app.auth.signinError.textContent = '登録に失敗しました。ネットワークまたは設定を確認してください。';
+    $app.auth.signinError.textContent = String(err.message || err);
   }
 }
 
