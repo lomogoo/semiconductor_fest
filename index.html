@@ -1185,7 +1185,6 @@ function updateActivePage() {
 
   const isMap = state.activePage === 'map';
   $app.map.iconsGroup?.setAttribute('pointer-events', isMap ? 'auto' : 'none');
-  if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
 }
 
 function openCategorySheet(categoryKey) {
