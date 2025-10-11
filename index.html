@@ -669,7 +669,8 @@ const state = {
   activePage: 'home', 
   prevCount: 0, 
   user: null,
-  percentile: null 
+  percentile: null,
+  acquiredStamps: new Set() // ← 追加
 };
 
 const QR_WHITELIST = {
@@ -874,18 +875,21 @@ async function sbGetUserPoints(userId) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
     .from('app_users')
-    .select('points')
+    .select('points, acquired_stamps')  // ← acquired_stampsも取得
     .eq('id', userId)
     .single();
   if (error) throw error;
-  return data?.points || 0;
+  return data;
 }
 
-async function sbUpdateUserPoints(userId, points) {
+async function sbUpdateUserPoints(userId, points, acquiredStamps) {  // ← 引数追加
   const client = getSupabaseClientOrThrow();
   const { error } = await client
     .from('app_users')
-    .update({ points })
+    .update({ 
+      points,
+      acquired_stamps: Array.from(acquiredStamps)  // ← SetをArrayに変換して保存
+    })
     .eq('id', userId);
   if (error) throw error;
 }
@@ -908,7 +912,8 @@ async function sbInsertUser({name, school, department}) {
       school,
       department,
       registration_type: 'on_site',
-      points: 0
+      points: 0,
+      acquired_stamps: []  // ← 追加
     })
     .select()
     .single();
@@ -928,8 +933,9 @@ async function sbFindUserByNameAndSchool({name, school}) {
 async function syncPointsFromServer() {
   if (!state.user?.id) return;
   try {
-    const points = await sbGetUserPoints(state.user.id);
-    state.points = points;
+    const data = await sbGetUserPoints(state.user.id);
+    state.points = data.points || 0;
+    state.acquiredStamps = new Set(data.acquired_stamps || []);  // ← 追加
     await updatePercentile();
     renderAll();
   } catch (err) {
@@ -937,23 +943,36 @@ async function syncPointsFromServer() {
   }
 }
 
-async function addPoints(amount) {
+async function addPoints(amount, stampId = null) {  // ← stampId引数追加
   if (!state.user?.id) {
     showToast('ログインしてください');
     return false;
+  }
+  
+  // 企業スタンプの重複チェック
+  if (stampId) {
+    if (state.acquiredStamps.has(stampId)) {
+      showToast(`「${stampId}」は既に取得済みです`);
+      return false;
+    }
+    state.acquiredStamps.add(stampId);
   }
   
   const newPoints = Math.min(state.points + amount, MAX_POINTS);
   state.points = newPoints;
   
   try {
-    await sbUpdateUserPoints(state.user.id, newPoints);
+    await sbUpdateUserPoints(state.user.id, newPoints, state.acquiredStamps);  // ← 引数追加
     await updatePercentile();
     renderAll();
     return true;
   } catch (err) {
     console.error('Failed to update points:', err);
     showToast('ポイント更新に失敗しました');
+    // ロールバック
+    if (stampId) {
+      state.acquiredStamps.delete(stampId);
+    }
     return false;
   }
 }
@@ -1205,19 +1224,22 @@ async function grantPointsByCode(code) {
   
   let points = 0;
   let name = '';
+  let stampId = null;
   
   if (categoryKey === 'stage' || categoryKey === 'presentation') {
+    // ステージイベントは重複取得可能（必要に応じて変更可能）
     points = CATEGORY_DATA[categoryKey].points;
     name = CATEGORY_DATA[categoryKey].title;
   } else {
-    // ブース
+    // 企業ブース
     const booth = BOOTH_DATA.find(b => b.id === categoryKey);
     if (!booth) return false;
     points = 1;
     name = booth.name;
+    stampId = categoryKey;  // ← 企業IDをスタンプIDとして使用
   }
   
-  const success = await addPoints(points);
+  const success = await addPoints(points, stampId);  // ← stampIdを渡す
   if (success) {
     showToast(`✅ 「${name}」で${points}pt獲得！`);
   }
@@ -1400,6 +1422,7 @@ async function handleSignin(e){
     saveLocalUser(user);
     state.user = user;
     state.points = data.points || 0;
+    state.acquiredStamps = new Set(data.acquired_stamps || []);  // ← 追加
     closeAuthModal('signin');
     enableAppUI(user);
     await syncPointsFromServer();
@@ -1429,6 +1452,7 @@ async function handleLogin(e){
     saveLocalUser(user);
     state.user = user;
     state.points = rec.points || 0;
+    state.acquiredStamps = new Set(rec.acquired_stamps || []);  // ← 追加
     closeAuthModal('login');
     enableAppUI(user);
     await syncPointsFromServer();
