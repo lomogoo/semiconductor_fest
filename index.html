@@ -831,6 +831,12 @@ function backToAuthGate(kind) {
 }
   
 function enableAppUI(user) {
+  // どこかで取り残された「前面レイヤ」を全て剥がす
+  $app.auth.backdrop?.classList.remove('show');
+  $app.auth.launch?.classList.remove('show');
+  $app.auth.signin?.classList.remove('show');
+  $app.auth.login?.classList.remove('show');
+  $app.qr.modal?.classList.remove('show');
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
@@ -1155,6 +1161,7 @@ function updateAcquiredBadges() {
 
 
 function updateActivePage() {
+  console.debug('[nav] activePage =', state.activePage);
   $app.pages.forEach(p => {
     const isActive = p.id === `page-${state.activePage}`;
     p.classList.toggle('active', isActive);
@@ -1185,6 +1192,7 @@ function updateActivePage() {
 
   const isMap = state.activePage === 'map';
   $app.map.iconsGroup?.setAttribute('pointer-events', isMap ? 'auto' : 'none');
+  if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
 }
 
 function openCategorySheet(categoryKey) {
@@ -1636,11 +1644,18 @@ function applySupabaseAvailabilityState() {
 
 /******************* Initialization *******************/
 function init() {
-  // Navigation
-  $app.navButtons.forEach(btn => btn.addEventListener('click', () => {
+  // Navigation（個別登録はnullセーフ）
+  $app.navButtons.forEach(btn => btn?.addEventListener?.('click', () => {
     state.activePage = btn.dataset.page;
     updateActivePage();
   }));
+  // 予備：ナビ全体で委譲。個別登録が死んでも動く。
+  $app.nav?.addEventListener?.('click', (e) => {
+    const btn = e.target.closest?.('.nav-btn');
+    if (!btn) return;
+    state.activePage = btn.dataset.page;
+    updateActivePage();
+  });
 
   applySupabaseAvailabilityState();
 
@@ -1686,10 +1701,10 @@ function init() {
   });
 
   // QR Scanner (Fullscreen)
-  $app.scan.openCard.addEventListener('click', openFullscreenScanner);
-  $app.fullscreenScanner.closeBtn.addEventListener('click', closeFullscreenScanner);
-  $app.fullscreenScanner.torchBtn.addEventListener('click', toggleTorch);
-  $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
+  $app.scan.openCard?.addEventListener?.('click', openFullscreenScanner);
+  $app.fullscreenScanner.closeBtn?.addEventListener?.('click', closeFullscreenScanner);
+  $app.fullscreenScanner.torchBtn?.addEventListener?.('click', toggleTorch);
+  $app.fullscreenScanner.switchBtn?.addEventListener?.('click', switchCamera);
 
   // Deep Link
   handleDeepLinkAward();
