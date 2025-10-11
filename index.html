@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- QR生成用（軽量） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
   <style>
     :root {
       --bg-light: #f0f4f8;
@@ -272,13 +272,39 @@
     }
 
     .stamp-category-card {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .stamp-category-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.stamp-category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* 取得済みバッジ */
+.stamp-category-card .acquired-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
+}
+
+/* 企業ブース用の進捗表示 */
+.booth-progress {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 2px;
+}
 
     .company-mini-card {
       cursor: pointer;
@@ -508,50 +534,51 @@
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
-            <!-- ステージコンテンツ -->
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
-                  <div>
-                    <div class="font-semibold text-slate-800">ステージコンテンツ</div>
-                    <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
-                  </div>
-                </div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-
-            <!-- 研究発表会 -->
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
-                  <div>
-                    <div class="font-semibold text-slate-800">研究発表会</div>
-                    <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
-                  </div>
-                </div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-
-            <!-- 企業ブース -->
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
-                  <div>
-                    <div class="font-semibold text-slate-800">企業ブース</div>
-                    <div class="text-xs text-slate-600">6社 | 各1pt</div>
-                  </div>
-                </div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-          </div>
+  <!-- ステージコンテンツ -->
+  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
+    <div id="stage-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
+        <div>
+          <div class="font-semibold text-slate-800">ステージコンテンツ</div>
+          <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
         </div>
       </div>
+      <div class="text-slate-400">›</div>
+    </div>
+  </div>
+
+  <!-- 研究発表会 -->
+  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
+    <div id="presentation-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
+        <div>
+          <div class="font-semibold text-slate-800">研究発表会</div>
+          <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+        </div>
+      </div>
+      <div class="text-slate-400">›</div>
+    </div>
+  </div>
+
+  <!-- 企業ブース -->
+  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
+        <div>
+          <div class="font-semibold text-slate-800">企業ブース</div>
+          <div class="text-xs text-slate-600">6社 | 各1pt</div>
+          <div id="booth-progress" class="booth-progress">0/6 獲得済み</div>
+        </div>
+      </div>
+      <div class="text-slate-400">›</div>
+    </div>
+  </div>
+</div>
 
       <div id="page-map" class="page p-3 pt-2 space-y-1">
         <!-- カメラ起動ボタン -->
@@ -1001,12 +1028,128 @@ async function updatePercentile() {
 }
 
 /******************* RENDER FUNCTIONS *******************/
+/******************* RENDER FUNCTIONS *******************/
 function renderAll() {
   renderProgress();
   updateActivePage();
   layoutBoothIcons();
 }
 
+function renderBoothList() {
+  $app.boothList.innerHTML = '';
+  BOOTH_DATA.forEach((b, i) => {
+    const li = document.createElement('li');
+    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim';
+    li.style.animationDelay = `${i * 50}ms`;
+    li.innerHTML = `
+      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
+        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-cover" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-semibold text-slate-800">${b.name}</div>
+        <div class="text-xs text-slate-500 truncate">${b.desc}</div>
+      </div>
+      <div class="text-xl">1pt</div>`;
+    li.addEventListener('click', () => openBoothSheet(b));
+    $app.boothList.appendChild(li);
+  });
+}
+
+function renderProgress() {
+  const n = state.points;
+  
+  const milestones = [
+    { count: 2, percent: 20 },
+    { count: 4, percent: 40 },
+    { count: 5, percent: 50 }
+  ];
+  
+  let progressPercent = 0;
+  if (n >= 5) {
+    progressPercent = 50 + ((n - 5) / 5) * 50;
+  } else if (n >= 4) {
+    progressPercent = 40 + ((n - 4) / 1) * 10;
+  } else if (n >= 2) {
+    progressPercent = 20 + ((n - 2) / 2) * 20;
+  } else if (n > 0) {
+    progressPercent = (n / 2) * 20;
+  }
+
+  $app.progress.badge.textContent = `${n}pt`;
+  $app.progress.bar.style.width = `${progressPercent}%`;
+  $app.progress.dot.style.left = `${progressPercent}%`;
+
+  // パーセンタイル表示
+  if (state.percentile !== null) {
+    $app.progress.rankPercentile.textContent = `上位 ${100 - state.percentile}%`;
+    $app.progress.rankPercentile.classList.remove('hidden');
+  } else {
+    $app.progress.rankPercentile.classList.add('hidden');
+  }
+
+  // バブルの達成状態
+  $app.progress.bubble2.classList.toggle('is-achieved', n >= 2);
+  $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
+  $app.progress.bubble5.classList.toggle('is-achieved', n >= 5);
+  
+  // メッセージの更新
+  if (n >= 5) {
+    $app.progress.msg.innerHTML = '🎉 <strong>全ての特典をゲット！</strong> おめでとうございます！';
+  } else if (n >= 4) {
+    $app.progress.msg.innerHTML = `🏅 <strong>ゴールドピンバッジゲット！</strong> あと<strong>${5 - n}pt</strong>でQuoカードも獲得！`;
+  } else if (n >= 2) {
+    $app.progress.msg.innerHTML = `🎖️ <strong>ノーマルピンバッジゲット！</strong> あと<strong>${4 - n}pt</strong>でゴールドピンバッジ！`;
+  } else {
+    $app.progress.msg.innerHTML = `あと<strong>${2 - n}pt</strong>で最初の特典（ノーマルピンバッジ）をゲット！`;
+  }
+
+  // 達成度パーセント表示
+  const achievementPercent = Math.round((n / MAX_POINTS) * 100);
+  $app.progress.percent.querySelector('.text-2xl').textContent = `${achievementPercent}%`;
+
+  // マイルストーン到達時はドットを非表示
+  const onMilestone = (n === 2 || n === 4 || n === 5);
+  $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
+  
+  // マーカーのアクティブ状態
+  $app.progress.marker2.classList.toggle('is-active', n >= 2);
+  $app.progress.marker4.classList.toggle('is-active', n >= 4);
+  $app.progress.marker5.classList.toggle('is-active', n >= 5);
+
+  // 取得済みバッジの表示更新
+  updateAcquiredBadges();
+
+  state.prevCount = n;
+  syncBubbleHeights();
+}
+
+// updateAcquiredBadges関数はそのまま
+function updateAcquiredBadges() {
+  // ステージコンテンツ
+  const stageAcquired = state.acquiredStamps.has('stage');
+  const stageBadge = document.getElementById('stage-acquired-badge');
+  if (stageBadge) {
+    stageBadge.style.display = stageAcquired ? 'flex' : 'none';
+  }
+  
+  // 研究発表会
+  const presentationAcquired = state.acquiredStamps.has('presentation');
+  const presentationBadge = document.getElementById('presentation-acquired-badge');
+  if (presentationBadge) {
+    presentationBadge.style.display = presentationAcquired ? 'flex' : 'none';
+  }
+  
+  // 企業ブース
+  const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
+  const boothProgress = document.getElementById('booth-progress');
+  if (boothProgress) {
+    boothProgress.textContent = `${acquiredBooths}/6 獲得済み`;
+    if (acquiredBooths === 6) {
+      boothProgress.style.color = '#059669';
+    }
+  }
+}
 function renderBoothList() {
   $app.boothList.innerHTML = '';
   BOOTH_DATA.forEach((b, i) => {
@@ -1247,11 +1390,14 @@ async function grantPointsByCode(code) {
 }
 
 /******************* QR Scanner (Fullscreen) *******************/
+/******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
-let barcodeDetector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+
+// ZXing使用に変更
+let codeReader = null;
 
 async function openFullscreenScanner() {
   $app.fullscreenScanner.container.classList.add('active');
@@ -1266,17 +1412,26 @@ function closeFullscreenScanner() {
 async function startCamera() {
   try {
     $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
+    
+    // ZXing初期化
+    if (!codeReader) {
+      codeReader = new ZXing.BrowserQRCodeReader();
+    }
+    
     const constraints = {
       audio: false,
       video: {
         facingMode: useBackCamera ? { ideal: 'environment' } : 'user',
-        width: { ideal: 1280 }, height: { ideal: 720 }
+        width: { ideal: 1280 }, 
+        height: { ideal: 720 }
       }
     };
+    
     scanStream = await navigator.mediaDevices.getUserMedia(constraints);
     $app.fullscreenScanner.video.srcObject = scanStream;
     await $app.fullscreenScanner.video.play();
 
+    // トーチ設定
     trackWithTorch = null;
     const [track] = scanStream.getVideoTracks();
     const caps = track.getCapabilities?.();
@@ -1287,9 +1442,9 @@ async function startCamera() {
       $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
     }
 
-    $app.fullscreenScanner.status.textContent = barcodeDetector ? 'QRコードを枠内に写してください' : 'この端末はネイティブQR非対応です（最新Chrome推奨）';
+    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
     scanning = true;
-    requestAnimationFrame(scanLoop);
+    scanLoop();
   } catch (err) {
     console.error(err);
     $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
@@ -1323,17 +1478,24 @@ async function switchCamera() {
 }
 
 async function scanLoop() {
-  if (!scanning) return;
-  if (barcodeDetector && $app.fullscreenScanner.video.readyState >= 2) {
-    try {
-      const barcodes = await barcodeDetector.detect($app.fullscreenScanner.video);
-      if (barcodes && barcodes.length > 0) {
-        const text = (barcodes[0].rawValue || '').trim();
-        if (await handleScanResult(text)) return;
-      }
-    } catch (e) { /* ignore */ }
+  if (!scanning || !$app.fullscreenScanner.video.readyState) {
+    if (scanning) requestAnimationFrame(scanLoop);
+    return;
   }
-  requestAnimationFrame(scanLoop);
+  
+  try {
+    const result = await codeReader.decodeOnceFromVideoElement($app.fullscreenScanner.video);
+    if (result && result.text) {
+      const text = result.text.trim();
+      if (await handleScanResult(text)) return;
+    }
+  } catch (e) {
+    // QRコードが見つからない場合は無視
+  }
+  
+  if (scanning) {
+    setTimeout(() => scanLoop(), 300); // 300msごとにスキャン
+  }
 }
 
 async function handleScanResult(text) {
