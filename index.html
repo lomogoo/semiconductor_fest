@@ -159,17 +159,17 @@
     .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
-    .progress-area { position: relative; padding-top: 9rem; margin-top: 1rem; overflow: visible; }
+    .progress-area { position: relative; padding-top: 10rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
-    .reward-bubble { 
+.reward-bubble { 
   position: absolute; 
-  bottom: -10px;  /* 64pxから変更 - アイコンの下に配置 */
+  bottom: 50px;  /* 進捗バーからの距離を確保 */
   transform: translateX(-50%); 
   display: flex; 
-  flex-direction: column-reverse;  /* 追加 - 上下を反転 */
+  flex-direction: column-reverse;  /* ラベルを上に */
   align-items: center; 
-  width: 90px; 
+  width: 80px;  /* 90pxから縮小 */
   pointer-events: none; 
 }
     #reward-bubble-2 { left: var(--marker-2-pos); }
@@ -178,34 +178,34 @@
 
 .reward-bubble-content { 
   width: 100%; 
-  min-height: 50px; 
-  border-radius: 16px; 
+  min-height: 45px;  /* 50pxから縮小 */
+  border-radius: 14px;  /* 16pxから縮小 */
   display: flex; 
   align-items: center; 
   justify-content: center; 
   position: relative; 
-  margin-top: 0;  /* 6pxから変更 */
-  padding: 8px;
+  padding: 6px;  /* 8pxから縮小 */
   transition: all 0.3s ease;
 }
-    .reward-bubble-content img {
-      width: 100%;
-      height: auto;
-      max-height: 60px;
-      object-fit: contain;
-    }
+.reward-bubble-content img {
+  width: 100%;
+  height: auto;
+  max-height: 50px;  /* 60pxから縮小 */
+  object-fit: contain;
+}
     .reward-bubble.is-achieved .reward-bubble-content {
       background: linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3));
       border-color: rgba(52, 211, 153, 0.6) !important;
       box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
     }
 .reward-bubble-label {
-  font-size: 9px;  /* 10pxから変更 */
+  font-size: 9px;
   color: #334155;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 4px;  /* margin-topから変更 */
+  margin-bottom: 6px;  /* ラベルとアイコンの間隔 */
   line-height: 1.2;
+  white-space: nowrap;  /* 改行を防ぐ */
 }
 
     .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
