@@ -600,7 +600,7 @@
         <!-- マップ -->
         <div class="map-wrap w-full max-w-[1200px] mx-auto">
           <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
-            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+            <image id="bg-image" href="background.png" xlink:href="background.png" x="0" y="0" width="1200" height="1800" />
             <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
           </svg>
         </div>
@@ -1597,6 +1597,7 @@ function layoutBoothIcons() {
     img.setAttribute('width', size);
     img.setAttribute('height', size);
     img.setAttribute('href', booth.img);
+    img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', booth.img);
     img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     img.setAttribute('cursor', 'pointer');
     img.setAttribute('role', 'button');
