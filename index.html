@@ -273,39 +273,37 @@
     }
 
     .stamp-category-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-.stamp-category-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .stamp-category-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
 
-/* 取得済みバッジ */
-.stamp-category-card .acquired-badge {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #34d399, #10b981);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
-}
+    .stamp-category-card .acquired-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #34d399, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
+    }
 
-/* 企業ブース用の進捗表示 */
-.booth-progress {
-  font-size: 11px;
-  color: #059669;
-  font-weight: 600;
-  margin-top: 2px;
-}
+    .booth-progress {
+      font-size: 11px;
+      color: #059669;
+      font-weight: 600;
+      margin-top: 2px;
+    }
 
     .company-mini-card {
       cursor: pointer;
@@ -452,9 +450,9 @@
       <div class="p-4 space-y-4 text-sm">
         <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
         <div class="text-slate-600 space-y-2">
-          <div><strong class="font-medium text-slate-800">獲得ポイント：</strong><span class="text-sky-600 font-semibold">1pt</span></div>
-          <div><strong class="font-medium text-slate-800">スタンプ条件：</strong><span id="booth-sheet-condition">-</span></div>
-          <div><strong class="font-medium text-slate-800">ノベルティ：</strong><span id="booth-sheet-giveaway">-</span></div>
+          <div><strong class="font-medium text-slate-800">獲得ポイント:</strong><span class="text-sky-600 font-semibold">1pt</span></div>
+          <div><strong class="font-medium text-slate-800">スタンプ条件:</strong><span id="booth-sheet-condition">-</span></div>
+          <div><strong class="font-medium text-slate-800">ノベルティ:</strong><span id="booth-sheet-giveaway">-</span></div>
         </div>
       </div>
     </div>
@@ -535,52 +533,53 @@
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
-  <!-- ステージコンテンツ -->
-  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
-    <div id="stage-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
-        <div>
-          <div class="font-semibold text-slate-800">ステージコンテンツ</div>
-          <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
-        </div>
-      </div>
-      <div class="text-slate-400">›</div>
-    </div>
-  </div>
+            <!-- ステージコンテンツ -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
+              <div id="stage-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">ステージコンテンツ</div>
+                    <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
 
-  <!-- 研究発表会 -->
-  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
-    <div id="presentation-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
-        <div>
-          <div class="font-semibold text-slate-800">研究発表会</div>
-          <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
-        </div>
-      </div>
-      <div class="text-slate-400">›</div>
-    </div>
-  </div>
+            <!-- 研究発表会 -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
+              <div id="presentation-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">研究発表会</div>
+                    <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
 
-  <!-- 企業ブース -->
-  <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
-        <div>
-          <div class="font-semibold text-slate-800">企業ブース</div>
-          <div class="text-xs text-slate-600">6社 | 各1pt</div>
-          <div id="booth-progress" class="booth-progress">0/6 獲得済み</div>
+            <!-- 企業ブース -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">企業ブース</div>
+                    <div class="text-xs text-slate-600">6社 | 各1pt</div>
+                    <div id="booth-progress" class="booth-progress">0/6 獲得済み</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="text-slate-400">›</div>
-    </div>
-  </div>
-</div>
-</div>
 
       <div id="page-map" class="page p-3 pt-2 space-y-1">
         <!-- カメラ起動ボタン -->
@@ -606,7 +605,7 @@
         </div>
       </div>
 
-      <div id="page-list" class="page p-2">
+      <div id="page-list" class="page p-4">
         <ul id="booth-list" class="space-y-2"></ul>
       </div>
     </main>
@@ -699,7 +698,7 @@ const state = {
   prevCount: 0, 
   user: null,
   percentile: null,
-  acquiredStamps: new Set() // ← 追加
+  acquiredStamps: new Set()
 };
 
 const QR_WHITELIST = {
@@ -831,7 +830,6 @@ function backToAuthGate(kind) {
 }
   
 function enableAppUI(user) {
-  // どこかで取り残された「前面レイヤ」を全て剥がす
   $app.auth.backdrop?.classList.remove('show');
   $app.auth.launch?.classList.remove('show');
   $app.auth.signin?.classList.remove('show');
@@ -910,20 +908,20 @@ async function sbGetUserPoints(userId) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
     .from('app_users')
-    .select('points, acquired_stamps')  // ← acquired_stampsも取得
+    .select('points, acquired_stamps')
     .eq('id', userId)
     .single();
   if (error) throw error;
   return data;
 }
 
-async function sbUpdateUserPoints(userId, points, acquiredStamps) {  // ← 引数追加
+async function sbUpdateUserPoints(userId, points, acquiredStamps) {
   const client = getSupabaseClientOrThrow();
   const { error } = await client
     .from('app_users')
     .update({ 
       points,
-      acquired_stamps: Array.from(acquiredStamps)  // ← SetをArrayに変換して保存
+      acquired_stamps: Array.from(acquiredStamps)
     })
     .eq('id', userId);
   if (error) throw error;
@@ -948,7 +946,7 @@ async function sbInsertUser({name, school, department}) {
       department,
       registration_type: 'on_site',
       points: 0,
-      acquired_stamps: []  // ← 追加
+      acquired_stamps: []
     })
     .select()
     .single();
@@ -970,7 +968,7 @@ async function syncPointsFromServer() {
   try {
     const data = await sbGetUserPoints(state.user.id);
     state.points = data.points || 0;
-    state.acquiredStamps = new Set(data.acquired_stamps || []);  // ← 追加
+    state.acquiredStamps = new Set(data.acquired_stamps || []);
     await updatePercentile();
     renderAll();
   } catch (err) {
@@ -978,13 +976,12 @@ async function syncPointsFromServer() {
   }
 }
 
-async function addPoints(amount, stampId = null) {  // ← stampId引数追加
+async function addPoints(amount, stampId = null) {
   if (!state.user?.id) {
     showToast('ログインしてください');
     return false;
   }
   
-  // 企業スタンプの重複チェック
   if (stampId) {
     if (state.acquiredStamps.has(stampId)) {
       showToast(`「${stampId}」は既に取得済みです`);
@@ -997,14 +994,13 @@ async function addPoints(amount, stampId = null) {  // ← stampId引数追加
   state.points = newPoints;
   
   try {
-    await sbUpdateUserPoints(state.user.id, newPoints, state.acquiredStamps);  // ← 引数追加
+    await sbUpdateUserPoints(state.user.id, newPoints, state.acquiredStamps);
     await updatePercentile();
     renderAll();
     return true;
   } catch (err) {
     console.error('Failed to update points:', err);
     showToast('ポイント更新に失敗しました');
-    // ロールバック
     if (stampId) {
       state.acquiredStamps.delete(stampId);
     }
@@ -1036,18 +1032,20 @@ async function updatePercentile() {
 }
 
 /******************* RENDER FUNCTIONS *******************/
-/******************* RENDER FUNCTIONS *******************/
 function renderAll() {
   renderProgress();
   updateActivePage();
-  layoutBoothIcons();
+  if (state.activePage === 'map') {
+    layoutBoothIcons();
+  }
 }
 
 function renderBoothList() {
+  console.log('[renderBoothList] called');
   $app.boothList.innerHTML = '';
   BOOTH_DATA.forEach((b, i) => {
     const li = document.createElement('li');
-    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim';
+    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer';
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
       <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
@@ -1057,7 +1055,7 @@ function renderBoothList() {
         <div class="font-semibold text-slate-800">${b.name}</div>
         <div class="text-xs text-slate-500 truncate">${b.desc}</div>
       </div>
-      <div class="text-xl">1pt</div>`;
+      <div class="text-xl text-sky-600 font-semibold">1pt</div>`;
     li.addEventListener('click', () => openBoothSheet(b));
     $app.boothList.appendChild(li);
   });
@@ -1065,12 +1063,6 @@ function renderBoothList() {
 
 function renderProgress() {
   const n = state.points;
-  
-  const milestones = [
-    { count: 2, percent: 20 },
-    { count: 4, percent: 40 },
-    { count: 5, percent: 50 }
-  ];
   
   let progressPercent = 0;
   if (n >= 5) {
@@ -1087,7 +1079,6 @@ function renderProgress() {
   $app.progress.bar.style.width = `${progressPercent}%`;
   $app.progress.dot.style.left = `${progressPercent}%`;
 
-  // パーセンタイル表示
   if (state.percentile !== null) {
     $app.progress.rankPercentile.textContent = `上位 ${100 - state.percentile}%`;
     $app.progress.rankPercentile.classList.remove('hidden');
@@ -1095,12 +1086,10 @@ function renderProgress() {
     $app.progress.rankPercentile.classList.add('hidden');
   }
 
-  // バブルの達成状態
   $app.progress.bubble2.classList.toggle('is-achieved', n >= 2);
   $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
   $app.progress.bubble5.classList.toggle('is-achieved', n >= 5);
   
-  // メッセージの更新
   if (n >= 5) {
     $app.progress.msg.innerHTML = '🎉 <strong>全ての特典をゲット！</strong> おめでとうございます！';
   } else if (n >= 4) {
@@ -1111,43 +1100,35 @@ function renderProgress() {
     $app.progress.msg.innerHTML = `あと<strong>${2 - n}pt</strong>で最初の特典（ノーマルピンバッジ）をゲット！`;
   }
 
-  // 達成度パーセント表示
   const achievementPercent = Math.round((n / MAX_POINTS) * 100);
   $app.progress.percent.querySelector('.text-2xl').textContent = `${achievementPercent}%`;
 
-  // マイルストーン到達時はドットを非表示
   const onMilestone = (n === 2 || n === 4 || n === 5);
   $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
   
-  // マーカーのアクティブ状態
   $app.progress.marker2.classList.toggle('is-active', n >= 2);
   $app.progress.marker4.classList.toggle('is-active', n >= 4);
   $app.progress.marker5.classList.toggle('is-active', n >= 5);
 
-  // 取得済みバッジの表示更新
   updateAcquiredBadges();
 
   state.prevCount = n;
   syncBubbleHeights();
 }
 
-// updateAcquiredBadges関数はそのまま
 function updateAcquiredBadges() {
-  // ステージコンテンツ
   const stageAcquired = state.acquiredStamps.has('stage');
   const stageBadge = document.getElementById('stage-acquired-badge');
   if (stageBadge) {
     stageBadge.style.display = stageAcquired ? 'flex' : 'none';
   }
   
-  // 研究発表会
   const presentationAcquired = state.acquiredStamps.has('presentation');
   const presentationBadge = document.getElementById('presentation-acquired-badge');
   if (presentationBadge) {
     presentationBadge.style.display = presentationAcquired ? 'flex' : 'none';
   }
   
-  // 企業ブース
   const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
   const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
   const boothProgress = document.getElementById('booth-progress');
@@ -1159,14 +1140,13 @@ function updateAcquiredBadges() {
   }
 }
 
-
 function updateActivePage() {
-  console.debug('[nav] activePage =', state.activePage);
+  console.log('[updateActivePage] activePage =', state.activePage);
+  
   $app.pages.forEach(p => {
     const isActive = p.id === `page-${state.activePage}`;
     p.classList.toggle('active', isActive);
     p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-    p.style.visibility = isActive ? 'visible' : 'hidden';
   });
 
   let activeBtn = null;
@@ -1188,16 +1168,17 @@ function updateActivePage() {
   const pageTitles = { home: 'ホーム', map: 'マップ', list: 'コンテンツ' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
 
-  if (state.activePage === 'list') { renderBoothList(); }
-
-  const isMap = state.activePage === 'map';
-  $app.map.iconsGroup?.setAttribute('pointer-events', isMap ? 'auto' : 'none');
-  if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
+  if (state.activePage === 'list') { 
+    renderBoothList(); 
+  }
+  
+  if (state.activePage === 'map') {
+    layoutBoothIcons();
+  }
 }
 
 function openCategorySheet(categoryKey) {
   if (categoryKey === 'booths') {
-    // 企業ブース一覧を表示
     $app.categorySheet.title.textContent = '企業ブース';
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-3">
@@ -1219,7 +1200,6 @@ function openCategorySheet(categoryKey) {
       </div>
     `;
     
-    // 企業カードにクリックイベントを追加
     $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
       card.addEventListener('click', () => {
         const boothId = card.dataset.boothId;
@@ -1231,7 +1211,6 @@ function openCategorySheet(categoryKey) {
       });
     });
   } else {
-    // ステージコンテンツ or 研究発表会
     const category = CATEGORY_DATA[categoryKey];
     $app.categorySheet.title.textContent = category.title;
     $app.categorySheet.content.innerHTML = `
@@ -1296,19 +1275,17 @@ async function grantPointsByCode(code) {
   let stampId = null;
   
   if (categoryKey === 'stage' || categoryKey === 'presentation') {
-    // ステージイベントは重複取得可能（必要に応じて変更可能）
     points = CATEGORY_DATA[categoryKey].points;
     name = CATEGORY_DATA[categoryKey].title;
   } else {
-    // 企業ブース
     const booth = BOOTH_DATA.find(b => b.id === categoryKey);
     if (!booth) return false;
     points = 1;
     name = booth.name;
-    stampId = categoryKey;  // ← 企業IDをスタンプIDとして使用
+    stampId = categoryKey;
   }
   
-  const success = await addPoints(points, stampId);  // ← stampIdを渡す
+  const success = await addPoints(points, stampId);
   if (success) {
     showToast(`✅ 「${name}」で${points}pt獲得！`);
   }
@@ -1336,7 +1313,6 @@ async function startCamera() {
   try {
     $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
     
-    // html5-qrcode初期化
     if (!html5QrCode) {
       html5QrCode = new Html5Qrcode("fullscreen-video");
     }
@@ -1368,7 +1344,6 @@ async function startCamera() {
     scanning = true;
     $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
     
-    // トーチ機能は別途設定
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       const [track] = stream.getVideoTracks();
@@ -1440,6 +1415,7 @@ async function handleScanResult(text) {
 }
 
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
 function handleDeepLinkAward() {
   const url = new URL(window.location.href);
   let code = url.searchParams.get('qr');
@@ -1509,7 +1485,7 @@ async function handleSignin(e){
     saveLocalUser(user);
     state.user = user;
     state.points = data.points || 0;
-    state.acquiredStamps = new Set(data.acquired_stamps || []);  // ← 追加
+    state.acquiredStamps = new Set(data.acquired_stamps || []);
     closeAuthModal('signin');
     enableAppUI(user);
     await syncPointsFromServer();
@@ -1539,7 +1515,7 @@ async function handleLogin(e){
     saveLocalUser(user);
     state.user = user;
     state.points = rec.points || 0;
-    state.acquiredStamps = new Set(rec.acquired_stamps || []);  // ← 追加
+    state.acquiredStamps = new Set(rec.acquired_stamps || []);
     closeAuthModal('login');
     enableAppUI(user);
     await syncPointsFromServer();
@@ -1571,6 +1547,8 @@ function showToast(msg) {
 function layoutBoothIcons() {
   const g = $app.map.iconsGroup;
   if (!g) return;
+  
+  console.log('[layoutBoothIcons] called');
   g.innerHTML = '';
   
   const vb = $app.map.svg.viewBox.baseVal;
@@ -1645,18 +1623,28 @@ function applySupabaseAvailabilityState() {
 
 /******************* Initialization *******************/
 function init() {
-  // Navigation（個別登録はnullセーフ）
-  $app.navButtons.forEach(btn => btn?.addEventListener?.('click', () => {
-    state.activePage = btn.dataset.page;
-    updateActivePage();
-  }));
-  // 予備：ナビ全体で委譲。個別登録が死んでも動く。
-  $app.nav?.addEventListener?.('click', (e) => {
-    const btn = e.target.closest?.('.nav-btn');
+  console.log('[init] starting');
+  
+  // Navigation
+  $app.navButtons.forEach(btn => {
     if (!btn) return;
-    state.activePage = btn.dataset.page;
-    updateActivePage();
+    btn.addEventListener('click', () => {
+      console.log('[nav] clicked:', btn.dataset.page);
+      state.activePage = btn.dataset.page;
+      updateActivePage();
+    });
   });
+
+  // Backup navigation via event delegation
+  if ($app.nav) {
+    $app.nav.addEventListener('click', (e) => {
+      const btn = e.target.closest('.nav-btn');
+      if (!btn) return;
+      console.log('[nav-delegate] clicked:', btn.dataset.page);
+      state.activePage = btn.dataset.page;
+      updateActivePage();
+    });
+  }
 
   applySupabaseAvailabilityState();
 
@@ -1697,15 +1685,25 @@ function init() {
 
   // Layout
   window.addEventListener('resize', () => {
-    layoutBoothIcons();
+    if (state.activePage === 'map') {
+      layoutBoothIcons();
+    }
     syncBubbleHeights();
   });
 
-  // QR Scanner (Fullscreen)
-  $app.scan.openCard?.addEventListener?.('click', openFullscreenScanner);
-  $app.fullscreenScanner.closeBtn?.addEventListener?.('click', closeFullscreenScanner);
-  $app.fullscreenScanner.torchBtn?.addEventListener?.('click', toggleTorch);
-  $app.fullscreenScanner.switchBtn?.addEventListener?.('click', switchCamera);
+  // QR Scanner
+  if ($app.scan.openCard) {
+    $app.scan.openCard.addEventListener('click', openFullscreenScanner);
+  }
+  if ($app.fullscreenScanner.closeBtn) {
+    $app.fullscreenScanner.closeBtn.addEventListener('click', closeFullscreenScanner);
+  }
+  if ($app.fullscreenScanner.torchBtn) {
+    $app.fullscreenScanner.torchBtn.addEventListener('click', toggleTorch);
+  }
+  if ($app.fullscreenScanner.switchBtn) {
+    $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
+  }
 
   // Deep Link
   handleDeepLinkAward();
@@ -1748,7 +1746,9 @@ function init() {
     if (state.user?.id) {
       syncPointsFromServer();
     }
-  }, 30000); // 30秒ごとに同期
+  }, 30000);
+  
+  console.log('[init] complete');
 }
 
 // Start the app
