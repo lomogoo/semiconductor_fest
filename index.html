@@ -16,17 +16,17 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
-      --bg-light: #f0f4f8;
-      --accent-sky: #0ea5e9;
-      --text-main: #1e293b;
-      --text-sub: #64748b;
-      --bar-width-pct: 78%;
-      --dot-size: 28px;
-      --dot-border: 4px;
-      --chip-size: 64px;
-      --marker-2-pos: 20%;
-      --marker-4-pos: 40%;
-      --marker-5-pos: 50%;
+  --bg-light: #f0f4f8;
+  --accent-sky: #0ea5e9;
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+  --bar-width-pct: 78%;
+  --dot-size: 28px;
+  --dot-border: 4px;
+  --chip-size: 64px;
+  --marker-2-pos: 25%;  /* 15%から変更 */
+  --marker-4-pos: 50%;  /* 変更なし */
+  --marker-5-pos: 75%;  /* 60%から変更 */
     }
     html { font-family: 'Inter', sans-serif; }
     body {
@@ -162,23 +162,32 @@
     .progress-area { position: relative; padding-top: 9rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
-    .reward-bubble { position: absolute; bottom: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 90px; pointer-events: none; }
+    .reward-bubble { 
+  position: absolute; 
+  bottom: -10px;  /* 64pxから変更 - アイコンの下に配置 */
+  transform: translateX(-50%); 
+  display: flex; 
+  flex-direction: column-reverse;  /* 追加 - 上下を反転 */
+  align-items: center; 
+  width: 90px; 
+  pointer-events: none; 
+}
     #reward-bubble-2 { left: var(--marker-2-pos); }
     #reward-bubble-4 { left: var(--marker-4-pos); }
     #reward-bubble-5 { left: var(--marker-5-pos); }
 
-    .reward-bubble-content { 
-      width: 100%; 
-      min-height: 50px; 
-      border-radius: 16px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      position: relative; 
-      margin-top: 6px;
-      padding: 8px;
-      transition: all 0.3s ease;
-    }
+.reward-bubble-content { 
+  width: 100%; 
+  min-height: 50px; 
+  border-radius: 16px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  position: relative; 
+  margin-top: 0;  /* 6pxから変更 */
+  padding: 8px;
+  transition: all 0.3s ease;
+}
     .reward-bubble-content img {
       width: 100%;
       height: auto;
@@ -190,14 +199,14 @@
       border-color: rgba(52, 211, 153, 0.6) !important;
       box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
     }
-    .reward-bubble-label {
-      font-size: 10px;
-      color: #334155;
-      font-weight: 600;
-      text-align: center;
-      margin-top: 4px;
-      line-height: 1.2;
-    }
+.reward-bubble-label {
+  font-size: 9px;  /* 10pxから変更 */
+  color: #334155;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 4px;  /* margin-topから変更 */
+  line-height: 1.2;
+}
 
     .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
     #progress-bar { 
