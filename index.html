@@ -158,7 +158,7 @@
     .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
-    .progress-area { position: relative; padding-top: 7rem; margin-top: 1rem; overflow: visible; }
+    .progress-area { position: relative; padding-top: 9rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
     .reward-bubble { position: absolute; bottom: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 90px; pointer-events: none; }
@@ -176,12 +176,26 @@
       position: relative; 
       margin-top: 6px;
       padding: 8px;
+      transition: all 0.3s ease;
     }
     .reward-bubble-content img {
       width: 100%;
       height: auto;
       max-height: 60px;
       object-fit: contain;
+    }
+    .reward-bubble.is-achieved .reward-bubble-content {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3));
+      border-color: rgba(52, 211, 153, 0.6) !important;
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+    }
+    .reward-bubble-label {
+      font-size: 10px;
+      color: #334155;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 4px;
+      line-height: 1.2;
     }
 
     .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
@@ -255,6 +269,23 @@
       justify-content: space-between;
       align-items: center;
       z-index: 101;
+    }
+
+    .stamp-category-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .stamp-category-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .company-mini-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .company-mini-card:hover {
+      background: rgba(255,255,255,0.8);
     }
   </style>
 </head>
@@ -347,6 +378,18 @@
     </div>
   </div>
 
+  <!-- Stamp Category Detail Sheet -->
+  <div id="category-sheet" class="bottom-sheet">
+    <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between">
+        <h4 id="category-sheet-title" class="font-semibold text-lg text-slate-800"></h4>
+        <button id="close-category-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <div id="category-sheet-content" class="p-4"></div>
+    </div>
+  </div>
+  <div class="bottom-sheet-backdrop" data-target="category"></div>
+
   <!-- Fullscreen Scanner -->
   <div id="fullscreen-scanner" class="fullscreen-scanner">
     <div class="fullscreen-scanner-controls">
@@ -367,6 +410,29 @@
       <span id="fullscreen-status">QRコードを枠内に写してください</span>
     </div>
   </div>
+
+  <!-- Booth Detail Sheet -->
+  <div id="booth-sheet" class="bottom-sheet">
+    <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-start gap-3">
+        <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
+        <div class="min-w-0 flex-1">
+          <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
+          <div id="booth-sheet-tags" class="mt-2 flex flex-wrap gap-2"></div>
+        </div>
+        <button id="close-booth-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <div class="p-4 space-y-4 text-sm">
+        <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
+        <div class="text-slate-600 space-y-2">
+          <div><strong class="font-medium text-slate-800">獲得ポイント：</strong><span class="text-sky-600 font-semibold">1pt</span></div>
+          <div><strong class="font-medium text-slate-800">スタンプ条件：</strong><span id="booth-sheet-condition">-</span></div>
+          <div><strong class="font-medium text-slate-800">ノベルティ：</strong><span id="booth-sheet-giveaway">-</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-sheet-backdrop" data-target="booth"></div>
 
   <div id="app" class="opacity-0 pointer-events-none select-none">
     <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
@@ -396,9 +462,12 @@
     <main class="flex-1 pb-28">
       <div id="page-home" class="page active p-4 space-y-6">
         <div class="liquid-glass rounded-3xl p-4">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between mb-2">
             <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
-            <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0/6</span>
+            <div class="flex items-center gap-2">
+              <span id="rank-percentile" class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium"></span>
+              <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
+            </div>
           </div>
           <div class="progress-area">
             <div id="progress-wrapper">
@@ -406,16 +475,19 @@
                 <div class="reward-bubble-content liquid-glass border-slate-300">
                   <img src="normal.png" alt="ノーマルピンバッジ" />
                 </div>
+                <div class="reward-bubble-label">ピンバッジ</div>
               </div>
               <div id="reward-bubble-4" class="reward-bubble">
                 <div class="reward-bubble-content liquid-glass border-amber-300">
                   <img src="gold.png" alt="ゴールドピンバッジ" />
                 </div>
+                <div class="reward-bubble-label">ピンバッジ<br>(ゴールド)</div>
               </div>
               <div id="reward-bubble-5" class="reward-bubble">
                 <div class="reward-bubble-content liquid-glass border-purple-300">
                   <img src="quo.png" alt="Quoカード" />
                 </div>
+                <div class="reward-bubble-label">QUOカード<br>(1000円分)</div>
               </div>
               <div id="progress-track" class="progress-track">
                 <div id="progress-bar" style="width:0%"></div>
@@ -426,63 +498,89 @@
               </div>
             </div>
           </div>
-          <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600">スタンプをタップして詳細を確認しよう。</p>
+          <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
+          <div id="progress-percent" class="mt-2 text-center">
+            <span class="text-2xl font-bold text-sky-600">0%</span>
+            <span class="text-xs text-slate-500 ml-1">達成</span>
+          </div>
         </div>
+
         <div class="liquid-glass rounded-3xl p-4">
-          <div class="grid grid-cols-4 gap-y-4" id="stamp-grid"></div>
+          <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
+          <div class="space-y-3" id="stamp-categories">
+            <!-- ステージコンテンツ -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">ステージコンテンツ</div>
+                    <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <!-- 研究発表会 -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">研究発表会</div>
+                    <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <!-- 企業ブース -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
+                  <div>
+                    <div class="font-semibold text-slate-800">企業ブース</div>
+                    <div class="text-xs text-slate-600">6社 | 各1pt</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-<div id="page-map" class="page p-3 pt-2 space-y-1">
-  <!-- カメラ起動ボタン -->
-  <div class="max-w-[1200px] mx-auto">
-    <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
-        <div class="text-left">
-          <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
-          <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
+      <div id="page-map" class="page p-3 pt-2 space-y-1">
+        <!-- カメラ起動ボタン -->
+        <div class="max-w-[1200px] mx-auto">
+          <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
+              <div class="text-left">
+                <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
+                <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
+              </div>
+            </div>
+            <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
+          </button>
+        </div>
+        
+        <!-- マップ -->
+        <div class="map-wrap w-full max-w-[1200px] mx-auto">
+          <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
+            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+            <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
+          </svg>
         </div>
       </div>
-      <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
-    </button>
-  </div>
-  
-  <!-- マップ -->
-  <div class="map-wrap w-full max-w-[1200px] mx-auto">
-    <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
-      <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
-      <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
-    </svg>
-  </div>
-</div>
 
       <div id="page-list" class="page p-2">
         <ul id="booth-list" class="space-y-2"></ul>
       </div>
     </main>
-
-    <!-- ブース詳細シート -->
-    <div id="booth-sheet" class="bottom-sheet">
-      <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
-        <div class="p-4 border-b border-white/50 flex items-start gap-3">
-          <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
-          <div class="min-w-0 flex-1">
-            <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
-            <div id="booth-sheet-tags" class="mt-2 flex flex-wrap gap-2"></div>
-          </div>
-          <button id="get-stamp-btn" data-id="" class="px-4 py-2 text-sm rounded-2xl bg-sky-500 text-white ripple shadow-md">スタンプGET</button>
-        </div>
-        <div class="p-4 space-y-4 text-sm">
-          <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
-          <div class="text-slate-600 space-y-2">
-            <div><strong class="font-medium text-slate-800">スタンプ条件：</strong><span id="booth-sheet-condition">-</span></div>
-            <div><strong class="font-medium text-slate-800">ノベルティ：</strong><span id="booth-sheet-giveaway">-</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="bottom-sheet-backdrop" data-target="booth"></div>
 
     <div id="toast" class="toast hidden">
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
@@ -492,8 +590,7 @@
       <nav class="h-16 grid grid-cols-3 items-center floating-nav rounded-3xl">
         <div id="nav-indicator"></div>
         <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
-        <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span>
-</button>
+        <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
         <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">一覧</span></button>
       </nav>
     </div>
@@ -528,6 +625,8 @@ function getSupabaseClientOrThrow() {
 
 /******************* DATA & STATE *******************/
 const IMG_DEFAULT = 'logo.jpg';
+const MAX_POINTS = 10;
+
 const BOOTH_ANCHORS = {
   A: { x: 0.25, y: 0.25 }, 
   B: { x: 0.75, y: 0.25 }, 
@@ -546,11 +645,38 @@ const BOOTH_DATA = [
   { id: 'F', name: 'ラピスセミコンダクタ株式会社', img: IMG_DEFAULT, icon: '🌡️', desc: '国内第4位の半導体メーカー「ローム株式会社」のグループ企業。大衡村に半導体製造工場が立地している。', tags:['計測', '成膜', 'コントローラー'], giveaway:'液晶温度計カード', condition:'膜厚計のデモンストレーションを見学' },
 ];
 
-const state = { stamps: new Set(), activePage: 'home', prevCount: 0, user: null };
+const CATEGORY_DATA = {
+  stage: {
+    title: 'ステージコンテンツ',
+    icon: '🎤',
+    time: '16:00〜',
+    points: 2,
+    desc: 'メインステージでのトークセッションに参加してスタンプを獲得しましょう。業界のトップランナーによる貴重なお話が聞けます。',
+    condition: 'ステージイベントに参加し、スタッフにQRコードを提示'
+  },
+  presentation: {
+    title: '研究発表会',
+    icon: '📊',
+    time: '17:30〜',
+    points: 2,
+    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
+    condition: '研究発表会に参加し、スタッフにQRコードを提示'
+  }
+};
+
+const state = { 
+  points: 0, 
+  activePage: 'home', 
+  prevCount: 0, 
+  user: null,
+  percentile: null 
+};
 
 const QR_WHITELIST = {
   'handoutai_a': 'A', 'handoutai_b': 'B', 'handoutai_c': 'C', 'handoutai_d': 'D',
-  'handoutai_e': 'E', 'handoutai_f': 'F'
+  'handoutai_e': 'E', 'handoutai_f': 'F',
+  'handoutai_stage': 'stage',
+  'handoutai_presentation': 'presentation'
 };
 
 /******************* DOM ELEMENTS *******************/
@@ -562,13 +688,14 @@ const $app = {
   nav: document.querySelector('.floating-nav'),
   navIndicator: document.getElementById('nav-indicator'),
   navButtons: document.querySelectorAll('.nav-btn'),
-  stampGrid: document.getElementById('stamp-grid'),
   boothList: document.getElementById('booth-list'),
   progress: {
     badge: document.getElementById('progress-badge'),
     bar: document.getElementById('progress-bar'),
     wrapper: document.getElementById('progress-wrapper'),
     msg: document.getElementById('progress-msg'),
+    percent: document.getElementById('progress-percent'),
+    rankPercentile: document.getElementById('rank-percentile'),
     bubble2: document.getElementById('reward-bubble-2'),
     bubble4: document.getElementById('reward-bubble-4'),
     bubble5: document.getElementById('reward-bubble-5'),
@@ -582,7 +709,14 @@ const $app = {
     bg: document.getElementById('bg-image'),
     iconsGroup: document.getElementById('booth-icons')
   },
-  sheet: {
+  categorySheet: {
+    el: document.getElementById('category-sheet'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="category"]'),
+    title: document.getElementById('category-sheet-title'),
+    content: document.getElementById('category-sheet-content'),
+    closeBtn: document.getElementById('close-category-sheet')
+  },
+  boothSheet: {
     el: document.getElementById('booth-sheet'),
     backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
     icon: document.getElementById('booth-sheet-icon'),
@@ -591,7 +725,7 @@ const $app = {
     desc: document.getElementById('booth-sheet-desc'),
     condition: document.getElementById('booth-sheet-condition'),
     giveaway: document.getElementById('booth-sheet-giveaway'),
-    getStampBtn: document.getElementById('get-stamp-btn'),
+    closeBtn: document.getElementById('close-booth-sheet')
   },
   scan: {
     openCard: document.getElementById('scan-card'),
@@ -654,7 +788,6 @@ function openAuthModal(kind) {
 function closeAuthModal(kind) {
   const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
   target.classList.remove('show');
-  // 他のモーダルが開いていなければbackdropを閉じる
   if (!$app.auth.signin.classList.contains('show') && 
       !$app.auth.login.classList.contains('show') &&
       !$app.qr.modal.classList.contains('show')) {
@@ -677,7 +810,6 @@ function enableAppUI(user) {
        ${user.name}（${user.school}）
      </button>`;
   
-  // Auth完了後に初期レイアウトを実行
   setTimeout(() => {
     layoutBoothIcons();
     syncBubbleHeights();
@@ -693,7 +825,6 @@ function openQrModal() {
 
 function closeQrModal() {
   $app.qr.modal.classList.remove('show');
-  // 他のモーダルが開いていなければbackdropを閉じる
   if (!$app.auth.signin.classList.contains('show') &&
       !$app.auth.login.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
@@ -705,7 +836,6 @@ function renderUserQr(uuid) {
   $app.qr.uuid.textContent = uuid;
 
   try {
-    // QRCodeJSライブラリを使用
     new QRCode($app.qr.box, {
       text: uuid,
       width: 260,
@@ -715,7 +845,6 @@ function renderUserQr(uuid) {
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // ダウンロードリンクの設定（生成後に少し待つ）
     setTimeout(() => {
       const canvas = $app.qr.box.querySelector('canvas');
       if (canvas) {
@@ -741,6 +870,35 @@ function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_US
 function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 
 /******************* Supabase Accessors *******************/
+async function sbGetUserPoints(userId) {
+  const client = getSupabaseClientOrThrow();
+  const { data, error } = await client
+    .from('app_users')
+    .select('points')
+    .eq('id', userId)
+    .single();
+  if (error) throw error;
+  return data?.points || 0;
+}
+
+async function sbUpdateUserPoints(userId, points) {
+  const client = getSupabaseClientOrThrow();
+  const { error } = await client
+    .from('app_users')
+    .update({ points })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+async function sbGetAllUserPoints() {
+  const client = getSupabaseClientOrThrow();
+  const { data, error } = await client
+    .from('app_users')
+    .select('points');
+  if (error) throw error;
+  return data.map(u => u.points || 0);
+}
+
 async function sbInsertUser({name, school, department}) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
@@ -749,7 +907,8 @@ async function sbInsertUser({name, school, department}) {
       name,
       school,
       department,
-      registration_type: 'on_site'
+      registration_type: 'on_site',
+      points: 0
     })
     .select()
     .single();
@@ -765,28 +924,68 @@ async function sbFindUserByNameAndSchool({name, school}) {
   return data;
 }
 
+/******************* Points Management *******************/
+async function syncPointsFromServer() {
+  if (!state.user?.id) return;
+  try {
+    const points = await sbGetUserPoints(state.user.id);
+    state.points = points;
+    await updatePercentile();
+    renderAll();
+  } catch (err) {
+    console.error('Failed to sync points:', err);
+  }
+}
+
+async function addPoints(amount) {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return false;
+  }
+  
+  const newPoints = Math.min(state.points + amount, MAX_POINTS);
+  state.points = newPoints;
+  
+  try {
+    await sbUpdateUserPoints(state.user.id, newPoints);
+    await updatePercentile();
+    renderAll();
+    return true;
+  } catch (err) {
+    console.error('Failed to update points:', err);
+    showToast('ポイント更新に失敗しました');
+    return false;
+  }
+}
+
+async function updatePercentile() {
+  if (!state.user?.id || state.points === 0) {
+    state.percentile = null;
+    return;
+  }
+  
+  try {
+    const allPoints = await sbGetAllUserPoints();
+    const total = allPoints.length;
+    if (total === 0) {
+      state.percentile = null;
+      return;
+    }
+    
+    const below = allPoints.filter(p => p < state.points).length;
+    const percentile = Math.round((below / total) * 100);
+    state.percentile = percentile;
+  } catch (err) {
+    console.error('Failed to calculate percentile:', err);
+    state.percentile = null;
+  }
+}
+
 /******************* RENDER FUNCTIONS *******************/
 function renderAll() {
-  renderStampGrid();
   renderProgress();
   updateActivePage();
   layoutBoothIcons();
-}
-
-function renderStampGrid() {
-  $app.stampGrid.innerHTML = '';
-  BOOTH_DATA.forEach(b => {
-    const on = state.stamps.has(b.id);
-    const cell = document.createElement('div');
-    cell.className = 'flex flex-col items-center';
-    cell.innerHTML = `
-      <div class="chip ${on ? 'on' : ''}" data-id="${b.id}">
-        <img src="${b.img}" alt="${b.name}">
-      </div>
-      <div class="chip-name" title="${b.name}">${b.name}</div>`;
-    cell.addEventListener('click', () => { openBoothSheet(b); });
-    $app.stampGrid.appendChild(cell);
-  });
 }
 
 function renderBoothList() {
@@ -803,39 +1002,43 @@ function renderBoothList() {
         <div class="font-semibold text-slate-800">${b.name}</div>
         <div class="text-xs text-slate-500 truncate">${b.desc}</div>
       </div>
-      <div class="text-2xl text-slate-300">${state.stamps.has(b.id) ? '✅' : '⚪️'}</div>`;
+      <div class="text-xl">1pt</div>`;
     li.addEventListener('click', () => openBoothSheet(b));
     $app.boothList.appendChild(li);
   });
 }
 
 function renderProgress() {
-  const n = state.stamps.size;
-  const total = BOOTH_DATA.length;
+  const n = state.points;
   
-  // マイルストーン位置（パーセント）
   const milestones = [
     { count: 2, percent: 20 },
     { count: 4, percent: 40 },
     { count: 5, percent: 50 }
   ];
   
-  // 現在の進捗率を計算（次のマイルストーンまたは最大値）
   let progressPercent = 0;
   if (n >= 5) {
-    progressPercent = 50;
+    progressPercent = 50 + ((n - 5) / 5) * 50; // 5-10の間は50-100%
   } else if (n >= 4) {
-    progressPercent = 40;
+    progressPercent = 40 + ((n - 4) / 1) * 10; // 4-5の間は40-50%
   } else if (n >= 2) {
-    progressPercent = 20;
-  } else if (n > 0) {
-    // 0-2の間は線形補間
-    progressPercent = (n / 2) * 20;
+    progressPercent = 20 + ((n - 2) / 2) * 20; // 2-4の間は20-40%
+  } else if (n > 0){
+    progressPercent = (n / 2) * 20; // 0-2の間は0-20%
   }
 
-  $app.progress.badge.textContent = `${n}/${total}`;
+  $app.progress.badge.textContent = `${n}pt`;
   $app.progress.bar.style.width = `${progressPercent}%`;
   $app.progress.dot.style.left = `${progressPercent}%`;
+
+  // パーセンタイル表示
+  if (state.percentile !== null) {
+    $app.progress.rankPercentile.textContent = `上位 ${100 - state.percentile}%`;
+    $app.progress.rankPercentile.classList.remove('hidden');
+  } else {
+    $app.progress.rankPercentile.classList.add('hidden');
+  }
 
   // バブルの達成状態
   $app.progress.bubble2.classList.toggle('is-achieved', n >= 2);
@@ -846,12 +1049,16 @@ function renderProgress() {
   if (n >= 5) {
     $app.progress.msg.innerHTML = '🎉 <strong>全ての特典をゲット！</strong> おめでとうございます！';
   } else if (n >= 4) {
-    $app.progress.msg.innerHTML = `🏅 <strong>ゴールドピンバッジゲット！</strong> あと<strong>${5 - n}個</strong>でQuoカードも獲得！`;
+    $app.progress.msg.innerHTML = `🏅 <strong>ゴールドピンバッジゲット！</strong> あと<strong>${5 - n}pt</strong>でQuoカードも獲得！`;
   } else if (n >= 2) {
-    $app.progress.msg.innerHTML = `🎖️ <strong>ノーマルピンバッジゲット！</strong> あと<strong>${4 - n}個</strong>でゴールドピンバッジ！`;
+    $app.progress.msg.innerHTML = `🎖️ <strong>ノーマルピンバッジゲット！</strong> あと<strong>${4 - n}pt</strong>でゴールドピンバッジ！`;
   } else {
-    $app.progress.msg.innerHTML = `あと<strong>${2 - n}個</strong>で最初の特典（ノーマルピンバッジ）をゲット！`;
+    $app.progress.msg.innerHTML = `あと<strong>${2 - n}pt</strong>で最初の特典（ノーマルピンバッジ）をゲット！`;
   }
+
+  // 達成度パーセント表示
+  const achievementPercent = Math.round((n / MAX_POINTS) * 100);
+  $app.progress.percent.querySelector('.text-2xl').textContent = `${achievementPercent}%`;
 
   // マイルストーン到達時はドットを非表示
   const onMilestone = (n === 2 || n === 4 || n === 5);
@@ -900,50 +1107,121 @@ function updateActivePage() {
   if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
 }
 
+function openCategorySheet(categoryKey) {
+  if (categoryKey === 'booths') {
+    // 企業ブース一覧を表示
+    $app.categorySheet.title.textContent = '企業ブース';
+    $app.categorySheet.content.innerHTML = `
+      <div class="space-y-3">
+        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。各ブース1ptずつ獲得できます。</p>
+        ${BOOTH_DATA.map(booth => `
+          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40" data-booth-id="${booth.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
+                <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-slate-800 text-sm">${booth.name}</div>
+                <div class="text-xs text-slate-500 truncate">${booth.desc}</div>
+              </div>
+              <div class="text-sky-600 font-semibold text-sm">1pt</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    
+    // 企業カードにクリックイベントを追加
+    $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const boothId = card.dataset.boothId;
+        const booth = BOOTH_DATA.find(b => b.id === boothId);
+        if (booth) {
+          closeCategorySheet();
+          setTimeout(() => openBoothSheet(booth), 300);
+        }
+      });
+    });
+  } else {
+    // ステージコンテンツ or 研究発表会
+    const category = CATEGORY_DATA[categoryKey];
+    $app.categorySheet.title.textContent = category.title;
+    $app.categorySheet.content.innerHTML = `
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm">
+          <span class="text-3xl">${category.icon}</span>
+          <div>
+            <div class="font-semibold text-slate-800">${category.time}</div>
+            <div class="text-sky-600 font-semibold">獲得ポイント: ${category.points}pt</div>
+          </div>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">${category.desc}</p>
+        <div class="liquid-glass rounded-xl p-3 border border-white/40">
+          <div class="text-xs font-semibold text-slate-700 mb-1">スタンプ獲得条件</div>
+          <div class="text-sm text-slate-600">${category.condition}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  $app.categorySheet.el.classList.add('is-open');
+  $app.categorySheet.backdrop.classList.add('is-open');
+}
+
+function closeCategorySheet() {
+  $app.categorySheet.el.classList.remove('is-open');
+  $app.categorySheet.backdrop.classList.remove('is-open');
+}
+
 function openBoothSheet(booth) {
-  $app.sheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
-  $app.sheet.title.textContent = booth.name;
-  $app.sheet.desc.textContent = booth.desc;
-  $app.sheet.condition.textContent = booth.condition;
-  $app.sheet.giveaway.textContent = booth.giveaway;
-  $app.sheet.getStampBtn.dataset.id = booth.id;
+  $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
+  $app.boothSheet.title.textContent = booth.name;
+  $app.boothSheet.desc.textContent = booth.desc;
+  $app.boothSheet.condition.textContent = booth.condition;
+  $app.boothSheet.giveaway.textContent = booth.giveaway;
   
-  const hasStamp = state.stamps.has(booth.id);
-  $app.sheet.getStampBtn.textContent = hasStamp ? 'キャンセル' : 'スタンプGET';
-  $app.sheet.getStampBtn.classList.toggle('bg-red-500', hasStamp);
-  $app.sheet.getStampBtn.classList.toggle('bg-sky-500', !hasStamp);
-  
-  $app.sheet.tags.innerHTML = '';
+  $app.boothSheet.tags.innerHTML = '';
   booth.tags.forEach(t => {
     const span = document.createElement('span');
     span.className = 'px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs';
     span.textContent = t;
-    $app.sheet.tags.appendChild(span);
+    $app.boothSheet.tags.appendChild(span);
   });
   
-  $app.sheet.el.classList.add('is-open');
-  $app.sheet.backdrop.classList.add('is-open');
+  $app.boothSheet.el.classList.add('is-open');
+  $app.boothSheet.backdrop.classList.add('is-open');
 }
 
 function closeBoothSheet() {
-  $app.sheet.el.classList.remove('is-open');
-  $app.sheet.backdrop.classList.remove('is-open');
+  $app.boothSheet.el.classList.remove('is-open');
+  $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
-function toggleStamp(id) {
-  state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id);
-  renderAll();
-}
-
-function grantStampByBoothId(boothId) {
-  if (!boothId) return false;
-  const booth = BOOTH_DATA.find(b => b.id === boothId);
-  if (!booth) return false;
-  const firstTime = !state.stamps.has(boothId);
-  state.stamps.add(boothId);
-  renderAll();
-  showToast(firstTime ? `✅ 「${booth.name}」のスタンプを獲得！` : `ℹ️ 「${booth.name}」は取得済みです`);
-  return true;
+async function grantPointsByCode(code) {
+  if (!code) return false;
+  
+  const categoryKey = QR_WHITELIST[code];
+  if (!categoryKey) return false;
+  
+  let points = 0;
+  let name = '';
+  
+  if (categoryKey === 'stage' || categoryKey === 'presentation') {
+    points = CATEGORY_DATA[categoryKey].points;
+    name = CATEGORY_DATA[categoryKey].title;
+  } else {
+    // ブース
+    const booth = BOOTH_DATA.find(b => b.id === categoryKey);
+    if (!booth) return false;
+    points = 1;
+    name = booth.name;
+  }
+  
+  const success = await addPoints(points);
+  if (success) {
+    showToast(`✅ 「${name}」で${points}pt獲得！`);
+  }
+  return success;
 }
 
 /******************* QR Scanner (Fullscreen) *******************/
@@ -1039,16 +1317,16 @@ async function scanLoop() {
 async function handleScanResult(text) {
   if (!text) return false;
   const lowered = text.toLowerCase();
-  const boothId = QR_WHITELIST[lowered];
-  if (!boothId) {
+  const success = await grantPointsByCode(lowered);
+  if (success) {
+    await wait(500);
+    closeFullscreenScanner();
+    return true;
+  } else {
     showToast('未対応のQRコードです');
     await wait(800);
     return false;
   }
-  grantStampByBoothId(boothId);
-  await wait(500);
-  closeFullscreenScanner();
-  return true;
 }
 
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
@@ -1061,15 +1339,16 @@ function handleDeepLinkAward() {
     if (m) code = decodeURIComponent(m[1]);
   }
   if (!code) return;
-  const boothId = QR_WHITELIST[String(code).toLowerCase()];
-  if (boothId) {
-    grantStampByBoothId(boothId);
-    url.searchParams.delete('qr');
-    const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
-    history.replaceState({}, '', clean || '/');
-  } else {
-    showToast('未対応のQRコードです');
-  }
+  
+  grantPointsByCode(code.toLowerCase()).then(success => {
+    if (success) {
+      url.searchParams.delete('qr');
+      const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
+      history.replaceState({}, '', clean || '/');
+    } else {
+      showToast('未対応のQRコードです');
+    }
+  });
 }
 
 /******************* Auth Flow *******************/
@@ -1078,6 +1357,7 @@ async function ensureAuth() {
   if (local && local.id) {
     state.user = local;
     enableAppUI(state.user);
+    await syncPointsFromServer();
     return true;
   }
   showAuthGate();
@@ -1119,8 +1399,10 @@ async function handleSignin(e){
     const user = { id: data.id, name: data.name, school: data.school, department: data.department };
     saveLocalUser(user);
     state.user = user;
+    state.points = data.points || 0;
     closeAuthModal('signin');
     enableAppUI(user);
+    await syncPointsFromServer();
     showToast('登録が完了しました。ようこそ！');
   } catch (err) {
     console.error(err);
@@ -1146,8 +1428,10 @@ async function handleLogin(e){
     const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
     saveLocalUser(user);
     state.user = user;
+    state.points = rec.points || 0;
     closeAuthModal('login');
     enableAppUI(user);
+    await syncPointsFromServer();
     showToast('ログインしました。');
   } catch(err){
     console.error(err);
@@ -1257,14 +1541,24 @@ function init() {
 
   applySupabaseAvailabilityState();
 
-  // Booth sheet
-  if ($app.sheet.backdrop) {
-    $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
-  }
-  $app.sheet.getStampBtn.addEventListener('click', (e) => {
-    toggleStamp(e.target.dataset.id);
-    closeBoothSheet();
+  // Category cards
+  document.querySelectorAll('.stamp-category-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const category = card.dataset.category;
+      openCategorySheet(category);
+    });
   });
+
+  // Sheets
+  if ($app.categorySheet.backdrop) {
+    $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
+  }
+  $app.categorySheet.closeBtn.addEventListener('click', closeCategorySheet);
+
+  if ($app.boothSheet.backdrop) {
+    $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
+  }
+  $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
 
   // Ripple effect
   document.addEventListener('click', e => {
@@ -1329,6 +1623,13 @@ function init() {
 
   // Initial render
   renderAll();
+  
+  // Periodic sync
+  setInterval(() => {
+    if (state.user?.id) {
+      syncPointsFromServer();
+    }
+  }, 30000); // 30秒ごとに同期
 }
 
 // Start the app
