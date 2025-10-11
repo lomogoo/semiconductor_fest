@@ -12,7 +12,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- QR生成用（軽量） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+  <!-- html5-qrcode（ZXingの代わり） -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
       --bg-light: #f0f4f8;
@@ -1308,14 +1309,11 @@ async function grantPointsByCode(code) {
 }
 
 /******************* QR Scanner (Fullscreen) *******************/
-/******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
-
-// ZXing使用に変更
-let codeReader = null;
+let html5QrCode = null;
 
 async function openFullscreenScanner() {
   $app.fullscreenScanner.container.classList.add('active');
@@ -1331,46 +1329,69 @@ async function startCamera() {
   try {
     $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
     
-    // ZXing初期化
-    if (!codeReader) {
-      codeReader = new ZXing.BrowserQRCodeReader();
+    // html5-qrcode初期化
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("fullscreen-video");
     }
     
-    const constraints = {
-      audio: false,
-      video: {
-        facingMode: useBackCamera ? { ideal: 'environment' } : 'user',
-        width: { ideal: 1280 }, 
-        height: { ideal: 720 }
-      }
+    const config = { 
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0
     };
     
-    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
-    $app.fullscreenScanner.video.srcObject = scanStream;
-    await $app.fullscreenScanner.video.play();
-
-    // トーチ設定
-    trackWithTorch = null;
-    const [track] = scanStream.getVideoTracks();
-    const caps = track.getCapabilities?.();
-    if (caps && 'torch' in caps) {
-      trackWithTorch = track;
-      $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
-    } else {
-      $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
-    }
-
-    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+    const facingMode = useBackCamera ? "environment" : "user";
+    
+    await html5QrCode.start(
+      { facingMode },
+      config,
+      async (decodedText) => {
+        if (!scanning) return;
+        const success = await handleScanResult(decodedText);
+        if (success) {
+          await html5QrCode.stop();
+          closeFullscreenScanner();
+        }
+      },
+      (errorMessage) => {
+        // エラーは無視（QRコードが見つからない場合）
+      }
+    );
+    
     scanning = true;
-    scanLoop();
+    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+    
+    // トーチ機能は別途設定
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const [track] = stream.getVideoTracks();
+      const caps = track.getCapabilities?.();
+      if (caps && 'torch' in caps) {
+        trackWithTorch = track;
+        scanStream = stream;
+        $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+      }
+    } catch (e) {
+      console.warn('Torch not available');
+    }
+    
   } catch (err) {
     console.error(err);
     $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
   }
 }
 
-function stopCamera() {
+async function stopCamera() {
   scanning = false;
+  if (html5QrCode && html5QrCode.isScanning) {
+    try {
+      await html5QrCode.stop();
+    } catch (e) {
+      console.warn('Stop error:', e);
+    }
+  }
   if (scanStream) {
     scanStream.getTracks().forEach(t => t.stop());
     scanStream = null;
@@ -1386,34 +1407,15 @@ async function toggleTorch() {
     await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
     $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
     $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
-  } catch (e) { console.warn('Torch not available', e); }
+  } catch (e) { 
+    console.warn('Torch not available', e); 
+  }
 }
 
 async function switchCamera() {
   useBackCamera = !useBackCamera;
-  stopCamera();
-  await startCamera();
-}
-
-async function scanLoop() {
-  if (!scanning || !$app.fullscreenScanner.video.readyState) {
-    if (scanning) requestAnimationFrame(scanLoop);
-    return;
-  }
-  
-  try {
-    const result = await codeReader.decodeOnceFromVideoElement($app.fullscreenScanner.video);
-    if (result && result.text) {
-      const text = result.text.trim();
-      if (await handleScanResult(text)) return;
-    }
-  } catch (e) {
-    // QRコードが見つからない場合は無視
-  }
-  
-  if (scanning) {
-    setTimeout(() => scanLoop(), 300); // 300msごとにスキャン
-  }
+  await stopCamera();
+  setTimeout(() => startCamera(), 300);
 }
 
 async function handleScanResult(text) {
@@ -1422,7 +1424,6 @@ async function handleScanResult(text) {
   const success = await grantPointsByCode(lowered);
   if (success) {
     await wait(500);
-    closeFullscreenScanner();
     return true;
   } else {
     showToast('未対応のQRコードです');
@@ -1432,7 +1433,6 @@ async function handleScanResult(text) {
 }
 
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
-
 function handleDeepLinkAward() {
   const url = new URL(window.location.href);
   let code = url.searchParams.get('qr');
