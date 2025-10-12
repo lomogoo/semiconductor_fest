@@ -1066,7 +1066,7 @@ function renderBoothList() {
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
       <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
-        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-cover" />
+        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
       <div class="min-w-0 flex-1">
         <div class="font-semibold text-slate-800">${b.name}</div>
@@ -1204,7 +1204,7 @@ function openCategorySheet(categoryKey) {
           <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40" data-booth-id="${booth.id}">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
-                <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />
+                <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
               </div>
               <div class="flex-1 min-w-0">
                 <div class="font-semibold text-slate-800 text-sm">${booth.name}</div>
@@ -1258,7 +1258,7 @@ function closeCategorySheet() {
 }
 
 function openBoothSheet(booth) {
-  $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
+  $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
   $app.boothSheet.title.textContent = booth.name;
   $app.boothSheet.desc.textContent = booth.desc;
   $app.boothSheet.condition.textContent = booth.condition;
@@ -1678,6 +1678,19 @@ function layoutBoothIcons() {
     defs.appendChild(clipPath);
     group.appendChild(defs);
     
+
+       // 画像の下地（レターボックスが出る時の背景）
+   const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+   fillRect.setAttribute('x', x + 5);
+   fillRect.setAttribute('y', y + 5);
+   fillRect.setAttribute('width', size - 10);
+   fillRect.setAttribute('height', size - 10);
+   fillRect.setAttribute('rx', size * 0.15);
+   fillRect.setAttribute('fill', '#fff');
+   fillRect.setAttribute('clip-path', `url(#${clipId})`);
+   group.appendChild(fillRect);
+
+
     // 画像
     const img = document.createElementNS('http://www.w3.org/2000/svg','image');
     img.setAttribute('x', x + 5);
@@ -1686,7 +1699,7 @@ function layoutBoothIcons() {
     img.setAttribute('height', size - 10);
     img.setAttribute('href', booth.img);
     img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', booth.img);
-    img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     img.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(img);
     
