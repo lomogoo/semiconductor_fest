@@ -12,8 +12,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- QR生成用（軽量） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- html5-qrcode（ZXingの代わり） -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- ZXing QRコードスキャナー -->
+  <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
   <style>
     :root {
   --bg-light: #f0f4f8;
@@ -1314,7 +1314,7 @@ let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
-let html5QrCode = null;
+let codeReader = null;
 
 async function openFullscreenScanner() {
   $app.fullscreenScanner.container.classList.add('active');
@@ -1330,51 +1330,42 @@ async function startCamera() {
   try {
     $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
     
-    if (!html5QrCode) {
-      html5QrCode = new Html5Qrcode("fullscreen-video");
+    if (!codeReader) {
+      codeReader = new ZXing.BrowserQRCodeReader();
     }
     
-    const config = { 
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0
+    const constraints = {
+      video: {
+        facingMode: useBackCamera ? 'environment' : 'user',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
     };
     
-    const facingMode = useBackCamera ? "environment" : "user";
+    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+    $app.fullscreenScanner.video.srcObject = scanStream;
+    await $app.fullscreenScanner.video.play();
     
-    await html5QrCode.start(
-      { facingMode },
-      config,
-      async (decodedText) => {
-        if (!scanning) return;
-        const success = await handleScanResult(decodedText);
-        if (success) {
-          await html5QrCode.stop();
-          closeFullscreenScanner();
-        }
-      },
-      (errorMessage) => {
-        // エラーは無視（QRコードが見つからない場合）
-      }
-    );
-    
-    scanning = true;
-    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
-    
+    // トーチ機能の確認
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const [track] = stream.getVideoTracks();
+      const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
       if (caps && 'torch' in caps) {
         trackWithTorch = track;
-        scanStream = stream;
         $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
       } else {
         $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
       }
     } catch (e) {
       console.warn('Torch not available');
+      $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
     }
+    
+    scanning = true;
+    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+    
+    // ZXingでのスキャン開始
+    scanQRCode();
     
   } catch (err) {
     console.error(err);
@@ -1382,19 +1373,40 @@ async function startCamera() {
   }
 }
 
+async function scanQRCode() {
+  if (!scanning || !$app.fullscreenScanner.video.srcObject) return;
+  
+  try {
+    const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
+    if (result && result.text) {
+      const success = await handleScanResult(result.text);
+      if (success) {
+        closeFullscreenScanner();
+        return;
+      }
+    }
+  } catch (err) {
+    // QRコードが見つからない場合は無視
+  }
+  
+  if (scanning) {
+    requestAnimationFrame(() => scanQRCode());
+  }
+}
+
 async function stopCamera() {
   scanning = false;
-  if (html5QrCode && html5QrCode.isScanning) {
-    try {
-      await html5QrCode.stop();
-    } catch (e) {
-      console.warn('Stop error:', e);
-    }
-  }
+  
   if (scanStream) {
     scanStream.getTracks().forEach(t => t.stop());
     scanStream = null;
   }
+  
+  if ($app.fullscreenScanner.video.srcObject) {
+    $app.fullscreenScanner.video.srcObject = null;
+  }
+  
+  trackWithTorch = null;
   $app.fullscreenScanner.torchBtn.dataset.on = '0';
   $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
 }
