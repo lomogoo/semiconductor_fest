@@ -1584,100 +1584,143 @@ function layoutBoothIcons() {
   g.innerHTML = '';
   
   const vb = $app.map.svg.viewBox.baseVal;
-  const marginFactorX = 0.02;
-  const marginFactorY = 0.02;
-  const usableW = vb.width * (1 - marginFactorX * 2);
-  const usableH = vb.height * (1 - marginFactorY * 2);
-  const offsetX = vb.x + vb.width * marginFactorX;
-  const offsetY = vb.y + vb.height * marginFactorY;
   const base = Math.min(vb.width, vb.height);
-  const size = Math.max(100, Math.min(280, Math.round(base * 0.14))); // サイズを大きく
+  const size = Math.max(100, Math.min(280, Math.round(base * 0.14)));
 
   Object.keys(BOOTH_ANCHORS).forEach(id => {
     const a = BOOTH_ANCHORS[id];
-    const cx = offsetX + a.x * usableW;
-    const cy = offsetY + a.y * usableH;
+    // viewBox座標系で直接配置（相対位置）
+    const cx = vb.width * a.x;
+    const cy = vb.height * a.y;
     const x = cx - size / 2;
     const y = cy - size / 2;
 
     const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
     
-    // グループ要素を作成（立体効果のため）
+    // グループ要素を作成
     const group = document.createElementNS('http://www.w3.org/2000/svg','g');
     group.setAttribute('cursor', 'pointer');
     group.setAttribute('role', 'button');
     group.setAttribute('aria-label', booth.name);
     group.dataset.id = id;
     
-    // 影（立体効果）
-    const shadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    shadow.setAttribute('x', x + 4);
-    shadow.setAttribute('y', y + 4);
-    shadow.setAttribute('width', size);
-    shadow.setAttribute('height', size);
-    shadow.setAttribute('rx', size * 0.15); // 角丸
-    shadow.setAttribute('fill', 'rgba(0,0,0,0.2)');
-    shadow.setAttribute('filter', 'blur(8px)');
-    group.appendChild(shadow);
+    // 一番下の影（ぼかし大）
+    const shadowDeep = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    shadowDeep.setAttribute('x', x + 8);
+    shadowDeep.setAttribute('y', y + 8);
+    shadowDeep.setAttribute('width', size);
+    shadowDeep.setAttribute('height', size);
+    shadowDeep.setAttribute('rx', size * 0.18);
+    shadowDeep.setAttribute('fill', 'rgba(0,0,0,0.3)');
+    shadowDeep.setAttribute('filter', 'blur(12px)');
+    group.appendChild(shadowDeep);
     
-    // 外枠（立体効果の境界）
+    // 中間の影（グラデーション）
+    const shadowMid = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    shadowMid.setAttribute('x', x + 2);
+    shadowMid.setAttribute('y', y + 2);
+    shadowMid.setAttribute('width', size);
+    shadowMid.setAttribute('height', size);
+    shadowMid.setAttribute('rx', size * 0.18);
+    shadowMid.setAttribute('fill', 'rgba(0,0,0,0.15)');
+    shadowMid.setAttribute('filter', 'blur(4px)');
+    group.appendChild(shadowMid);
+    
+    // ベース（ダークボーダー）
+    const base = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    base.setAttribute('x', x + 1);
+    base.setAttribute('y', y + 1);
+    base.setAttribute('width', size);
+    base.setAttribute('height', size);
+    base.setAttribute('rx', size * 0.18);
+    base.setAttribute('fill', 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
+    base.setAttribute('stroke', '#64748b');
+    base.setAttribute('stroke-width', '2');
+    group.appendChild(base);
+    
+    // メインの外枠（立体的な白枠）
     const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
     border.setAttribute('x', x);
     border.setAttribute('y', y);
     border.setAttribute('width', size);
     border.setAttribute('height', size);
-    border.setAttribute('rx', size * 0.15); // 角丸
+    border.setAttribute('rx', size * 0.18);
     border.setAttribute('fill', 'white');
-    border.setAttribute('stroke', 'rgba(255,255,255,0.8)');
-    border.setAttribute('stroke-width', '3');
-    border.setAttribute('filter', 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))');
+    border.setAttribute('stroke', 'url(#border-gradient)');
+    border.setAttribute('stroke-width', '4');
+    border.setAttribute('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
     group.appendChild(border);
     
-    // クリップパス定義（角丸の画像表示用）
+    // 内側の影（エンボス効果）
+    const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    innerShadow.setAttribute('x', x + 4);
+    innerShadow.setAttribute('y', y + 4);
+    innerShadow.setAttribute('width', size - 8);
+    innerShadow.setAttribute('height', size - 8);
+    innerShadow.setAttribute('rx', size * 0.15);
+    innerShadow.setAttribute('fill', 'none');
+    innerShadow.setAttribute('stroke', 'rgba(0,0,0,0.1)');
+    innerShadow.setAttribute('stroke-width', '1');
+    group.appendChild(innerShadow);
+    
+    // クリップパス定義
     const clipId = `clip-${id}`;
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
     const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
     clipPath.setAttribute('id', clipId);
     const clipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    clipRect.setAttribute('x', x + 3);
-    clipRect.setAttribute('y', y + 3);
-    clipRect.setAttribute('width', size - 6);
-    clipRect.setAttribute('height', size - 6);
-    clipRect.setAttribute('rx', size * 0.13);
+    clipRect.setAttribute('x', x + 5);
+    clipRect.setAttribute('y', y + 5);
+    clipRect.setAttribute('width', size - 10);
+    clipRect.setAttribute('height', size - 10);
+    clipRect.setAttribute('rx', size * 0.15);
     clipPath.appendChild(clipRect);
     defs.appendChild(clipPath);
     group.appendChild(defs);
     
     // 画像
     const img = document.createElementNS('http://www.w3.org/2000/svg','image');
-    img.setAttribute('x', x + 3);
-    img.setAttribute('y', y + 3);
-    img.setAttribute('width', size - 6);
-    img.setAttribute('height', size - 6);
+    img.setAttribute('x', x + 5);
+    img.setAttribute('y', y + 5);
+    img.setAttribute('width', size - 10);
+    img.setAttribute('height', size - 10);
     img.setAttribute('href', booth.img);
     img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', booth.img);
-    img.setAttribute('preserveAspectRatio', 'xMidYMid slice'); // 画像を正方形に収める
+    img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     img.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(img);
     
-    // ハイライト（立体効果の光沢）
+    // ハイライト（ガラス効果）
     const highlight = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    highlight.setAttribute('x', x + 3);
-    highlight.setAttribute('y', y + 3);
-    highlight.setAttribute('width', size - 6);
-    highlight.setAttribute('height', (size - 6) * 0.4);
-    highlight.setAttribute('rx', size * 0.13);
+    highlight.setAttribute('x', x + 5);
+    highlight.setAttribute('y', y + 5);
+    highlight.setAttribute('width', size - 10);
+    highlight.setAttribute('height', (size - 10) * 0.5);
+    highlight.setAttribute('rx', size * 0.15);
     highlight.setAttribute('fill', 'url(#highlight-gradient)');
-    highlight.setAttribute('opacity', '0.3');
+    highlight.setAttribute('opacity', '0.5');
     highlight.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(highlight);
+    
+    // 光沢（左上）
+    const gloss = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    gloss.setAttribute('cx', x + size * 0.3);
+    gloss.setAttribute('cy', y + size * 0.25);
+    gloss.setAttribute('rx', size * 0.15);
+    gloss.setAttribute('ry', size * 0.1);
+    gloss.setAttribute('fill', 'white');
+    gloss.setAttribute('opacity', '0.6');
+    gloss.setAttribute('clip-path', `url(#${clipId})`);
+    group.appendChild(gloss);
     
     g.appendChild(group);
   });
   
-  // グラデーション定義を一度だけ追加
+  // グラデーション定義
   if (!document.getElementById('highlight-gradient')) {
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    
+    // ハイライトグラデーション
     const gradient = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     gradient.setAttribute('id', 'highlight-gradient');
     gradient.setAttribute('x1', '0');
@@ -1688,7 +1731,7 @@ function layoutBoothIcons() {
     const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
     stop1.setAttribute('offset', '0%');
     stop1.setAttribute('stop-color', 'white');
-    stop1.setAttribute('stop-opacity', '0.8');
+    stop1.setAttribute('stop-opacity', '0.9');
     
     const stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
     stop2.setAttribute('offset', '100%');
@@ -1698,10 +1741,36 @@ function layoutBoothIcons() {
     gradient.appendChild(stop1);
     gradient.appendChild(stop2);
     defs.appendChild(gradient);
+    
+    // ボーダーグラデーション
+    const borderGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    borderGrad.setAttribute('id', 'border-gradient');
+    borderGrad.setAttribute('x1', '0');
+    borderGrad.setAttribute('y1', '0');
+    borderGrad.setAttribute('x2', '0');
+    borderGrad.setAttribute('y2', '1');
+    
+    const bstop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    bstop1.setAttribute('offset', '0%');
+    bstop1.setAttribute('stop-color', '#f1f5f9');
+    
+    const bstop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    bstop2.setAttribute('offset', '50%');
+    bstop2.setAttribute('stop-color', '#e2e8f0');
+    
+    const bstop3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    bstop3.setAttribute('offset', '100%');
+    bstop3.setAttribute('stop-color', '#cbd5e1');
+    
+    borderGrad.appendChild(bstop1);
+    borderGrad.appendChild(bstop2);
+    borderGrad.appendChild(bstop3);
+    defs.appendChild(borderGrad);
+    
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
 
-  // クリックイベント（グループ全体に）
+  // クリックイベント
   g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
     const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
     if (booth) openBoothSheet(booth);
