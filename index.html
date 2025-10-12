@@ -839,6 +839,14 @@ function backToAuthGate(kind) {
 }
   
 function enableAppUI(user) {
+  // ユーザー情報の検証を追加
+  if (!user || !user.id || !user.name || !user.school) {
+    console.error('Invalid user data:', user);
+    showToast('登録されていないユーザーです');
+    showAuthGate();
+    return;
+  }
+  
   $app.auth.backdrop?.classList.remove('show');
   $app.auth.launch?.classList.remove('show');
   $app.auth.signin?.classList.remove('show');
@@ -1516,10 +1524,14 @@ async function handleLogin(e){
   }
   try {
     const rec = await sbFindUserByNameAndSchool({ name, school });
-    if (!rec) {
-      $app.auth.loginError.textContent = '該当ユーザーが見つかりません。サインインをお試しください。';
-      return;
+    
+    // ここを強化！
+    if (!rec || !rec.id) {  // ← rec.idもチェック
+      $app.auth.loginError.textContent = '該当ユーザーが見つかりません。入力内容を確認するか、当日受付からサインインしてください。';
+      return;  // ← 必ずここで処理を止める
     }
+    
+    // ここから下は rec.id が確実に存在する
     const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
     saveLocalUser(user);
     state.user = user;
@@ -1535,10 +1547,9 @@ async function handleLogin(e){
       $app.auth.loginError.textContent = '現在ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
       return;
     }
-    $app.auth.loginError.textContent = 'ログインに失敗しました。';
+    $app.auth.loginError.textContent = 'ログインに失敗しました。入力内容を確認してください。';
   }
 }
-
 /******************* UI Utilities *******************/
 function showToast(msg) {
   const el = $app.toast;
