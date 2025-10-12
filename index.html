@@ -321,74 +321,6 @@
     .company-mini-card:hover {
       background: rgba(255,255,255,0.8);
     }
-
-
-/* 🎈 ふわふわ浮遊アニメーション */
-@keyframes icon-floating {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* ⚡ 電気信号のパルス（グロー効果） */
-@keyframes electric-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(14,165,233,0.6)) 
-            drop-shadow(0 0 16px rgba(14,165,233,0.4))
-            brightness(1.1);
-  }
-  50% {
-    filter: drop-shadow(0 0 16px rgba(14,165,233,0.9)) 
-            drop-shadow(0 0 32px rgba(14,165,233,0.6))
-            drop-shadow(0 0 48px rgba(14,165,233,0.3))
-            brightness(1.25);
-  }
-}
-
-/* 🔄 終了アニメーション */
-@keyframes icon-float-end {
-  0% {
-    transform: translateY(-10px);
-    filter: drop-shadow(0 0 16px rgba(14,165,233,0.9)) 
-            drop-shadow(0 0 32px rgba(14,165,233,0.6))
-            brightness(1.25);
-  }
-  100% {
-    transform: translateY(0);
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15))
-            brightness(1);
-  }
-}
-
-.icon-floating {
-  animation: 
-    icon-floating 3s ease-in-out infinite,
-    electric-pulse 2s ease-in-out infinite;
-}
-
-.icon-float-ending {
-  animation: icon-float-end 0.5s ease-out forwards !important;
-}
-
-/* ボトムシートの登場 */
-.bottom-sheet.is-open {
-  transform: translateY(0);
-  animation: sheet-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes sheet-slide-up {
-  0% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
   </style>
 </head>
 <body>
@@ -1141,7 +1073,7 @@ function renderBoothList() {
         <div class="text-xs text-slate-500 truncate">${b.desc}</div>
       </div>
       <div class="text-xl text-sky-600 font-semibold">1pt</div>`;
-    li.addEventListener('click', () => openBoothSheet(b, null));
+    li.addEventListener('click', () => openBoothSheet(b));
     $app.boothList.appendChild(li);
   });
 }
@@ -1286,15 +1218,15 @@ function openCategorySheet(categoryKey) {
     `;
     
     $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const boothId = card.dataset.boothId;
-    const booth = BOOTH_DATA.find(b => b.id === boothId);
-    if (booth) {
-      closeCategorySheet();
-      setTimeout(() => openBoothSheet(booth, null), 300);
-    }
-  });
-});
+      card.addEventListener('click', () => {
+        const boothId = card.dataset.boothId;
+        const booth = BOOTH_DATA.find(b => b.id === boothId);
+        if (booth) {
+          closeCategorySheet();
+          setTimeout(() => openBoothSheet(booth), 300);
+        }
+      });
+    });
   } else {
     const category = CATEGORY_DATA[categoryKey];
     $app.categorySheet.title.textContent = category.title;
@@ -1325,15 +1257,7 @@ function closeCategorySheet() {
   $app.categorySheet.backdrop.classList.remove('is-open');
 }
 
-function openBoothSheet(booth, iconElement = null) {
-  console.log('[openBoothSheet] called with icon:', iconElement?.dataset?.id);
-  
-  // 🌟 ふわふわ浮遊 + 光のアニメーション開始
-  if (iconElement) {
-    iconElement.classList.add('icon-floating');
-    console.log('[openBoothSheet] animation started for:', iconElement.dataset.id);
-  }
-  
+function openBoothSheet(booth) {
   $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
   $app.boothSheet.title.textContent = booth.name;
   $app.boothSheet.desc.textContent = booth.desc;
@@ -1348,36 +1272,11 @@ function openBoothSheet(booth, iconElement = null) {
     $app.boothSheet.tags.appendChild(span);
   });
   
-  // シート表示
-  setTimeout(() => {
-    $app.boothSheet.el.classList.add('is-open');
-    $app.boothSheet.backdrop.classList.add('is-open');
-  }, iconElement ? 100 : 0);
+  $app.boothSheet.el.classList.add('is-open');
+  $app.boothSheet.backdrop.classList.add('is-open');
 }
 
 function closeBoothSheet() {
-  console.log('[closeBoothSheet] called');
-  
-  // 浮遊アニメーションを停止
-  const allIcons = $app.map.iconsGroup.querySelectorAll('g[data-id]');
-  console.log('[closeBoothSheet] found icons:', allIcons.length);
-  
-  allIcons.forEach(icon => {
-    if (icon.classList.contains('icon-floating')) {
-      console.log('[closeBoothSheet] stopping animation for:', icon.dataset.id);
-      icon.classList.remove('icon-floating');
-      icon.classList.add('icon-float-ending');
-      
-      // 終了アニメーション後にクラスを削除
-      setTimeout(() => {
-        icon.classList.remove('icon-float-ending');
-        icon.style.filter = '';
-        icon.style.transform = '';
-      }, 500);
-    }
-  });
-  
-  // シートを閉じる
   $app.boothSheet.el.classList.remove('is-open');
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
@@ -1871,11 +1770,11 @@ function layoutBoothIcons() {
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
 
-// クリックイベント
-g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
-  const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
-  if (booth) openBoothSheet(booth, el);
-}));
+  // クリックイベント
+  g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
+    const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
+    if (booth) openBoothSheet(booth);
+  }));
 }
 
 function syncBubbleHeights(){
