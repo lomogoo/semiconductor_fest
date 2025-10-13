@@ -440,8 +440,12 @@
       <div class="scan-corner bl"></div>
       <div class="scan-corner br"></div>
     </div>
+    <!-- Fullscreen Scanner セクションのメッセージ表示部分 -->
     <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: white; text-align: center; background: rgba(0,0,0,0.6); padding: 0.5rem 1rem; border-radius: 1rem;">
       <span id="fullscreen-status">QRコードを枠内に写してください</span>
+    </div>
+    <div id="fullscreen-message" class="hidden" style="position: absolute; bottom: 6rem; left: 50%; transform: translateX(-50%); z-index: 102; width: 80%; max-width: 320px;">
+      <div class="px-4 py-3 rounded-2xl bg-red-500 text-white shadow-lg text-center font-medium"></div>
     </div>
   </div>
 
@@ -1281,11 +1285,23 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
+// grantPointsByCode関数を置き換え
 async function grantPointsByCode(code) {
   if (!code) return false;
   
   const categoryKey = QR_WHITELIST[code];
   if (!categoryKey) return false;
+  
+  // 既に取得済みかチェック
+  if (categoryKey === 'stage' || categoryKey === 'presentation') {
+    if (state.acquiredStamps.has(categoryKey)) {
+      return 'already_acquired';
+    }
+  } else {
+    if (state.acquiredStamps.has(categoryKey)) {
+      return 'already_acquired';
+    }
+  }
   
   let points = 0;
   let name = '';
@@ -1294,6 +1310,7 @@ async function grantPointsByCode(code) {
   if (categoryKey === 'stage' || categoryKey === 'presentation') {
     points = CATEGORY_DATA[categoryKey].points;
     name = CATEGORY_DATA[categoryKey].title;
+    stampId = categoryKey;
   } else {
     const booth = BOOTH_DATA.find(b => b.id === categoryKey);
     if (!booth) return false;
@@ -1429,16 +1446,35 @@ async function switchCamera() {
   setTimeout(() => startCamera(), 300);
 }
 
+// showFullscreenMessage関数を追加（handleScanResult関数の前に配置）
+function showFullscreenMessage(msg, isError = true) {
+  const el = document.getElementById('fullscreen-message');
+  const box = el.firstElementChild;
+  box.textContent = msg;
+  box.className = `px-4 py-3 rounded-2xl shadow-lg text-center font-medium ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+  el.classList.remove('hidden');
+  clearTimeout(showFullscreenMessage._t);
+  showFullscreenMessage._t = setTimeout(() => {
+    el.classList.add('hidden');
+  }, 2000);
+}
+  
 async function handleScanResult(text) {
   if (!text) return false;
   const lowered = text.toLowerCase();
-  const success = await grantPointsByCode(lowered);
-  if (success) {
-    await wait(500);
+  const result = await grantPointsByCode(lowered);
+  
+  if (result === true) {
+    showFullscreenMessage('✅ スタンプ獲得！', false);
+    await wait(1500);
     return true;
+  } else if (result === 'already_acquired') {
+    showFullscreenMessage('⚠️ 既に取得済みです', true);
+    await wait(1500);
+    return false;
   } else {
-    showToast('未対応のQRコードです');
-    await wait(800);
+    showFullscreenMessage('❌ 未対応のQRコードです', true);
+    await wait(1500);
     return false;
   }
 }
