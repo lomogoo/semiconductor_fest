@@ -1672,7 +1672,7 @@ async function openFullscreenScanner() {
 }
 
 function closeFullscreenScanner() {
-  stopCamera();
+  stopCamera(); // ★ 念のためもう一度呼ぶ（冪等性あり）
   $app.fullscreenScanner.container.classList.remove('active');
 }
 
@@ -1729,12 +1729,11 @@ async function scanQRCode() {
   try {
     const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
     if (result && result.text) {
+      // ★ まずscanningをfalseにして、再帰を止める
+      scanning = false;
       const success = await handleScanResult(result.text);
-      if (success) {
-        // ★ 成功時は既にhandleScanResult内でstopCamera()が呼ばれているので
-        // ここではcloseFullscreenScanner()は不要（handleScanResultで呼んでいる）
-        return;
-      }
+      // ★ handleScanResult内でstopCamera()とcloseFullscreenScanner()が呼ばれる
+      return;
     }
   } catch (err) {
     // QRコードが見つからない場合は無視
@@ -1746,10 +1745,22 @@ async function scanQRCode() {
 }
 
 async function stopCamera() {
-  scanning = false;
+  scanning = false; // ★ 最初に設定
+  
+  // ★ ZXingのリーダーもリセット
+  if (codeReader) {
+    try {
+      await codeReader.reset();
+    } catch (e) {
+      console.warn('Failed to reset code reader', e);
+    }
+  }
   
   if (scanStream) {
-    scanStream.getTracks().forEach(t => t.stop());
+    scanStream.getTracks().forEach(t => {
+      t.stop();
+      console.log('Track stopped:', t.label); // デバッグ用
+    });
     scanStream = null;
   }
   
@@ -1761,6 +1772,7 @@ async function stopCamera() {
   $app.fullscreenScanner.torchBtn.dataset.on = '0';
   $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
 }
+
 
 async function toggleTorch() {
   if (!trackWithTorch) return;
@@ -1798,11 +1810,11 @@ async function handleScanResult(text) {
   const result = await grantPointsByCode(lowered);
   
   if (result === true) {
-    // ★ カメラを停止してから画面を閉じる
-    stopCamera();
+    // ★ 確実にカメラを停止してから画面を閉じる
+    await stopCamera(); // awaitを追加
     showFullscreenMessage('✅ スタンプ獲得！', false);
     await wait(1500);
-    closeFullscreenScanner(); // この中のstopCamera()は2重呼び出しになるが問題ない
+    closeFullscreenScanner();
     return true;
   } else if (result === 'already_acquired') {
     showFullscreenMessage('⚠️ 既に取得済みです', true);
