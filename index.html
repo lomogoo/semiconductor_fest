@@ -1384,13 +1384,18 @@ function renderProgress() {
   const n = state.points;
   
   let progressPercent = 0;
+  // ★ マーカーの位置に合わせて進捗パーセントを計算
   if (n >= 5) {
-    progressPercent = 50 + ((n - 5) / 5) * 50;
+    // 5pt(80%)から10pt(100%)へ
+    progressPercent = 80 + ((n - 5) / 5) * 20;
   } else if (n >= 4) {
-    progressPercent = 40 + ((n - 4) / 1) * 10;
+    // 4pt(50%)から5pt(80%)へ
+    progressPercent = 50 + ((n - 4) / 1) * 30;
   } else if (n >= 2) {
-    progressPercent = 20 + ((n - 2) / 2) * 20;
+    // 2pt(20%)から4pt(50%)へ
+    progressPercent = 20 + ((n - 2) / 2) * 30;
   } else if (n > 0) {
+    // 0ptから2pt(20%)へ
     progressPercent = (n / 2) * 20;
   }
 
