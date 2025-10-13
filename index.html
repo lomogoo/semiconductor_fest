@@ -24,9 +24,9 @@
   --dot-size: 28px;
   --dot-border: 4px;
   --chip-size: 64px;
-  --marker-2-pos: 20%;  /* 15%から変更 */
-  --marker-4-pos: 50%;  /* 変更なし */
-  --marker-5-pos: 80%;  /* 60%から変更 */
+  --marker-2-pos: 20%;
+  --marker-4-pos: 50%;
+  --marker-5-pos: 80%;
     }
     html { font-family: 'Inter', sans-serif; }
     body {
@@ -164,12 +164,12 @@
 
 .reward-bubble { 
   position: absolute; 
-  bottom: 50px;  /* 進捗バーからの距離を確保 */
+  bottom: 50px;
   transform: translateX(-50%); 
   display: flex; 
-  flex-direction: column-reverse;  /* ラベルを上に */
+  flex-direction: column-reverse;
   align-items: center; 
-  width: 80px;  /* 90pxから縮小 */
+  width: 80px;
   pointer-events: none; 
 }
     #reward-bubble-2 { left: var(--marker-2-pos); }
@@ -178,19 +178,19 @@
 
 .reward-bubble-content { 
   width: 100%; 
-  min-height: 45px;  /* 50pxから縮小 */
-  border-radius: 14px;  /* 16pxから縮小 */
+  min-height: 45px;
+  border-radius: 14px;
   display: flex; 
   align-items: center; 
   justify-content: center; 
   position: relative; 
-  padding: 6px;  /* 8pxから縮小 */
+  padding: 6px;
   transition: all 0.3s ease;
 }
 .reward-bubble-content img {
   width: 100%;
   height: auto;
-  max-height: 50px;  /* 60pxから縮小 */
+  max-height: 50px;
   object-fit: contain;
 }
     .reward-bubble.is-achieved .reward-bubble-content {
@@ -203,9 +203,9 @@
   color: #334155;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 6px;  /* ラベルとアイコンの間隔 */
+  margin-bottom: 6px;
   line-height: 1.2;
-  white-space: nowrap;  /* 改行を防ぐ */
+  white-space: nowrap;
 }
 
     .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
@@ -317,9 +317,75 @@
     .company-mini-card {
       cursor: pointer;
       transition: all 0.2s ease;
+      position: relative;
     }
     .company-mini-card:hover {
       background: rgba(255,255,255,0.8);
+    }
+
+    .company-mini-card .acquired-check {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #34d399, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      box-shadow: 0 2px 6px rgba(52, 211, 153, 0.4);
+    }
+
+    .reward-item {
+      transition: all 0.3s ease;
+    }
+
+    .reward-item.claimed {
+      opacity: 0.6;
+      background: rgba(148, 163, 184, 0.2) !important;
+    }
+
+    .reward-item .reward-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .reward-item.claimed .reward-icon {
+      filter: grayscale(1);
+    }
+
+    .reward-item .reward-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .reward-item .claim-btn {
+      transition: all 0.2s ease;
+    }
+
+    .reward-item .claim-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .reward-item .claimed-badge {
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -412,6 +478,85 @@
     </div>
   </div>
 
+  <!-- Rewards Modal -->
+  <div id="rewards-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm">
+        <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
+        <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <div id="rewards-content" class="p-4 space-y-3">
+        <!-- 事前申込特典 (事前申込者のみ表示) -->
+        <div id="pre-registration-reward" class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" style="display: none;">
+          <div class="flex items-center gap-4">
+            <div class="reward-icon">
+              <img src="pre-registration.png" alt="事前申込特典" />
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-slate-800">事前申込特典</div>
+              <div class="text-xs text-slate-600 mt-1">事前申込者限定の特典です</div>
+              <div class="text-xs text-amber-600 font-semibold mt-1">必要ポイント: 0pt</div>
+            </div>
+            <button class="claim-btn px-4 py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm ripple" data-reward="pre-registration">
+              交換する
+            </button>
+          </div>
+        </div>
+
+        <!-- ノーマルピンバッジ (2pt) -->
+        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="2">
+          <div class="flex items-center gap-4">
+            <div class="reward-icon">
+              <img src="normal.png" alt="ノーマルピンバッジ" />
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-slate-800">ピンバッジ</div>
+              <div class="text-xs text-slate-600 mt-1">イベント記念のピンバッジ</div>
+              <div class="text-xs text-sky-600 font-semibold mt-1">必要ポイント: 2pt</div>
+            </div>
+            <button class="claim-btn px-4 py-2 rounded-xl bg-sky-500 text-white font-semibold text-sm ripple" data-reward="normal-badge">
+              交換する
+            </button>
+          </div>
+        </div>
+
+        <!-- ゴールドピンバッジ (4pt) -->
+        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="4">
+          <div class="flex items-center gap-4">
+            <div class="reward-icon">
+              <img src="gold.png" alt="ゴールドピンバッジ" />
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-slate-800">ピンバッジ (ゴールド)</div>
+              <div class="text-xs text-slate-600 mt-1">特別なゴールドピンバッジ</div>
+              <div class="text-xs text-amber-600 font-semibold mt-1">必要ポイント: 4pt</div>
+            </div>
+            <button class="claim-btn px-4 py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm ripple" data-reward="gold-badge">
+              交換する
+            </button>
+          </div>
+        </div>
+
+        <!-- QUOカード (5pt) -->
+        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="5">
+          <div class="flex items-center gap-4">
+            <div class="reward-icon">
+              <img src="quo.png" alt="QUOカード" />
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-slate-800">QUOカード (1000円分)</div>
+              <div class="text-xs text-slate-600 mt-1">全てのスタンプを集めた方への特別報酬</div>
+              <div class="text-xs text-purple-600 font-semibold mt-1">必要ポイント: 5pt</div>
+            </div>
+            <button class="claim-btn px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold text-sm ripple" data-reward="quo-card">
+              交換する
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Stamp Category Detail Sheet -->
   <div id="category-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
@@ -440,7 +585,6 @@
       <div class="scan-corner bl"></div>
       <div class="scan-corner br"></div>
     </div>
-    <!-- Fullscreen Scanner セクションのメッセージ表示部分 -->
     <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: white; text-align: center; background: rgba(0,0,0,0.6); padding: 0.5rem 1rem; border-radius: 1rem;">
       <span id="fullscreen-status">QRコードを枠内に写してください</span>
     </div>
@@ -540,6 +684,11 @@
           <div id="progress-percent" class="mt-2 text-center">
             <span class="text-2xl font-bold text-sky-600">0%</span>
             <span class="text-xs text-slate-500 ml-1">達成</span>
+          </div>
+          <div class="mt-4 text-center">
+            <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
+              🎁 特典を交換する
+            </button>
           </div>
         </div>
 
@@ -711,7 +860,8 @@ const state = {
   prevCount: 0, 
   user: null,
   percentile: null,
-  acquiredStamps: new Set()
+  acquiredStamps: new Set(),
+  claimedRewards: new Set()
 };
 
 const QR_WHITELIST = {
@@ -804,6 +954,12 @@ const $app = {
     uuid: document.getElementById('qr-uuid'),
     dl: document.getElementById('download-qr'),
     closeBtn: document.getElementById('close-qr')
+  },
+  rewards: {
+    modal: document.getElementById('rewards-modal'),
+    content: document.getElementById('rewards-content'),
+    closeBtn: document.getElementById('close-rewards'),
+    openBtn: document.getElementById('open-rewards-btn')
   }
 };
 
@@ -830,9 +986,11 @@ function openAuthModal(kind) {
 function closeAuthModal(kind) {
   const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
   target.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show') && 
-      !$app.auth.login.classList.contains('show') &&
-      !$app.qr.modal.classList.contains('show')) {
+  if (!$app.auth.signin.classList.contains('show'))
+  !$app.auth.login.classList.contains('show') &&
+      !$app.qr.modal.classList.contains('show') &&
+      !$app.rewards.modal.classList.contains('show')
+      {
     $app.auth.backdrop.classList.remove('show');
   }
 }
@@ -856,6 +1014,7 @@ function enableAppUI(user) {
   $app.auth.signin?.classList.remove('show');
   $app.auth.login?.classList.remove('show');
   $app.qr.modal?.classList.remove('show');
+  $app.rewards.modal?.classList.remove('show');
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
@@ -881,7 +1040,8 @@ function openQrModal() {
 function closeQrModal() {
   $app.qr.modal.classList.remove('show');
   if (!$app.auth.signin.classList.contains('show') &&
-      !$app.auth.login.classList.contains('show')) {
+      !$app.auth.login.classList.contains('show') &&
+      !$app.rewards.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
 }
@@ -918,6 +1078,102 @@ function renderUserQr(uuid) {
   }
 }
 
+/******************* Rewards Modal *******************/
+function openRewardsModal() {
+  if (!state.user?.id) { 
+    showToast('ログインしてください'); 
+    return; 
+  }
+  $app.auth.backdrop.classList.add('show');
+  $app.rewards.modal.classList.add('show');
+  renderRewardsModal();
+}
+
+function closeRewardsModal() {
+  $app.rewards.modal.classList.remove('show');
+  if (!$app.auth.signin.classList.contains('show') &&
+      !$app.auth.login.classList.contains('show') &&
+      !$app.qr.modal.classList.contains('show')) {
+    $app.auth.backdrop.classList.remove('show');
+  }
+}
+
+function renderRewardsModal() {
+  const isPreRegistration = state.user?.registration_type === 'pre_registration';
+  
+  // 事前申込特典の表示/非表示
+  const preRegReward = document.getElementById('pre-registration-reward');
+  if (preRegReward) {
+    preRegReward.style.display = isPreRegistration ? 'block' : 'none';
+  }
+  
+  // 各特典の状態を更新
+  updateRewardButton('pre-registration', 0, isPreRegistration);
+  updateRewardButton('normal-badge', 2, true);
+  updateRewardButton('gold-badge', 4, true);
+  updateRewardButton('quo-card', 5, true);
+}
+
+function updateRewardButton(rewardId, requiredPoints, isVisible) {
+  if (!isVisible) return;
+  
+  const btn = document.querySelector(`button[data-reward="${rewardId}"]`);
+  if (!btn) return;
+  
+  const rewardItem = btn.closest('.reward-item');
+  const isClaimed = state.claimedRewards.has(rewardId);
+  const hasEnoughPoints = state.points >= requiredPoints;
+  
+  if (isClaimed) {
+    rewardItem.classList.add('claimed');
+    btn.outerHTML = '<div class="claimed-badge">交換済み</div>';
+  } else if (!hasEnoughPoints) {
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.textContent = `${requiredPoints}pt必要`;
+  } else {
+    btn.disabled = false;
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    btn.textContent = '交換する';
+  }
+}
+
+async function claimReward(rewardId, requiredPoints) {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+  
+  if (state.claimedRewards.has(rewardId)) {
+    showToast('既に交換済みです');
+    return;
+  }
+  
+  if (state.points < requiredPoints) {
+    showToast(`${requiredPoints}pt必要です（現在${state.points}pt）`);
+    return;
+  }
+  
+  try {
+    state.claimedRewards.add(rewardId);
+    await sbUpdateUserRewards(state.user.id, state.claimedRewards);
+    
+    const rewardNames = {
+      'pre-registration': '事前申込特典',
+      'normal-badge': 'ピンバッジ',
+      'gold-badge': 'ゴールドピンバッジ',
+      'quo-card': 'QUOカード'
+    };
+    
+    showToast(`✅ ${rewardNames[rewardId]}を交換しました！`);
+    renderRewardsModal();
+  } catch (err) {
+    console.error('Failed to claim reward:', err);
+    state.claimedRewards.delete(rewardId);
+    showToast('特典の交換に失敗しました');
+  }
+}
+
 /******************* Auth Storage *******************/
 const LS_KEY_USER = 'app_user';
 function saveLocalUser(u){ localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); }
@@ -929,7 +1185,7 @@ async function sbGetUserPoints(userId) {
   const client = getSupabaseClientOrThrow();
   const { data, error } = await client
     .from('app_users')
-    .select('points, acquired_stamps')
+    .select('points, acquired_stamps, claimed_rewards')
     .eq('id', userId)
     .single();
   if (error) throw error;
@@ -943,6 +1199,17 @@ async function sbUpdateUserPoints(userId, points, acquiredStamps) {
     .update({ 
       points,
       acquired_stamps: Array.from(acquiredStamps)
+    })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+async function sbUpdateUserRewards(userId, claimedRewards) {
+  const client = getSupabaseClientOrThrow();
+  const { error } = await client
+    .from('app_users')
+    .update({ 
+      claimed_rewards: Array.from(claimedRewards)
     })
     .eq('id', userId);
   if (error) throw error;
@@ -967,7 +1234,8 @@ async function sbInsertUser({name, school, department}) {
       department,
       registration_type: 'on_site',
       points: 0,
-      acquired_stamps: []
+      acquired_stamps: [],
+      claimed_rewards: []
     })
     .select()
     .single();
@@ -990,6 +1258,7 @@ async function syncPointsFromServer() {
     const data = await sbGetUserPoints(state.user.id);
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
+    state.claimedRewards = new Set(data.claimed_rewards || []);
     await updatePercentile();
     renderAll();
   } catch (err) {
@@ -1065,10 +1334,15 @@ function renderBoothList() {
   console.log('[renderBoothList] called');
   $app.boothList.innerHTML = '';
   BOOTH_DATA.forEach((b, i) => {
+    const isAcquired = state.acquiredStamps.has(b.id);
     const li = document.createElement('li');
     li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer';
+    if (isAcquired) {
+      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
+    }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
+      ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
       <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
         <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
@@ -1076,7 +1350,7 @@ function renderBoothList() {
         <div class="font-semibold text-slate-800">${b.name}</div>
         <div class="text-xs text-slate-500 truncate">${b.desc}</div>
       </div>
-      <div class="text-xl text-sky-600 font-semibold">1pt</div>`;
+      <div class="text-xl ${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold">${isAcquired ? '✓' : '1pt'}</div>`;
     li.addEventListener('click', () => openBoothSheet(b));
     $app.boothList.appendChild(li);
   });
@@ -1144,10 +1418,30 @@ function updateAcquiredBadges() {
     stageBadge.style.display = stageAcquired ? 'flex' : 'none';
   }
   
+  // ステージカードの背景色も変更
+  const stageCard = document.querySelector('.stamp-category-card[data-category="stage"]');
+  if (stageCard) {
+    if (stageAcquired) {
+      stageCard.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
+    } else {
+      stageCard.style.background = '';
+    }
+  }
+  
   const presentationAcquired = state.acquiredStamps.has('presentation');
   const presentationBadge = document.getElementById('presentation-acquired-badge');
   if (presentationBadge) {
     presentationBadge.style.display = presentationAcquired ? 'flex' : 'none';
+  }
+  
+  // 研究発表会カードの背景色も変更
+  const presentationCard = document.querySelector('.stamp-category-card[data-category="presentation"]');
+  if (presentationCard) {
+    if (presentationAcquired) {
+      presentationCard.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
+    } else {
+      presentationCard.style.background = '';
+    }
   }
   
   const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -1204,8 +1498,11 @@ function openCategorySheet(categoryKey) {
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-3">
         <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。各ブース1ptずつ獲得できます。</p>
-        ${BOOTH_DATA.map(booth => `
-          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40" data-booth-id="${booth.id}">
+        ${BOOTH_DATA.map(booth => {
+          const isAcquired = state.acquiredStamps.has(booth.id);
+          return `
+          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-50/50 to-green-50/50' : ''}" data-booth-id="${booth.id}">
+            ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
                 <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
@@ -1214,10 +1511,10 @@ function openCategorySheet(categoryKey) {
                 <div class="font-semibold text-slate-800 text-sm">${booth.name}</div>
                 <div class="text-xs text-slate-500 truncate">${booth.desc}</div>
               </div>
-              <div class="text-sky-600 font-semibold text-sm">1pt</div>
+              <div class="${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold text-sm">${isAcquired ? '✓' : '1pt'}</div>
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     `;
     
@@ -1233,9 +1530,11 @@ function openCategorySheet(categoryKey) {
     });
   } else {
     const category = CATEGORY_DATA[categoryKey];
+    const isAcquired = state.acquiredStamps.has(categoryKey);
     $app.categorySheet.title.textContent = category.title;
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-4">
+        ${isAcquired ? '<div class="px-3 py-2 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-700 font-semibold text-sm text-center">✓ 取得済み</div>' : ''}
         <div class="flex items-center gap-2 text-sm">
           <span class="text-3xl">${category.icon}</span>
           <div>
@@ -1262,6 +1561,8 @@ function closeCategorySheet() {
 }
 
 function openBoothSheet(booth) {
+  const isAcquired = state.acquiredStamps.has(booth.id);
+  
   $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
   $app.boothSheet.title.textContent = booth.name;
   $app.boothSheet.desc.textContent = booth.desc;
@@ -1269,6 +1570,15 @@ function openBoothSheet(booth) {
   $app.boothSheet.giveaway.textContent = booth.giveaway;
   
   $app.boothSheet.tags.innerHTML = '';
+  
+  // 取得済みバッジを追加
+  if (isAcquired) {
+    const acquiredBadge = document.createElement('span');
+    acquiredBadge.className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold';
+    acquiredBadge.textContent = '✓ 取得済み';
+    $app.boothSheet.tags.appendChild(acquiredBadge);
+  }
+  
   booth.tags.forEach(t => {
     const span = document.createElement('span');
     span.className = 'px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs';
@@ -1285,7 +1595,6 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
-// grantPointsByCode関数を置き換え
 async function grantPointsByCode(code) {
   if (!code) return false;
   
@@ -1446,7 +1755,6 @@ async function switchCamera() {
   setTimeout(() => startCamera(), 300);
 }
 
-// showFullscreenMessage関数を追加（handleScanResult関数の前に配置）
 function showFullscreenMessage(msg, isError = true) {
   const el = document.getElementById('fullscreen-message');
   const box = el.firstElementChild;
@@ -1546,11 +1854,18 @@ async function handleSignin(e){
     }
 
     const data = body.user ?? body;
-    const user = { id: data.id, name: data.name, school: data.school, department: data.department };
+    const user = { 
+      id: data.id, 
+      name: data.name, 
+      school: data.school, 
+      department: data.department,
+      registration_type: data.registration_type || 'on_site'
+    };
     saveLocalUser(user);
     state.user = user;
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
+    state.claimedRewards = new Set(data.claimed_rewards || []);
     closeAuthModal('signin');
     enableAppUI(user);
     await syncPointsFromServer();
@@ -1573,18 +1888,23 @@ async function handleLogin(e){
   try {
     const rec = await sbFindUserByNameAndSchool({ name, school });
     
-    // ここを強化！
-    if (!rec || !rec.id) {  // ← rec.idもチェック
+    if (!rec || !rec.id) {
       $app.auth.loginError.textContent = '該当ユーザーが見つかりません。入力内容を確認するか、当日受付からサインインしてください。';
-      return;  // ← 必ずここで処理を止める
+      return;
     }
     
-    // ここから下は rec.id が確実に存在する
-    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
+    const user = { 
+      id: rec.id, 
+      name: rec.name, 
+      school: rec.school, 
+      department: rec.department,
+      registration_type: rec.registration_type || 'pre_registration'
+    };
     saveLocalUser(user);
     state.user = user;
     state.points = rec.points || 0;
     state.acquiredStamps = new Set(rec.acquired_stamps || []);
+    state.claimedRewards = new Set(rec.claimed_rewards || []);
     closeAuthModal('login');
     enableAppUI(user);
     await syncPointsFromServer();
@@ -1598,6 +1918,7 @@ async function handleLogin(e){
     $app.auth.loginError.textContent = 'ログインに失敗しました。入力内容を確認してください。';
   }
 }
+
 /******************* UI Utilities *******************/
 function showToast(msg) {
   const el = $app.toast;
@@ -1625,15 +1946,14 @@ function layoutBoothIcons() {
 
   Object.keys(BOOTH_ANCHORS).forEach(id => {
     const a = BOOTH_ANCHORS[id];
-    // viewBox座標系で直接配置（相対位置）
     const cx = vb.width * a.x;
     const cy = vb.height * a.y;
     const x = cx - size / 2;
     const y = cy - size / 2;
 
     const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
+    const isAcquired = state.acquiredStamps.has(id);
     
-    // グループ要素を作成
     const group = document.createElementNS('http://www.w3.org/2000/svg','g');
     group.setAttribute('cursor', 'pointer');
     group.setAttribute('role', 'button');
@@ -1669,8 +1989,8 @@ function layoutBoothIcons() {
     base.setAttribute('width', size);
     base.setAttribute('height', size);
     base.setAttribute('rx', size * 0.18);
-    base.setAttribute('fill', 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
-    base.setAttribute('stroke', '#64748b');
+    base.setAttribute('fill', isAcquired ? 'linear-gradient(135deg, #6ee7b7, #34d399)' : 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
+    base.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
     base.setAttribute('stroke-width', '2');
     group.appendChild(base);
     
@@ -1682,7 +2002,7 @@ function layoutBoothIcons() {
     border.setAttribute('height', size);
     border.setAttribute('rx', size * 0.18);
     border.setAttribute('fill', 'white');
-    border.setAttribute('stroke', 'url(#border-gradient)');
+    border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
     border.setAttribute('stroke-width', '4');
     border.setAttribute('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
     group.appendChild(border);
@@ -1714,18 +2034,16 @@ function layoutBoothIcons() {
     defs.appendChild(clipPath);
     group.appendChild(defs);
     
-
-       // 画像の下地（レターボックスが出る時の背景）
-   const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-   fillRect.setAttribute('x', x + 5);
-   fillRect.setAttribute('y', y + 5);
-   fillRect.setAttribute('width', size - 10);
-   fillRect.setAttribute('height', size - 10);
-   fillRect.setAttribute('rx', size * 0.15);
-   fillRect.setAttribute('fill', '#fff');
-   fillRect.setAttribute('clip-path', `url(#${clipId})`);
-   group.appendChild(fillRect);
-
+    // 画像の下地（レターボックスが出る時の背景）
+    const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    fillRect.setAttribute('x', x + 5);
+    fillRect.setAttribute('y', y + 5);
+    fillRect.setAttribute('width', size - 10);
+    fillRect.setAttribute('height', size - 10);
+    fillRect.setAttribute('rx', size * 0.15);
+    fillRect.setAttribute('fill', '#fff');
+    fillRect.setAttribute('clip-path', `url(#${clipId})`);
+    group.appendChild(fillRect);
 
     // 画像
     const img = document.createElementNS('http://www.w3.org/2000/svg','image');
@@ -1761,6 +2079,29 @@ function layoutBoothIcons() {
     gloss.setAttribute('opacity', '0.6');
     gloss.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(gloss);
+    
+    // 取得済みチェックマーク
+    if (isAcquired) {
+      const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      checkBg.setAttribute('cx', x + size - 20);
+      checkBg.setAttribute('cy', y + 20);
+      checkBg.setAttribute('r', size * 0.12);
+      checkBg.setAttribute('fill', '#10b981');
+      checkBg.setAttribute('stroke', 'white');
+      checkBg.setAttribute('stroke-width', '3');
+      group.appendChild(checkBg);
+      
+      const checkMark = document.createElementNS('http://www.w3.org/2000/svg','text');
+      checkMark.setAttribute('x', x + size - 20);
+      checkMark.setAttribute('y', y + 20);
+      checkMark.setAttribute('text-anchor', 'middle');
+      checkMark.setAttribute('dominant-baseline', 'central');
+      checkMark.setAttribute('fill', 'white');
+      checkMark.setAttribute('font-size', size * 0.12);
+      checkMark.setAttribute('font-weight', 'bold');
+      checkMark.textContent = '✓';
+      group.appendChild(checkMark);
+    }
     
     g.appendChild(group);
   });
@@ -1815,6 +2156,31 @@ function layoutBoothIcons() {
     borderGrad.appendChild(bstop2);
     borderGrad.appendChild(bstop3);
     defs.appendChild(borderGrad);
+    
+    // 取得済みグラデーション
+    const acquiredGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    acquiredGrad.setAttribute('id', 'acquired-gradient');
+    acquiredGrad.setAttribute('x1', '0');
+    acquiredGrad.setAttribute('y1', '0');
+    acquiredGrad.setAttribute('x2', '0');
+    acquiredGrad.setAttribute('y2', '1');
+    
+    const astop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    astop1.setAttribute('offset', '0%');
+    astop1.setAttribute('stop-color', '#6ee7b7');
+    
+    const astop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    astop2.setAttribute('offset', '50%');
+    astop2.setAttribute('stop-color', '#34d399');
+    
+    const astop3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    astop3.setAttribute('offset', '100%');
+    astop3.setAttribute('stop-color', '#10b981');
+    
+    acquiredGrad.appendChild(astop1);
+    acquiredGrad.appendChild(astop2);
+    acquiredGrad.appendChild(astop3);
+    defs.appendChild(acquiredGrad);
     
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
@@ -1941,6 +2307,28 @@ function init() {
     $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
   }
 
+  // Rewards Modal
+  if ($app.rewards.openBtn) {
+    $app.rewards.openBtn.addEventListener('click', openRewardsModal);
+  }
+  if ($app.rewards.closeBtn) {
+    $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
+  }
+  
+  // Rewards claim buttons - イベント委譲を使用
+  if ($app.rewards.content) {
+    $app.rewards.content.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-reward]');
+      if (!btn || btn.disabled) return;
+      
+      const rewardId = btn.dataset.reward;
+      const rewardItem = btn.closest('.reward-item');
+      const requiredPoints = parseInt(rewardItem?.dataset.rewardPoints || '0');
+      
+      claimReward(rewardId, requiredPoints);
+    });
+  }
+
   // Deep Link
   handleDeepLinkAward();
 
@@ -1967,10 +2355,14 @@ function init() {
   $app.userPill.addEventListener('click', openQrModal);
   $app.qr.closeBtn.addEventListener('click', closeQrModal);
 
-  // Auth backdrop click to close QR modal
+  // Auth backdrop click to close modals
   $app.auth.backdrop.addEventListener('click', (e) => {
-    if (e.target === $app.auth.backdrop && $app.qr.modal.classList.contains('show')) {
-      closeQrModal();
+    if (e.target === $app.auth.backdrop) {
+      if ($app.qr.modal.classList.contains('show')) {
+        closeQrModal();
+      } else if ($app.rewards.modal.classList.contains('show')) {
+        closeRewardsModal();
+      }
     }
   });
 
