@@ -1744,7 +1744,8 @@ async function scanQRCode() {
     if (result && result.text) {
       const success = await handleScanResult(result.text);
       if (success) {
-        closeFullscreenScanner();
+        // ★ 成功時は既にhandleScanResult内でstopCamera()が呼ばれているので
+        // ここではcloseFullscreenScanner()は不要（handleScanResultで呼んでいる）
         return;
       }
     }
@@ -1810,8 +1811,11 @@ async function handleScanResult(text) {
   const result = await grantPointsByCode(lowered);
   
   if (result === true) {
+    // ★ カメラを停止してから画面を閉じる
+    stopCamera();
     showFullscreenMessage('✅ スタンプ獲得！', false);
     await wait(1500);
+    closeFullscreenScanner(); // この中のstopCamera()は2重呼び出しになるが問題ない
     return true;
   } else if (result === 'already_acquired') {
     showFullscreenMessage('⚠️ 既に取得済みです', true);
