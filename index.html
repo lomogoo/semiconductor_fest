@@ -1245,9 +1245,21 @@ async function sbInsertUser({name, school, department}) {
 
 async function sbFindUserByNameAndSchool({name, school}) {
   const client = getSupabaseClientOrThrow();
+  
+  // RPC関数を使わず、直接selectでクエリ
   const { data, error } = await client
-    .rpc('login_user', { p_name: name, p_school: school });
-  if (error) throw error;
+    .from('app_users')
+    .select('*')
+    .eq('name', name)
+    .eq('school', school)
+    .single();
+  
+  if (error) {
+    console.error('Login query error:', error);
+    throw error;
+  }
+  
+  console.log('Login data retrieved:', data);
   return data;
 }
 
