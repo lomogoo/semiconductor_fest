@@ -1863,12 +1863,15 @@ async function handleSignin(e){
     };
     saveLocalUser(user);
     state.user = user;
-    state.points = data.points || 0;
-    state.acquiredStamps = new Set(data.acquired_stamps || []);
-    state.claimedRewards = new Set(data.claimed_rewards || []);
+    
+    // ★★★ この3行を削除またはコメントアウト ★★★
+    // state.points = data.points || 0;
+    // state.acquiredStamps = new Set(data.acquired_stamps || []);
+    // state.claimedRewards = new Set(data.claimed_rewards || []);
+    
     closeAuthModal('signin');
     enableAppUI(user);
-    await syncPointsFromServer();
+    await syncPointsFromServer(); // ここでサーバーから正しいデータを取得
     showToast('登録が完了しました。ようこそ！');
   } catch (err) {
     console.error(err);
@@ -1902,12 +1905,15 @@ async function handleLogin(e){
     };
     saveLocalUser(user);
     state.user = user;
-    state.points = rec.points || 0;
-    state.acquiredStamps = new Set(rec.acquired_stamps || []);
-    state.claimedRewards = new Set(rec.claimed_rewards || []);
+    
+    // ★★★ この3行を削除またはコメントアウト ★★★
+    // state.points = rec.points || 0;
+    // state.acquiredStamps = new Set(rec.acquired_stamps || []);
+    // state.claimedRewards = new Set(rec.claimed_rewards || []);
+    
     closeAuthModal('login');
     enableAppUI(user);
-    await syncPointsFromServer();
+    await syncPointsFromServer(); // ここでサーバーから正しいデータを取得
     showToast('ログインしました。');
   } catch(err){
     console.error(err);
