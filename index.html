@@ -1183,12 +1183,20 @@ function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
 /******************* Supabase Accessors *******************/
 async function sbGetUserPoints(userId) {
   const client = getSupabaseClientOrThrow();
+  console.log('[sbGetUserPoints] Fetching data for user:', userId);
+  
   const { data, error } = await client
     .from('app_users')
     .select('points, acquired_stamps, claimed_rewards')
     .eq('id', userId)
     .single();
-  if (error) throw error;
+  
+  if (error) {
+    console.error('[sbGetUserPoints] Error:', error);
+    throw error;
+  }
+  
+  console.log('[sbGetUserPoints] Raw data from DB:', data);
   return data;
 }
 
@@ -1265,16 +1273,33 @@ async function sbFindUserByNameAndSchool({name, school}) {
 
 /******************* Points Management *******************/
 async function syncPointsFromServer() {
-  if (!state.user?.id) return;
+  if (!state.user?.id) {
+    console.log('[syncPointsFromServer] No user ID');
+    return;
+  }
+  
+  console.log('[syncPointsFromServer] Starting sync for user:', state.user.id);
+  
   try {
     const data = await sbGetUserPoints(state.user.id);
+    console.log('[syncPointsFromServer] Data received from Supabase:', data);
+    
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
     state.claimedRewards = new Set(data.claimed_rewards || []);
+    
+    console.log('[syncPointsFromServer] State updated:', {
+      points: state.points,
+      acquiredStamps: Array.from(state.acquiredStamps),
+      claimedRewards: Array.from(state.claimedRewards)
+    });
+    
     await updatePercentile();
     renderAll();
+    
+    console.log('[syncPointsFromServer] Sync complete');
   } catch (err) {
-    console.error('Failed to sync points:', err);
+    console.error('[syncPointsFromServer] Failed to sync points:', err);
   }
 }
 
