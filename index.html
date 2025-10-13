@@ -1010,6 +1010,15 @@ function enableAppUI(user) {
     `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
        ${user.name}（${user.school}）
      </button>`;
+
+  // ★ ページトップにスクロール
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  
+  // ★ mainコンテナもトップにスクロール
+  const mainEl = document.querySelector('main');
+  if (mainEl) {
+    mainEl.scrollTop = 0;
+  }
   
   setTimeout(() => {
     layoutBoothIcons();
