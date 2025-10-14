@@ -1818,28 +1818,61 @@ function showFullscreenMessage(msg, isError = true) {
   }, 2000);
 }
   
+// handleScanResult関数を修正
 async function handleScanResult(text) {
   if (!text) return false;
-  const lowered = text.toLowerCase();
-  const result = await grantPointsByCode(lowered);
   
-  if (result === true) {
-    // ★ 確実にカメラを停止してから画面を閉じる
-    await stopCamera(); // awaitを追加
-    showFullscreenMessage('✅ スタンプ獲得！', false);
-    await wait(1500);
-    closeFullscreenScanner();
-    return true;
-  } else if (result === 'already_acquired') {
-    showFullscreenMessage('⚠️ 既に取得済みです', true);
-    await wait(1500);
+  if (!state.user?.id) {
+    showFullscreenMessage('ログインしてください', true);
     return false;
-  } else {
-    showFullscreenMessage('❌ 未対応のQRコードです', true);
+  }
+  
+  try {
+    // Edge Functionを呼び出し
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/grant-stamp`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          userId: state.user.id,
+          qrCode: text.toLowerCase()
+        })
+      }
+    );
+    
+    const result = await response.json();
+    
+    if (response.ok && result.success) {
+      await stopCamera();
+      showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
+      await wait(1500);
+      closeFullscreenScanner();
+      
+      // サーバーから最新データを取得
+      await syncPointsFromServer();
+      return true;
+    } else if (response.status === 409) {
+      showFullscreenMessage('⚠️ 既に取得済みです', true);
+      await wait(1500);
+      return false;
+    } else {
+      showFullscreenMessage('❌ 未対応のQRコードです', true);
+      await wait(1500);
+      return false;
+    }
+  } catch (error) {
+    console.error('Stamp grant error:', error);
+    showFullscreenMessage('❌ エラーが発生しました', true);
     await wait(1500);
     return false;
   }
 }
+
+// grantPointsByCode関数は削除（使用しない）
 
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
 
