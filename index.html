@@ -783,6 +783,7 @@ async function callEdgeFunction(functionName, body = {}) {
   
   const headers = {
     'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
   };
   
   // 認証トークンがある場合は追加
@@ -790,23 +791,27 @@ async function callEdgeFunction(functionName, body = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const response = await fetch(
-    `${SUPABASE_URL}/functions/v1/${functionName}`,
-    {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/${functionName}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || `API Error: ${response.status}`);
     }
-  );
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || `API Error: ${response.status}`);
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`[callEdgeFunction] ${functionName} failed:`, error);
+    throw error;
   }
-  
-  return await response.json();
 }
-
 /******************* DATA & STATE *******************/
 const IMG_DEFAULT = 'logo.jpg';
 const MAX_POINTS = 10;
