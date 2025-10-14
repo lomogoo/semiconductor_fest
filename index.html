@@ -1299,6 +1299,10 @@ async function syncPointsFromServer() {
   }
 }
 
+/*
+ * この関数は使用されていません。
+ * ポイント付与はgrant-stamp Edge Functionで行います。
+ * 
 async function addPoints(amount, stampId = null) {
   if (!state.user?.id) {
     showToast('ログインしてください');
@@ -1330,6 +1334,7 @@ async function addPoints(amount, stampId = null) {
     return false;
   }
 }
+*/
 
 async function updatePercentile() {
   if (!state.user?.id || state.points === 0) {
@@ -1633,6 +1638,9 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
+// 1299行目付近
+// ❌ この関数も削除（コメントに「削除」とあるが残っている）
+/*
 async function grantPointsByCode(code) {
   if (!code) return false;
   
@@ -1672,6 +1680,7 @@ async function grantPointsByCode(code) {
   }
   return success;
 }
+*/
 
 /******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
@@ -1885,6 +1894,8 @@ function handleDeepLinkAward() {
   }
   if (!code) return;
   
+  // ❌ この部分を削除
+  /*
   grantPointsByCode(code.toLowerCase()).then(success => {
     if (success) {
       url.searchParams.delete('qr');
@@ -1894,6 +1905,13 @@ function handleDeepLinkAward() {
       showToast('未対応のQRコードです');
     }
   });
+  */
+
+    // ✅ ディープリンク機能が必要な場合は、handleScanResultを使用
+  showToast('QRコードはマップページからスキャンしてください');
+  url.searchParams.delete('qr');
+  const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
+  history.replaceState({}, '', clean || '/');
 }
 
 /******************* Auth Flow *******************/
