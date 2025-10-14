@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-  <!-- Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- QR生成用（軽量） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- ZXing QRコードスキャナー -->
@@ -543,6 +541,7 @@
             <div class="flex-1">
               <div class="font-semibold text-slate-800">QUOカード (1000円分)</div>
               <div class="text-xs text-slate-600 mt-1">全てのスタンプを集めた方への特別報酬</div>
+
               <div class="text-xs text-purple-600 font-semibold mt-1">必要ポイント: 5pt</div>
             </div>
             <button class="claim-btn px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold text-sm ripple" data-reward="quo-card">
@@ -775,26 +774,37 @@
 const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
-const IS_SUPABASE_CONFIGURED =
-  typeof SUPABASE_URL === "string" && SUPABASE_URL.trim() !== "" &&
-  typeof SUPABASE_ANON_KEY === "string" && SUPABASE_ANON_KEY.trim() !== "";
-  
-let supabase = null;
-if (IS_SUPABASE_CONFIGURED) {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false }
-  });
-} else {
-  console.warn('Supabase のURL/Anonキーが未設定のため、認証機能は無効化されています。');
-}
+// Supabase SDKは不要になったため削除
+// フロントエンドからは直接DBアクセスしない
 
-function getSupabaseClientOrThrow() {
-  if (!IS_SUPABASE_CONFIGURED || !supabase) {
-    const err = new Error('Supabase credentials are not configured.');
-    err.code = 'SUPABASE_NOT_CONFIGURED';
-    throw err;
+/******************* API Helper Functions *******************/
+async function callEdgeFunction(functionName, body = {}) {
+  const token = localStorage.getItem('auth_token');
+  
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  // 認証トークンがある場合は追加
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-  return supabase;
+  
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/${functionName}`,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    }
+  );
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || `API Error: ${response.status}`);
+  }
+  
+  return await response.json();
 }
 
 /******************* DATA & STATE *******************/
@@ -846,13 +856,6 @@ const state = {
   percentile: null,
   acquiredStamps: new Set(),
   claimedRewards: new Set()
-};
-
-const QR_WHITELIST = {
-  'handoutai_a': 'A', 'handoutai_b': 'B', 'handoutai_c': 'C', 'handoutai_d': 'D',
-  'handoutai_e': 'E', 'handoutai_f': 'F',
-  'handoutai_stage': 'stage',
-  'handoutai_presentation': 'presentation'
 };
 
 /******************* DOM ELEMENTS *******************/
@@ -915,22 +918,21 @@ const $app = {
     switchBtn: document.getElementById('fullscreen-switch'),
   },
   auth: {
-  backdrop: document.getElementById('auth-backdrop'),
-  launch: document.getElementById('auth-launch'),
-  signin: document.getElementById('signin-modal'),
-  login: document.getElementById('login-modal'),
-  openSignin: document.getElementById('open-signin'),
-  openLogin: document.getElementById('open-login'),
-  signinForm: document.getElementById('signin-form'),
-  loginForm: document.getElementById('login-form'),
-  siName: document.getElementById('si-name'),
-  siEmail: document.getElementById('si-email'),
-  liName: document.getElementById('li-name'),
-  liEmail: document.getElementById('li-email'),
-  signinError: document.getElementById('signin-error'),
-  loginError: document.getElementById('login-error'),
+    backdrop: document.getElementById('auth-backdrop'),
+    launch: document.getElementById('auth-launch'),
+    signin: document.getElementById('signin-modal'),
+    login: document.getElementById('login-modal'),
+    openSignin: document.getElementById('open-signin'),
+    openLogin: document.getElementById('open-login'),
+    signinForm: document.getElementById('signin-form'),
+    loginForm: document.getElementById('login-form'),
+    siName: document.getElementById('si-name'),
+    siEmail: document.getElementById('si-email'),
+    liName: document.getElementById('li-name'),
+    liEmail: document.getElementById('li-email'),
+    signinError: document.getElementById('signin-error'),
+    loginError: document.getElementById('login-error'),
   },
-  
   toast: document.getElementById('toast'),
   qr: {
     modal: document.getElementById('qr-modal'),
@@ -970,11 +972,10 @@ function openAuthModal(kind) {
 function closeAuthModal(kind) {
   const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
   target.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show'))
-  !$app.auth.login.classList.contains('show') &&
+  if (!$app.auth.signin.classList.contains('show') &&
+      !$app.auth.login.classList.contains('show') &&
       !$app.qr.modal.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show')
-      {
+      !$app.rewards.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
 }
@@ -985,7 +986,6 @@ function backToAuthGate(kind) {
 }
   
 function enableAppUI(user) {
-  // ユーザー情報の検証を追加
   if (!user || !user.id || !user.name || !user.email) {
     console.error('Invalid user data:', user);
     showToast('登録されていないユーザーです');
@@ -1008,10 +1008,8 @@ function enableAppUI(user) {
        ${user.name}
      </button>`;
 
-  // ★ ページトップにスクロール
   window.scrollTo({ top: 0, behavior: 'instant' });
   
-  // ★ mainコンテナもトップにスクロール
   const mainEl = document.querySelector('main');
   if (mainEl) {
     mainEl.scrollTop = 0;
@@ -1094,13 +1092,11 @@ function closeRewardsModal() {
 function renderRewardsModal() {
   const isPreRegistration = state.user?.registration_type === 'pre_registration';
   
-  // 事前申込特典の表示/非表示
   const preRegReward = document.getElementById('pre-registration-reward');
   if (preRegReward) {
     preRegReward.style.display = isPreRegistration ? 'block' : 'none';
   }
   
-  // 各特典の状態を更新
   updateRewardButton('pre-registration', 0, isPreRegistration);
   updateRewardButton('normal-badge', 2, true);
   updateRewardButton('gold-badge', 4, true);
@@ -1148,119 +1144,49 @@ async function claimReward(rewardId, requiredPoints) {
   }
   
   try {
-    state.claimedRewards.add(rewardId);
-    await sbUpdateUserRewards(state.user.id, state.claimedRewards);
+    const result = await callEdgeFunction('claim-reward', {
+      userId: state.user.id,
+      rewardId: rewardId
+    });
     
-    const rewardNames = {
-      'pre-registration': '事前申込特典',
-      'normal-badge': 'ピンバッジ',
-      'gold-badge': 'ゴールドピンバッジ',
-      'quo-card': 'QUOカード'
-    };
-    
-    showToast(`✅ ${rewardNames[rewardId]}を交換しました！`);
-    renderRewardsModal();
+    if (result.success) {
+      state.claimedRewards.add(rewardId);
+      
+      const rewardNames = {
+        'pre-registration': '事前申込特典',
+        'normal-badge': 'ピンバッジ',
+        'gold-badge': 'ゴールドピンバッジ',
+        'quo-card': 'QUOカード'
+      };
+      
+      showToast(`✅ ${rewardNames[rewardId]}を交換しました！`);
+      renderRewardsModal();
+    }
   } catch (err) {
     console.error('Failed to claim reward:', err);
-    state.claimedRewards.delete(rewardId);
     showToast('特典の交換に失敗しました');
   }
 }
 
 /******************* Auth Storage *******************/
 const LS_KEY_USER = 'app_user';
-function saveLocalUser(u){ localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); }
-function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_USER)||'null'); } catch { return null; } }
-function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
+const LS_KEY_TOKEN = 'auth_token';
 
-/******************* Supabase Accessors *******************/
-async function sbGetUserPoints(userId) {
-  const client = getSupabaseClientOrThrow();
-  console.log('[sbGetUserPoints] Fetching data for user:', userId);
-  
-  const { data, error } = await client
-    .from('app_users')
-    .select('points, acquired_stamps, claimed_rewards')
-    .eq('id', userId)
-    .single();
-  
-  if (error) {
-    console.error('[sbGetUserPoints] Error:', error);
-    throw error;
-  }
-  
-  console.log('[sbGetUserPoints] Raw data from DB:', data);
-  return data;
+function saveLocalUser(u) { 
+  localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); 
 }
 
-async function sbUpdateUserPoints(userId, points, acquiredStamps) {
-  const client = getSupabaseClientOrThrow();
-  const { error } = await client
-    .from('app_users')
-    .update({ 
-      points,
-      acquired_stamps: Array.from(acquiredStamps)
-    })
-    .eq('id', userId);
-  if (error) throw error;
+function loadLocalUser() { 
+  try { 
+    return JSON.parse(localStorage.getItem(LS_KEY_USER) || 'null'); 
+  } catch { 
+    return null; 
+  } 
 }
 
-async function sbUpdateUserRewards(userId, claimedRewards) {
-  const client = getSupabaseClientOrThrow();
-  const { error } = await client
-    .from('app_users')
-    .update({ 
-      claimed_rewards: Array.from(claimedRewards)
-    })
-    .eq('id', userId);
-  if (error) throw error;
-}
-
-async function sbGetAllUserPoints() {
-  const client = getSupabaseClientOrThrow();
-  const { data, error } = await client
-    .from('app_users')
-    .select('points');
-  if (error) throw error;
-  return data.map(u => u.points || 0);
-}
-
-async function sbInsertUser({name, school, department}) {
-  const client = getSupabaseClientOrThrow();
-  const { data, error } = await client
-    .from('app_users')
-    .insert({
-      name,
-      school,
-      department,
-      registration_type: 'on_site',
-      points: 0,
-      acquired_stamps: [],
-      claimed_rewards: []
-    })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
-}
-
-async function sbFindUserByNameAndEmail({name, email}) {
-  const client = getSupabaseClientOrThrow();
-  
-  const { data, error } = await client
-    .from('app_users')
-    .select('*')
-    .eq('name', name)
-    .eq('email', email)
-    .single();
-  
-  if (error) {
-    console.error('Login query error:', error);
-    throw error;
-  }
-  
-  console.log('Login data retrieved:', data);
-  return data;
+function clearLocalUser() { 
+  localStorage.removeItem(LS_KEY_USER); 
+  localStorage.removeItem(LS_KEY_TOKEN);
 }
 
 /******************* Points Management *******************/
@@ -1273,8 +1199,11 @@ async function syncPointsFromServer() {
   console.log('[syncPointsFromServer] Starting sync for user:', state.user.id);
   
   try {
-    const data = await sbGetUserPoints(state.user.id);
-    console.log('[syncPointsFromServer] Data received from Supabase:', data);
+    const data = await callEdgeFunction('get-user-data', {
+      userId: state.user.id
+    });
+    
+    console.log('[syncPointsFromServer] Data received:', data);
     
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
@@ -1295,43 +1224,6 @@ async function syncPointsFromServer() {
   }
 }
 
-/*
- * この関数は使用されていません。
- * ポイント付与はgrant-stamp Edge Functionで行います。
- * 
-async function addPoints(amount, stampId = null) {
-  if (!state.user?.id) {
-    showToast('ログインしてください');
-    return false;
-  }
-  
-  if (stampId) {
-    if (state.acquiredStamps.has(stampId)) {
-      showToast(`「${stampId}」は既に取得済みです`);
-      return false;
-    }
-    state.acquiredStamps.add(stampId);
-  }
-  
-  const newPoints = Math.min(state.points + amount, MAX_POINTS);
-  state.points = newPoints;
-  
-  try {
-    await sbUpdateUserPoints(state.user.id, newPoints, state.acquiredStamps);
-    await updatePercentile();
-    renderAll();
-    return true;
-  } catch (err) {
-    console.error('Failed to update points:', err);
-    showToast('ポイント更新に失敗しました');
-    if (stampId) {
-      state.acquiredStamps.delete(stampId);
-    }
-    return false;
-  }
-}
-*/
-
 async function updatePercentile() {
   if (!state.user?.id || state.points === 0) {
     state.percentile = null;
@@ -1339,16 +1231,11 @@ async function updatePercentile() {
   }
   
   try {
-    const allPoints = await sbGetAllUserPoints();
-    const total = allPoints.length;
-    if (total === 0) {
-      state.percentile = null;
-      return;
-    }
+    const result = await callEdgeFunction('get-percentile', {
+      userId: state.user.id
+    });
     
-    const below = allPoints.filter(p => p < state.points).length;
-    const percentile = Math.round((below / total) * 100);
-    state.percentile = percentile;
+    state.percentile = result.percentile;
   } catch (err) {
     console.error('Failed to calculate percentile:', err);
     state.percentile = null;
@@ -1394,18 +1281,13 @@ function renderProgress() {
   const n = state.points;
   
   let progressPercent = 0;
-  // ★ マーカーの位置に合わせて進捗パーセントを計算
   if (n >= 5) {
-    // 5pt(80%)から10pt(100%)へ
     progressPercent = 80 + ((n - 5) / 5) * 20;
   } else if (n >= 4) {
-    // 4pt(50%)から5pt(80%)へ
     progressPercent = 50 + ((n - 4) / 1) * 30;
   } else if (n >= 2) {
-    // 2pt(20%)から4pt(50%)へ
     progressPercent = 20 + ((n - 2) / 2) * 30;
   } else if (n > 0) {
-    // 0ptから2pt(20%)へ
     progressPercent = (n / 2) * 20;
   }
 
@@ -1457,7 +1339,6 @@ function updateAcquiredBadges() {
     stageBadge.style.display = stageAcquired ? 'flex' : 'none';
   }
   
-  // ステージカードの背景色も変更
   const stageCard = document.querySelector('.stamp-category-card[data-category="stage"]');
   if (stageCard) {
     if (stageAcquired) {
@@ -1473,7 +1354,6 @@ function updateAcquiredBadges() {
     presentationBadge.style.display = presentationAcquired ? 'flex' : 'none';
   }
   
-  // 研究発表会カードの背景色も変更
   const presentationCard = document.querySelector('.stamp-category-card[data-category="presentation"]');
   if (presentationCard) {
     if (presentationAcquired) {
@@ -1610,7 +1490,6 @@ function openBoothSheet(booth) {
   
   $app.boothSheet.tags.innerHTML = '';
   
-  // 取得済みバッジを追加
   if (isAcquired) {
     const acquiredBadge = document.createElement('span');
     acquiredBadge.className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold';
@@ -1634,50 +1513,6 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
-// 1299行目付近
-// ❌ この関数も削除（コメントに「削除」とあるが残っている）
-/*
-async function grantPointsByCode(code) {
-  if (!code) return false;
-  
-  const categoryKey = QR_WHITELIST[code];
-  if (!categoryKey) return false;
-  
-  // 既に取得済みかチェック
-  if (categoryKey === 'stage' || categoryKey === 'presentation') {
-    if (state.acquiredStamps.has(categoryKey)) {
-      return 'already_acquired';
-    }
-  } else {
-    if (state.acquiredStamps.has(categoryKey)) {
-      return 'already_acquired';
-    }
-  }
-  
-  let points = 0;
-  let name = '';
-  let stampId = null;
-  
-  if (categoryKey === 'stage' || categoryKey === 'presentation') {
-    points = CATEGORY_DATA[categoryKey].points;
-    name = CATEGORY_DATA[categoryKey].title;
-    stampId = categoryKey;
-  } else {
-    const booth = BOOTH_DATA.find(b => b.id === categoryKey);
-    if (!booth) return false;
-    points = 1;
-    name = booth.name;
-    stampId = categoryKey;
-  }
-  
-  const success = await addPoints(points, stampId);
-  if (success) {
-    showToast(`✅ 「${name}」で${points}pt獲得！`);
-  }
-  return success;
-}
-*/
-
 /******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
 let useBackCamera = true;
@@ -1691,7 +1526,7 @@ async function openFullscreenScanner() {
 }
 
 function closeFullscreenScanner() {
-  stopCamera(); // ★ 念のためもう一度呼ぶ（冪等性あり）
+  stopCamera();
   $app.fullscreenScanner.container.classList.remove('active');
 }
 
@@ -1715,7 +1550,6 @@ async function startCamera() {
     $app.fullscreenScanner.video.srcObject = scanStream;
     await $app.fullscreenScanner.video.play();
     
-    // トーチ機能の確認
     try {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
@@ -1733,7 +1567,6 @@ async function startCamera() {
     scanning = true;
     $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
     
-    // ZXingでのスキャン開始
     scanQRCode();
     
   } catch (err) {
@@ -1748,10 +1581,8 @@ async function scanQRCode() {
   try {
     const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
     if (result && result.text) {
-      // ★ まずscanningをfalseにして、再帰を止める
       scanning = false;
       const success = await handleScanResult(result.text);
-      // ★ handleScanResult内でstopCamera()とcloseFullscreenScanner()が呼ばれる
       return;
     }
   } catch (err) {
@@ -1764,9 +1595,8 @@ async function scanQRCode() {
 }
 
 async function stopCamera() {
-  scanning = false; // ★ 最初に設定
+  scanning = false;
   
-  // ★ ZXingのリーダーもリセット
   if (codeReader) {
     try {
       await codeReader.reset();
@@ -1778,7 +1608,7 @@ async function stopCamera() {
   if (scanStream) {
     scanStream.getTracks().forEach(t => {
       t.stop();
-      console.log('Track stopped:', t.label); // デバッグ用
+      console.log('Track stopped:', t.label);
     });
     scanStream = null;
   }
@@ -1791,7 +1621,6 @@ async function stopCamera() {
   $app.fullscreenScanner.torchBtn.dataset.on = '0';
   $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
 }
-
 
 async function toggleTorch() {
   if (!trackWithTorch) return;
@@ -1823,7 +1652,6 @@ function showFullscreenMessage(msg, isError = true) {
   }, 2000);
 }
   
-// handleScanResult関数を修正
 async function handleScanResult(text) {
   if (!text) return false;
   
@@ -1833,99 +1661,55 @@ async function handleScanResult(text) {
   }
   
   try {
-    // Edge Functionを呼び出し
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/grant-stamp`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          userId: state.user.id,
-          qrCode: text.toLowerCase()
-        })
-      }
-    );
+    const result = await callEdgeFunction('grant-stamp', {
+      userId: state.user.id,
+      qrCode: text.toLowerCase()
+    });
     
-    const result = await response.json();
-    
-    if (response.ok && result.success) {
+    if (result.success) {
       await stopCamera();
       showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
       await wait(1500);
       closeFullscreenScanner();
       
-      // サーバーから最新データを取得
       await syncPointsFromServer();
       return true;
-    } else if (response.status === 409) {
-      showFullscreenMessage('⚠️ 既に取得済みです', true);
-      await wait(1500);
-      return false;
-    } else {
-      showFullscreenMessage('❌ 未対応のQRコードです', true);
-      await wait(1500);
-      return false;
     }
   } catch (error) {
     console.error('Stamp grant error:', error);
-    showFullscreenMessage('❌ エラーが発生しました', true);
+    
+    if (error.message.includes('既に取得済み')) {
+      showFullscreenMessage('⚠️ 既に取得済みです', true);
+    } else if (error.message.includes('未対応')) {
+      showFullscreenMessage('❌ 未対応のQRコードです', true);
+    } else {
+      showFullscreenMessage('❌ エラーが発生しました', true);
+    }
+    
     await wait(1500);
     return false;
   }
 }
 
-// grantPointsByCode関数は削除（使用しない）
-
-function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-function handleDeepLinkAward() {
-  const url = new URL(window.location.href);
-  let code = url.searchParams.get('qr');
-  if (!code && url.hash) {
-    const m = url.hash.match(/qr=([^&]+)/);
-    if (m) code = decodeURIComponent(m[1]);
-  }
-  if (!code) return;
-  
-  // ❌ この部分を削除
-  /*
-  grantPointsByCode(code.toLowerCase()).then(success => {
-    if (success) {
-      url.searchParams.delete('qr');
-      const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
-      history.replaceState({}, '', clean || '/');
-    } else {
-      showToast('未対応のQRコードです');
-    }
-  });
-  */
-
-    // ✅ ディープリンク機能が必要な場合は、handleScanResultを使用
-  showToast('QRコードはマップページからスキャンしてください');
-  url.searchParams.delete('qr');
-  const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
-  history.replaceState({}, '', clean || '/');
-}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /******************* Auth Flow *******************/
 async function ensureAuth() {
   const local = loadLocalUser();
-  if (local && local.id) {
+  const token = localStorage.getItem(LS_KEY_TOKEN);
+  
+  if (local && local.id && token) {
     state.user = local;
     enableAppUI(state.user);
     await syncPointsFromServer();
     return true;
   }
+  
   showAuthGate();
   return false;
 }
 
-const FUNC_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co/functions/v1/onsite-intake";
-
-async function handleSignin(e){
+async function handleSignin(e) {
   e.preventDefault();
   $app.auth.signinError.textContent = '';
 
@@ -1937,7 +1721,6 @@ async function handleSignin(e){
     return;
   }
 
-  // メールアドレスの形式チェック
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     $app.auth.signinError.textContent = '正しいメールアドレスを入力してください。';
@@ -1945,56 +1728,45 @@ async function handleSignin(e){
   }
 
   try {
-    const res = await fetch(FUNC_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({ name, email })
+    const result = await callEdgeFunction('onsite-intake', {
+      name,
+      email
     });
 
-    const body = await res.json().catch(()=>({}));
-    if (!res.ok || body.ok === false) {
-      const msg = body.error || `登録に失敗しました`;
-      $app.auth.signinError.textContent = msg;
-      return;
+    if (result.user && result.token) {
+      const user = {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        registration_type: result.user.registration_type || 'on_site'
+      };
+      
+      saveLocalUser(user);
+      localStorage.setItem(LS_KEY_TOKEN, result.token);
+      state.user = user;
+      
+      closeAuthModal('signin');
+      enableAppUI(user);
+      await syncPointsFromServer();
+      showToast('登録が完了しました。ようこそ！');
     }
-
-    const data = body.user ?? body;
-    const user = { 
-      id: data.id, 
-      name: data.name, 
-      email: data.email,
-      registration_type: data.registration_type || 'on_site'
-    };
-    saveLocalUser(user);
-    state.user = user;
-    
-    closeAuthModal('signin');
-    enableAppUI(user);
-    await syncPointsFromServer();
-    showToast('登録が完了しました。ようこそ！');
   } catch (err) {
     console.error(err);
-    $app.auth.signinError.textContent = String(err.message || err);
+    $app.auth.signinError.textContent = err.message || '登録に失敗しました';
   }
 }
 
-async function handleLogin(e){
+async function handleLogin(e) {
   e.preventDefault();
   $app.auth.loginError.textContent = '';
   
   const name = $app.auth.liName.value.trim();
   const email = $app.auth.liEmail.value.trim();
-  
   if (!name || !email) {
     $app.auth.loginError.textContent = '氏名とメールアドレスを入力してください。';
     return;
   }
 
-  // メールアドレスの形式チェック
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     $app.auth.loginError.textContent = '正しいメールアドレスを入力してください。';
@@ -2002,33 +1774,31 @@ async function handleLogin(e){
   }
   
   try {
-    const rec = await sbFindUserByNameAndEmail({ name, email });
+    const result = await callEdgeFunction('login', {
+      name,
+      email
+    });
     
-    if (!rec || !rec.id) {
-      $app.auth.loginError.textContent = '該当ユーザーが見つかりません。入力内容を確認するか、当日受付からサインインしてください。';
-      return;
+    if (result.user && result.token) {
+      const user = {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        registration_type: result.user.registration_type || 'pre_registration'
+      };
+      
+      saveLocalUser(user);
+      localStorage.setItem(LS_KEY_TOKEN, result.token);
+      state.user = user;
+      
+      closeAuthModal('login');
+      enableAppUI(user);
+      await syncPointsFromServer();
+      showToast('ログインしました。');
     }
-    
-    const user = { 
-      id: rec.id, 
-      name: rec.name, 
-      email: rec.email,
-      registration_type: rec.registration_type || 'pre_registration'
-    };
-    saveLocalUser(user);
-    state.user = user;
-    
-    closeAuthModal('login');
-    enableAppUI(user);
-    await syncPointsFromServer();
-    showToast('ログインしました。');
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
-      $app.auth.loginError.textContent = '現在ログイン機能は利用できません。';
-      return;
-    }
-    $app.auth.loginError.textContent = 'ログインに失敗しました。入力内容を確認してください。';
+    $app.auth.loginError.textContent = err.message || 'ログインに失敗しました。入力内容を確認してください。';
   }
 }
 
@@ -2073,7 +1843,6 @@ function layoutBoothIcons() {
     group.setAttribute('aria-label', booth.name);
     group.dataset.id = id;
     
-    // 一番下の影（ぼかし大）
     const shadowDeep = document.createElementNS('http://www.w3.org/2000/svg','rect');
     shadowDeep.setAttribute('x', x + 8);
     shadowDeep.setAttribute('y', y + 8);
@@ -2084,7 +1853,6 @@ function layoutBoothIcons() {
     shadowDeep.setAttribute('filter', 'blur(12px)');
     group.appendChild(shadowDeep);
     
-    // 中間の影（グラデーション）
     const shadowMid = document.createElementNS('http://www.w3.org/2000/svg','rect');
     shadowMid.setAttribute('x', x + 2);
     shadowMid.setAttribute('y', y + 2);
@@ -2095,7 +1863,6 @@ function layoutBoothIcons() {
     shadowMid.setAttribute('filter', 'blur(4px)');
     group.appendChild(shadowMid);
     
-    // ベース（ダークボーダー）
     const base = document.createElementNS('http://www.w3.org/2000/svg','rect');
     base.setAttribute('x', x + 1);
     base.setAttribute('y', y + 1);
@@ -2107,7 +1874,6 @@ function layoutBoothIcons() {
     base.setAttribute('stroke-width', '2');
     group.appendChild(base);
     
-    // メインの外枠（立体的な白枠）
     const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
     border.setAttribute('x', x);
     border.setAttribute('y', y);
@@ -2120,7 +1886,6 @@ function layoutBoothIcons() {
     border.setAttribute('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
     group.appendChild(border);
     
-    // 内側の影（エンボス効果）
     const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
     innerShadow.setAttribute('x', x + 4);
     innerShadow.setAttribute('y', y + 4);
@@ -2132,7 +1897,6 @@ function layoutBoothIcons() {
     innerShadow.setAttribute('stroke-width', '1');
     group.appendChild(innerShadow);
     
-    // クリップパス定義
     const clipId = `clip-${id}`;
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
     const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
@@ -2147,7 +1911,6 @@ function layoutBoothIcons() {
     defs.appendChild(clipPath);
     group.appendChild(defs);
     
-    // 画像の下地（レターボックスが出る時の背景）
     const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     fillRect.setAttribute('x', x + 5);
     fillRect.setAttribute('y', y + 5);
@@ -2158,7 +1921,6 @@ function layoutBoothIcons() {
     fillRect.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(fillRect);
 
-    // 画像
     const img = document.createElementNS('http://www.w3.org/2000/svg','image');
     img.setAttribute('x', x + 5);
     img.setAttribute('y', y + 5);
@@ -2170,7 +1932,6 @@ function layoutBoothIcons() {
     img.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(img);
     
-    // ハイライト（ガラス効果）
     const highlight = document.createElementNS('http://www.w3.org/2000/svg','rect');
     highlight.setAttribute('x', x + 5);
     highlight.setAttribute('y', y + 5);
@@ -2182,7 +1943,6 @@ function layoutBoothIcons() {
     highlight.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(highlight);
     
-    // 光沢（左上）
     const gloss = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
     gloss.setAttribute('cx', x + size * 0.3);
     gloss.setAttribute('cy', y + size * 0.25);
@@ -2193,7 +1953,6 @@ function layoutBoothIcons() {
     gloss.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(gloss);
     
-    // 取得済みチェックマーク
     if (isAcquired) {
       const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
       checkBg.setAttribute('cx', x + size - 20);
@@ -2219,11 +1978,9 @@ function layoutBoothIcons() {
     g.appendChild(group);
   });
   
-  // グラデーション定義
   if (!document.getElementById('highlight-gradient')) {
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
     
-    // ハイライトグラデーション
     const gradient = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     gradient.setAttribute('id', 'highlight-gradient');
     gradient.setAttribute('x1', '0');
@@ -2245,7 +2002,6 @@ function layoutBoothIcons() {
     gradient.appendChild(stop2);
     defs.appendChild(gradient);
     
-    // ボーダーグラデーション
     const borderGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     borderGrad.setAttribute('id', 'border-gradient');
     borderGrad.setAttribute('x1', '0');
@@ -2270,7 +2026,6 @@ function layoutBoothIcons() {
     borderGrad.appendChild(bstop3);
     defs.appendChild(borderGrad);
     
-    // 取得済みグラデーション
     const acquiredGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     acquiredGrad.setAttribute('id', 'acquired-gradient');
     acquiredGrad.setAttribute('x1', '0');
@@ -2298,14 +2053,13 @@ function layoutBoothIcons() {
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
 
-  // クリックイベント
   g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
     const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
     if (booth) openBoothSheet(booth);
   }));
 }
 
-function syncBubbleHeights(){
+function syncBubbleHeights() {
   const b2 = document.querySelector('#reward-bubble-2 .reward-bubble-content');
   const b4 = document.querySelector('#reward-bubble-4 .reward-bubble-content');
   const b5 = document.querySelector('#reward-bubble-5 .reward-bubble-content');
@@ -2316,31 +2070,10 @@ function syncBubbleHeights(){
   b5.style.minHeight = h + 'px';
 }
 
-function applySupabaseAvailabilityState() {
-  if (IS_SUPABASE_CONFIGURED) return;
-  
-  const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-  
-  [$app.auth.signinError, $app.auth.loginError].forEach(el => {
-    if (el) el.textContent = disabledMessage;
-  });
-  
-  [$app.auth.signinForm, $app.auth.loginForm].forEach(form => {
-    if (!form) return;
-    form.querySelectorAll('input, button[type="submit"]').forEach(el => {
-      el.disabled = true;
-      if (el.tagName === 'BUTTON') {
-        el.classList.add('opacity-50', 'cursor-not-allowed');
-      }
-    });
-  });
-}
-
 /******************* Initialization *******************/
 function init() {
   console.log('[init] starting');
   
-  // Navigation
   $app.navButtons.forEach(btn => {
     if (!btn) return;
     btn.addEventListener('click', () => {
@@ -2350,7 +2083,6 @@ function init() {
     });
   });
 
-  // Backup navigation via event delegation
   if ($app.nav) {
     $app.nav.addEventListener('click', (e) => {
       const btn = e.target.closest('.nav-btn');
@@ -2361,9 +2093,6 @@ function init() {
     });
   }
 
-  applySupabaseAvailabilityState();
-
-  // Category cards
   document.querySelectorAll('.stamp-category-card').forEach(card => {
     card.addEventListener('click', () => {
       const category = card.dataset.category;
@@ -2371,7 +2100,6 @@ function init() {
     });
   });
 
-  // Sheets
   if ($app.categorySheet.backdrop) {
     $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
   }
@@ -2382,7 +2110,6 @@ function init() {
   }
   $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
 
-  // Ripple effect
   document.addEventListener('click', e => {
     const rippleTarget = e.target.closest('.ripple');
     if (!rippleTarget) return;
@@ -2398,7 +2125,6 @@ function init() {
     setTimeout(() => ripple.remove(), 600);
   });
 
-  // Layout
   window.addEventListener('resize', () => {
     if (state.activePage === 'map') {
       layoutBoothIcons();
@@ -2406,7 +2132,6 @@ function init() {
     syncBubbleHeights();
   });
 
-  // QR Scanner
   if ($app.scan.openCard) {
     $app.scan.openCard.addEventListener('click', openFullscreenScanner);
   }
@@ -2420,7 +2145,6 @@ function init() {
     $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
   }
 
-  // Rewards Modal
   if ($app.rewards.openBtn) {
     $app.rewards.openBtn.addEventListener('click', openRewardsModal);
   }
@@ -2428,7 +2152,6 @@ function init() {
     $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
   }
   
-  // Rewards claim buttons - イベント委譲を使用
   if ($app.rewards.content) {
     $app.rewards.content.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-reward]');
@@ -2442,17 +2165,12 @@ function init() {
     });
   }
 
-  // Deep Link
-  handleDeepLinkAward();
-
-  // Auth
   ensureAuth().then(ok => {
     if (ok) {
       enableAppUI(state.user);
     }
   });
 
-  // Auth Buttons
   $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
   $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
   document.querySelectorAll('[data-back="signin"]').forEach(el => 
@@ -2464,11 +2182,9 @@ function init() {
   $app.auth.signinForm.addEventListener('submit', handleSignin);
   $app.auth.loginForm.addEventListener('submit', handleLogin);
 
-  // User QR
   $app.userPill.addEventListener('click', openQrModal);
   $app.qr.closeBtn.addEventListener('click', closeQrModal);
 
-  // Auth backdrop click to close modals
   $app.auth.backdrop.addEventListener('click', (e) => {
     if (e.target === $app.auth.backdrop) {
       if ($app.qr.modal.classList.contains('show')) {
@@ -2479,10 +2195,8 @@ function init() {
     }
   });
 
-  // Initial render
   renderAll();
   
-  // Periodic sync
   setInterval(() => {
     if (state.user?.id) {
       syncPointsFromServer();
@@ -2492,7 +2206,6 @@ function init() {
   console.log('[init] complete');
 }
 
-// Start the app
 init();
 </script>
 </body>
