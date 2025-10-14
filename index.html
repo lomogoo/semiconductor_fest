@@ -416,21 +416,18 @@
       </div>
       
       <form id="signin-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-700">学校名</label>
-          <input id="si-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北大学" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-700">学部・学科</label>
-          <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:工学部 電気情報物理工学科" />
-        </div>
-        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
-        <p id="signin-error" class="text-sm text-red-600"></p>
-      </form>
+  <div>
+    <label class="text-sm text-slate-700">氏名</label>
+    <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
+  </div>
+  <div>
+    <label class="text-sm text-slate-700">メールアドレス</label>
+    <input id="si-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:taro@example.com" />
+  </div>
+  <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
+  <p id="signin-error" class="text-sm text-red-600"></p>
+</form>
+      
     </div>
   </div>
 
@@ -446,18 +443,18 @@
         <div class="w-16"></div>
       </div>
       <form id="login-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-700">学校名</label>
-          <input id="li-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した学校名" />
-        </div>
-        <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
-        <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
-        <p id="login-error" class="text-sm text-red-600"></p>
-      </form>
+  <div>
+    <label class="text-sm text-slate-700">氏名</label>
+    <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
+  </div>
+  <div>
+    <label class="text-sm text-slate-700">メールアドレス</label>
+    <input id="li-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録したメールアドレス" />
+  </div>
+  <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
+  <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
+  <p id="login-error" class="text-sm text-red-600"></p>
+</form>
     </div>
   </div>
 
@@ -918,22 +915,22 @@ const $app = {
     switchBtn: document.getElementById('fullscreen-switch'),
   },
   auth: {
-    backdrop: document.getElementById('auth-backdrop'),
-    launch: document.getElementById('auth-launch'),
-    signin: document.getElementById('signin-modal'),
-    login: document.getElementById('login-modal'),
-    openSignin: document.getElementById('open-signin'),
-    openLogin: document.getElementById('open-login'),
-    signinForm: document.getElementById('signin-form'),
-    loginForm: document.getElementById('login-form'),
-    siName: document.getElementById('si-name'),
-    siSchool: document.getElementById('si-school'),
-    siDept: document.getElementById('si-dept'),
-    liName: document.getElementById('li-name'),
-    liSchool: document.getElementById('li-school'),
-    signinError: document.getElementById('signin-error'),
-    loginError: document.getElementById('login-error'),
+  backdrop: document.getElementById('auth-backdrop'),
+  launch: document.getElementById('auth-launch'),
+  signin: document.getElementById('signin-modal'),
+  login: document.getElementById('login-modal'),
+  openSignin: document.getElementById('open-signin'),
+  openLogin: document.getElementById('open-login'),
+  signinForm: document.getElementById('signin-form'),
+  loginForm: document.getElementById('login-form'),
+  siName: document.getElementById('si-name'),
+  siEmail: document.getElementById('si-email'),
+  liName: document.getElementById('li-name'),
+  liEmail: document.getElementById('li-email'),
+  signinError: document.getElementById('signin-error'),
+  loginError: document.getElementById('login-error'),
   },
+  
   toast: document.getElementById('toast'),
   qr: {
     modal: document.getElementById('qr-modal'),
@@ -989,7 +986,7 @@ function backToAuthGate(kind) {
   
 function enableAppUI(user) {
   // ユーザー情報の検証を追加
-  if (!user || !user.id || !user.name || !user.school) {
+  if (!user || !user.id || !user.name || !user.email) {
     console.error('Invalid user data:', user);
     showToast('登録されていないユーザーです');
     showAuthGate();
@@ -1008,7 +1005,7 @@ function enableAppUI(user) {
   $app.userPill.classList.add('cursor-pointer');
   $app.userPill.innerHTML =
     `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
-       ${user.name}（${user.school}）
+       ${user.name}
      </button>`;
 
   // ★ ページトップにスクロール
@@ -1247,15 +1244,14 @@ async function sbInsertUser({name, school, department}) {
   return data;
 }
 
-async function sbFindUserByNameAndSchool({name, school}) {
+async function sbFindUserByNameAndEmail({name, email}) {
   const client = getSupabaseClientOrThrow();
   
-  // RPC関数を使わず、直接selectでクエリ
   const { data, error } = await client
     .from('app_users')
     .select('*')
     .eq('name', name)
-    .eq('school', school)
+    .eq('email', email)
     .single();
   
   if (error) {
@@ -1934,10 +1930,17 @@ async function handleSignin(e){
   $app.auth.signinError.textContent = '';
 
   const name = $app.auth.siName.value.trim();
-  const school = $app.auth.siSchool.value.trim();
-  const department = $app.auth.siDept.value.trim();
-  if (!name || !school || !department) {
+  const email = $app.auth.siEmail.value.trim();
+  
+  if (!name || !email) {
     $app.auth.signinError.textContent = '未入力の項目があります。';
+    return;
+  }
+
+  // メールアドレスの形式チェック
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    $app.auth.signinError.textContent = '正しいメールアドレスを入力してください。';
     return;
   }
 
@@ -1949,34 +1952,29 @@ async function handleSignin(e){
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
       },
-      body: JSON.stringify({ name, school, department })
+      body: JSON.stringify({ name, email })
     });
 
     const body = await res.json().catch(()=>({}));
     if (!res.ok || body.ok === false) {
-      const msg = body.error || `Function呼び出し失敗: ${res.status}`;
-      throw new Error(msg);
+      const msg = body.error || `登録に失敗しました`;
+      $app.auth.signinError.textContent = msg;
+      return;
     }
 
     const data = body.user ?? body;
     const user = { 
       id: data.id, 
       name: data.name, 
-      school: data.school, 
-      department: data.department,
+      email: data.email,
       registration_type: data.registration_type || 'on_site'
     };
     saveLocalUser(user);
     state.user = user;
     
-    // ★★★ この3行を削除またはコメントアウト ★★★
-    // state.points = data.points || 0;
-    // state.acquiredStamps = new Set(data.acquired_stamps || []);
-    // state.claimedRewards = new Set(data.claimed_rewards || []);
-    
     closeAuthModal('signin');
     enableAppUI(user);
-    await syncPointsFromServer(); // ここでサーバーから正しいデータを取得
+    await syncPointsFromServer();
     showToast('登録が完了しました。ようこそ！');
   } catch (err) {
     console.error(err);
@@ -1987,14 +1985,24 @@ async function handleSignin(e){
 async function handleLogin(e){
   e.preventDefault();
   $app.auth.loginError.textContent = '';
+  
   const name = $app.auth.liName.value.trim();
-  const school = $app.auth.liSchool.value.trim();
-  if (!name || !school) {
-    $app.auth.loginError.textContent = '氏名と学校名を入力してください。';
+  const email = $app.auth.liEmail.value.trim();
+  
+  if (!name || !email) {
+    $app.auth.loginError.textContent = '氏名とメールアドレスを入力してください。';
     return;
   }
+
+  // メールアドレスの形式チェック
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    $app.auth.loginError.textContent = '正しいメールアドレスを入力してください。';
+    return;
+  }
+  
   try {
-    const rec = await sbFindUserByNameAndSchool({ name, school });
+    const rec = await sbFindUserByNameAndEmail({ name, email });
     
     if (!rec || !rec.id) {
       $app.auth.loginError.textContent = '該当ユーザーが見つかりません。入力内容を確認するか、当日受付からサインインしてください。';
@@ -2004,26 +2012,20 @@ async function handleLogin(e){
     const user = { 
       id: rec.id, 
       name: rec.name, 
-      school: rec.school, 
-      department: rec.department,
+      email: rec.email,
       registration_type: rec.registration_type || 'pre_registration'
     };
     saveLocalUser(user);
     state.user = user;
     
-    // ★★★ この3行を削除またはコメントアウト ★★★
-    // state.points = rec.points || 0;
-    // state.acquiredStamps = new Set(rec.acquired_stamps || []);
-    // state.claimedRewards = new Set(rec.claimed_rewards || []);
-    
     closeAuthModal('login');
     enableAppUI(user);
-    await syncPointsFromServer(); // ここでサーバーから正しいデータを取得
+    await syncPointsFromServer();
     showToast('ログインしました。');
   } catch(err){
     console.error(err);
     if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
-      $app.auth.loginError.textContent = '現在ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
+      $app.auth.loginError.textContent = '現在ログイン機能は利用できません。';
       return;
     }
     $app.auth.loginError.textContent = 'ログインに失敗しました。入力内容を確認してください。';
