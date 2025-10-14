@@ -8,9 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-  <!-- QR生成用（軽量） -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- ZXing QRコードスキャナー -->
   <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
   <style>
     :root {
@@ -22,9 +20,6 @@
   --dot-size: 28px;
   --dot-border: 4px;
   --chip-size: 64px;
-  --marker-2-pos: 20%;
-  --marker-4-pos: 50%;
-  --marker-5-pos: 80%;
     }
     html { font-family: 'Inter', sans-serif; }
     body {
@@ -157,56 +152,10 @@
     .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
-    .progress-area { position: relative; padding-top: 8rem; margin-top: 1rem; overflow: visible; }
+    .progress-area { position: relative; padding-top: 3rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
-.reward-bubble { 
-  position: absolute; 
-  bottom: 50px;
-  transform: translateX(-50%); 
-  display: flex; 
-  flex-direction: column-reverse;
-  align-items: center; 
-  width: 80px;
-  pointer-events: none; 
-}
-    #reward-bubble-2 { left: var(--marker-2-pos); }
-    #reward-bubble-4 { left: var(--marker-4-pos); }
-    #reward-bubble-5 { left: var(--marker-5-pos); }
-
-.reward-bubble-content { 
-  width: 100%; 
-  min-height: 45px;
-  border-radius: 14px;
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  position: relative; 
-  padding: 6px;
-  transition: all 0.3s ease;
-}
-.reward-bubble-content img {
-  width: 100%;
-  height: auto;
-  max-height: 50px;
-  object-fit: contain;
-}
-    .reward-bubble.is-achieved .reward-bubble-content {
-      background: linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3));
-      border-color: rgba(52, 211, 153, 0.6) !important;
-      box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
-    }
-.reward-bubble-label {
-  font-size: 9px;
-  color: #334155;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 6px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-    .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
+    .progress-track { position: relative; width: 100%; height: 16px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
     #progress-bar { 
       height: 100%; 
       border-radius: 9999px; 
@@ -225,12 +174,57 @@
       border-radius: 0 9999px 9999px 0;
     }
 
-    .marker-dot { position: absolute; top: 50%; width: var(--dot-size); height: var(--dot-size); background: #fff; border: var(--dot-border) solid #cbd5e1; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 4px rgba(0,0,0,.08); z-index: 12; display: grid; place-items: center; }
-    .marker-dot .label { font-size: 14px; font-weight: 800; color: #334155; user-select: none; line-height: 1; }
-    .marker-dot.is-active { border-color: #3b82f6; background: #3b82f6; box-shadow: 0 0 14px rgba(59,130,246,.6), 0 2px 8px rgba(0,0,0,.15); }
-    .marker-dot.is-active .label { color: #fff; }
+    .progress-marker { 
+      position: absolute; 
+      top: 50%; 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      transform: translate(-50%, -50%); 
+      background: white;
+      border: 3px solid #cbd5e1;
+      box-shadow: 0 0 8px rgba(0,0,0,.12);
+      z-index: 12;
+      display: grid;
+      place-items: center;
+      transition: all 0.3s ease;
+    }
+    .progress-marker.is-active {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      box-shadow: 0 0 16px rgba(59,130,246,.6);
+      animation: pulse-marker 2s ease-in-out infinite;
+    }
+    .progress-marker.is-active .label {
+      color: white;
+    }
+    .progress-marker .label {
+      font-size: 14px;
+      font-weight: 800;
+      color: #334155;
+      user-select: none;
+    }
 
-    #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
+    @keyframes pulse-marker {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    #progress-dot { 
+      position: absolute; 
+      top: 50%; 
+      left: 0%; 
+      width: 36px; 
+      height: 36px; 
+      background-color: white; 
+      border: 4px solid #3b82f6; 
+      border-radius: 50%; 
+      transform: translate(-50%, -50%); 
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.6), 0 4px 12px rgba(0,0,0,.15); 
+      transition: left 0.5s ease-in-out; 
+      z-index: 20; 
+      outline: 4px solid #fff;
+    }
 
     .map-wrap { aspect-ratio:2/3; margin-top: 0; }
 
@@ -385,6 +379,55 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
+
+    .progress-info-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .progress-booth-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      border-radius: 0.75rem;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid #cbd5e1;
+      transition: all 0.3s ease;
+    }
+
+    .progress-booth-item.acquired {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.2));
+      border-color: #10b981;
+    }
+
+    .progress-booth-item .booth-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background: white;
+    }
+
+    .progress-booth-item .booth-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .progress-booth-item .booth-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #475569;
+      text-align: center;
+    }
+
+    .progress-booth-item.acquired .booth-label {
+      color: #059669;
+    }
   </style>
 </head>
 <body>
@@ -393,7 +436,7 @@
   <div id="auth-launch" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
       <h2 class="text-xl font-semibold text-slate-800">ご利用前にサインイン/ログイン</h2>
-      <p class="text-sm text-slate-600 mt-1">当日受付の方は「サインイン」で氏名・学校名・学部/学科を登録してください。事前申込済みの方は「ログイン」へ。</p>
+      <p class="text-sm text-slate-600 mt-1">当日受付の方は「サインイン」で氏名・メールアドレスを登録してください。事前申込済みの方は「ログイン」へ。</p>
       <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">当日受付の方</button>
         <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">事前申込済みの方</button>
@@ -412,20 +455,18 @@
         <h3 class="text-lg font-semibold text-slate-800">当日受付の方</h3>
         <div class="w-16"></div>
       </div>
-      
       <form id="signin-form" class="p-5 space-y-4">
-  <div>
-    <label class="text-sm text-slate-700">氏名</label>
-    <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
-  </div>
-  <div>
-    <label class="text-sm text-slate-700">メールアドレス</label>
-    <input id="si-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:taro@example.com" />
-  </div>
-  <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
-  <p id="signin-error" class="text-sm text-red-600"></p>
-</form>
-      
+        <div>
+          <label class="text-sm text-slate-700">氏名</label>
+          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-700">メールアドレス</label>
+          <input id="si-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:taro@example.com" />
+        </div>
+        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
+        <p id="signin-error" class="text-sm text-red-600"></p>
+      </form>
     </div>
   </div>
 
@@ -441,18 +482,18 @@
         <div class="w-16"></div>
       </div>
       <form id="login-form" class="p-5 space-y-4">
-  <div>
-    <label class="text-sm text-slate-700">氏名</label>
-    <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
-  </div>
-  <div>
-    <label class="text-sm text-slate-700">メールアドレス</label>
-    <input id="li-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録したメールアドレス" />
-  </div>
-  <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
-  <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
-  <p id="login-error" class="text-sm text-red-600"></p>
-</form>
+        <div>
+          <label class="text-sm text-slate-700">氏名</label>
+          <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-700">メールアドレス</label>
+          <input id="li-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録したメールアドレス" />
+        </div>
+        <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
+        <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
+        <p id="login-error" class="text-sm text-red-600"></p>
+      </form>
     </div>
   </div>
 
@@ -473,81 +514,68 @@
     </div>
   </div>
 
+  <!-- Survey Modal -->
+  <div id="survey-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,640px)] max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+        <h3 class="text-lg font-semibold text-slate-800">アンケート</h3>
+        <button id="close-survey" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">✕</button>
+      </div>
+      <div class="p-4">
+        <p class="text-sm text-slate-600 mb-4">特典交換の前に、簡単なアンケートにご協力ください。</p>
+        <iframe 
+          id="survey-iframe"
+          src="https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform?embedded=true"
+          width="100%" 
+          height="600"
+          frameborder="0"
+          marginheight="0"
+          marginwidth="0">
+          読み込んでいます…
+        </iframe>
+        <button id="survey-complete" class="w-full mt-4 px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+          回答完了
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Rewards Modal -->
   <div id="rewards-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto">
       <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm">
-        <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
+        <h3 class="text-lg font-semibold text-slate-800">QUOカード交換</h3>
         <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
-      <div id="rewards-content" class="p-4 space-y-3">
-        <!-- 事前申込特典 (事前申込者のみ表示) -->
-        <div id="pre-registration-reward" class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" style="display: none;">
-          <div class="flex items-center gap-4">
-            <div class="reward-icon">
-              <img src="pre-registration.png" alt="事前申込特典" />
-            </div>
-            <div class="flex-1">
-              <div class="font-semibold text-slate-800">事前申込特典</div>
-              <div class="text-xs text-slate-600 mt-1">事前申込者限定の特典です</div>
-              <div class="text-xs text-amber-600 font-semibold mt-1">必要ポイント: 0pt</div>
-            </div>
-            <button class="claim-btn px-4 py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm ripple" data-reward="pre-registration">
-              交換する
-            </button>
+      <div id="rewards-content" class="p-4 space-y-4">
+        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
+            <div class="text-xs text-slate-600 mt-1">獲得ポイント</div>
+          </div>
+          <div class="progress-info-grid" id="rewards-booth-grid">
+            <!-- ブースアイコンがここに動的生成される -->
           </div>
         </div>
-
-        <!-- ノーマルピンバッジ (2pt) -->
-        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="2">
-          <div class="flex items-center gap-4">
-            <div class="reward-icon">
-              <img src="normal.png" alt="ノーマルピンバッジ" />
-            </div>
-            <div class="flex-1">
-              <div class="font-semibold text-slate-800">ピンバッジ</div>
-              <div class="text-xs text-slate-600 mt-1">イベント記念のピンバッジ</div>
-              <div class="text-xs text-sky-600 font-semibold mt-1">必要ポイント: 2pt</div>
-            </div>
-            <button class="claim-btn px-4 py-2 rounded-xl bg-sky-500 text-white font-semibold text-sm ripple" data-reward="normal-badge">
-              交換する
-            </button>
-          </div>
-        </div>
-
-        <!-- ゴールドピンバッジ (4pt) -->
-        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="4">
-          <div class="flex items-center gap-4">
-            <div class="reward-icon">
-              <img src="gold.png" alt="ゴールドピンバッジ" />
-            </div>
-            <div class="flex-1">
-              <div class="font-semibold text-slate-800">ピンバッジ (ゴールド)</div>
-              <div class="text-xs text-slate-600 mt-1">特別なゴールドピンバッジ</div>
-              <div class="text-xs text-amber-600 font-semibold mt-1">必要ポイント: 4pt</div>
-            </div>
-            <button class="claim-btn px-4 py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm ripple" data-reward="gold-badge">
-              交換する
-            </button>
-          </div>
-        </div>
-
-        <!-- QUOカード (5pt) -->
-        <div class="reward-item liquid-glass rounded-2xl p-4 border border-white/50" data-reward-points="5">
+        
+        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
           <div class="flex items-center gap-4">
             <div class="reward-icon">
               <img src="quo.png" alt="QUOカード" />
             </div>
             <div class="flex-1">
-              <div class="font-semibold text-slate-800">QUOカード (1000円分)</div>
-              <div class="text-xs text-slate-600 mt-1">全てのスタンプを集めた方への特別報酬</div>
-
-              <div class="text-xs text-purple-600 font-semibold mt-1">必要ポイント: 5pt</div>
+              <div class="font-semibold text-slate-800">QUOカード (500円 × 枚数)</div>
+              <div class="text-xs text-slate-600 mt-1">1ブース = 500円分のQUOカード</div>
+              <div class="text-xs text-purple-600 font-semibold mt-1" id="rewards-exchange-info">0枚交換可能</div>
             </div>
-            <button class="claim-btn px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold text-sm ripple" data-reward="quo-card">
+            <button id="claim-reward-btn" class="claim-btn px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold text-sm ripple">
               交換する
             </button>
           </div>
+        </div>
+
+        <div class="text-xs text-slate-500 text-center">
+          ※交換したQUOカードは受付でお受け取りください
         </div>
       </div>
     </div>
@@ -603,7 +631,7 @@
       <div class="p-4 space-y-4 text-sm">
         <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
         <div class="text-slate-600 space-y-2">
-          <div><strong class="font-medium text-slate-800">獲得ポイント:</strong><span class="text-sky-600 font-semibold">1pt</span></div>
+          <div><strong class="font-medium text-slate-800">獲得ポイント:</strong><span class="text-sky-600 font-semibold">1pt (500円分QUOカード)</span></div>
           <div><strong class="font-medium text-slate-800">スタンプ条件:</strong><span id="booth-sheet-condition">-</span></div>
           <div><strong class="font-medium text-slate-800">ノベルティ:</strong><span id="booth-sheet-giveaway">-</span></div>
         </div>
@@ -636,29 +664,8 @@
           </div>
           <div class="progress-area">
             <div id="progress-wrapper">
-              <div id="reward-bubble-2" class="reward-bubble">
-                <div class="reward-bubble-content liquid-glass border-slate-300">
-                  <img src="normal.png" alt="ノーマルピンバッジ" />
-                </div>
-                <div class="reward-bubble-label">ピンバッジ</div>
-              </div>
-              <div id="reward-bubble-4" class="reward-bubble">
-                <div class="reward-bubble-content liquid-glass border-amber-300">
-                  <img src="gold.png" alt="ゴールドピンバッジ" />
-                </div>
-                <div class="reward-bubble-label">ピンバッジ<br>(ゴールド)</div>
-              </div>
-              <div id="reward-bubble-5" class="reward-bubble">
-                <div class="reward-bubble-content liquid-glass border-purple-300">
-                  <img src="quo.png" alt="Quoカード" />
-                </div>
-                <div class="reward-bubble-label">QUOカード<br>(1000円分)</div>
-              </div>
               <div id="progress-track" class="progress-track">
                 <div id="progress-bar" style="width:0%"></div>
-                <div id="marker-2" class="marker-dot" style="left:var(--marker-2-pos)"><span class="label">2</span></div>
-                <div id="marker-4" class="marker-dot" style="left:var(--marker-4-pos)"><span class="label">4</span></div>
-                <div id="marker-5" class="marker-dot" style="left:var(--marker-5-pos)"><span class="label">5</span></div>
                 <div id="progress-dot"></div>
               </div>
             </div>
@@ -669,8 +676,8 @@
             <span class="text-xs text-slate-500 ml-1">達成</span>
           </div>
           <div class="mt-4 text-center">
-            <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
-              🎁 特典を交換する
+            <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
+              🎁 QUOカードを交換する
             </button>
           </div>
         </div>
@@ -680,13 +687,12 @@
           <div class="space-y-3" id="stamp-categories">
             <!-- ステージコンテンツ -->
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
-              <div id="stage-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
                   <div>
                     <div class="font-semibold text-slate-800">ステージコンテンツ</div>
-                    <div class="text-xs text-slate-600">16:00〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                    <div class="text-xs text-slate-600">16:00〜 | ポイント付与なし</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -695,13 +701,12 @@
 
             <!-- 研究発表会 -->
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
-              <div id="presentation-acquired-badge" class="acquired-badge" style="display:none;">✓</div>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
                   <div>
                     <div class="font-semibold text-slate-800">研究発表会</div>
-                    <div class="text-xs text-slate-600">17:30〜 | 獲得: <span class="font-semibold text-sky-600">2pt</span></div>
+                    <div class="text-xs text-slate-600">17:30〜 | ポイント付与なし</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -715,7 +720,7 @@
                   <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
                   <div>
                     <div class="font-semibold text-slate-800">企業ブース</div>
-                    <div class="text-xs text-slate-600">6社 | 各1pt</div>
+                    <div class="text-xs text-slate-600">6社 | 各1pt (500円分)</div>
                     <div id="booth-progress" class="booth-progress">0/6 獲得済み</div>
                   </div>
                 </div>
@@ -727,7 +732,6 @@
       </div>
 
       <div id="page-map" class="page p-3 pt-2 space-y-1">
-        <!-- カメラ起動ボタン -->
         <div class="max-w-[1200px] mx-auto">
           <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
             <div class="flex items-center gap-3">
@@ -741,7 +745,6 @@
           </button>
         </div>
         
-        <!-- マップ -->
         <div class="map-wrap w-full max-w-[1200px] mx-auto">
           <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
             <image id="bg-image" href="assets/layout.png" xlink:href="assets/layout.png" x="0" y="0" width="1200" height="1800" />
@@ -770,51 +773,37 @@
   </div>
 
 <script>
-/******************* Supabase 接続設定 *******************/
 const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
-// Supabase SDKは不要になったため削除
-// フロントエンドからは直接DBアクセスしない
-
-/******************* API Helper Functions *******************/
 async function callEdgeFunction(functionName, body = {}) {
   const token = localStorage.getItem('auth_token');
-  
   const headers = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
   };
-  
-  // 認証トークンがある場合は追加
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/${functionName}`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body)
-      }
-    );
-    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.error || `API Error: ${response.status}`);
     }
-    
     return await response.json();
   } catch (error) {
     console.error(`[callEdgeFunction] ${functionName} failed:`, error);
     throw error;
   }
 }
-/******************* DATA & STATE *******************/
+
 const IMG_DEFAULT = 'logo.jpg';
-const MAX_POINTS = 10;
+const MAX_POINTS = 6;
 
 const BOOTH_ANCHORS = {
   A: { x: 0.85, y: 0.22 }, 
@@ -839,17 +828,15 @@ const CATEGORY_DATA = {
     title: 'ステージコンテンツ',
     icon: '🎤',
     time: '16:00〜',
-    points: 2,
-    desc: 'メインステージでのトークセッションに参加してスタンプを獲得しましょう。業界のトップランナーによる貴重なお話が聞けます。',
-    condition: 'ステージイベントに参加し、スタッフにQRコードを提示'
+    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。',
+    condition: 'ステージイベントに参加'
   },
   presentation: {
     title: '研究発表会',
     icon: '📊',
     time: '17:30〜',
-    points: 2,
     desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
-    condition: '研究発表会に参加し、スタッフにQRコードを提示'
+    condition: '研究発表会に参加'
   }
 };
 
@@ -860,10 +847,10 @@ const state = {
   user: null,
   percentile: null,
   acquiredStamps: new Set(),
-  claimedRewards: new Set()
+  claimedRewards: new Set(),
+  surveyCompleted: false
 };
 
-/******************* DOM ELEMENTS *******************/
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
@@ -880,13 +867,7 @@ const $app = {
     msg: document.getElementById('progress-msg'),
     percent: document.getElementById('progress-percent'),
     rankPercentile: document.getElementById('rank-percentile'),
-    bubble2: document.getElementById('reward-bubble-2'),
-    bubble4: document.getElementById('reward-bubble-4'),
-    bubble5: document.getElementById('reward-bubble-5'),
     dot: document.getElementById('progress-dot'),
-    marker2: document.getElementById('marker-2'),
-    marker4: document.getElementById('marker-4'),
-    marker5: document.getElementById('marker-5'),
   },
   map: {
     svg: document.getElementById('svg-map'),
@@ -950,11 +931,20 @@ const $app = {
     modal: document.getElementById('rewards-modal'),
     content: document.getElementById('rewards-content'),
     closeBtn: document.getElementById('close-rewards'),
-    openBtn: document.getElementById('open-rewards-btn')
+    openBtn: document.getElementById('open-rewards-btn'),
+    claimBtn: document.getElementById('claim-reward-btn'),
+    pointsDisplay: document.getElementById('rewards-points-display'),
+    exchangeInfo: document.getElementById('rewards-exchange-info'),
+    boothGrid: document.getElementById('rewards-booth-grid')
+  },
+  survey: {
+    modal: document.getElementById('survey-modal'),
+    closeBtn: document.getElementById('close-survey'),
+    completeBtn: document.getElementById('survey-complete'),
+    iframe: document.getElementById('survey-iframe')
   }
 };
 
-/******************* Auth UI Helpers *******************/
 function showAuthGate() {
   $app.auth.backdrop.classList.add('show');
   $app.auth.launch.classList.add('show');
@@ -980,7 +970,8 @@ function closeAuthModal(kind) {
   if (!$app.auth.signin.classList.contains('show') &&
       !$app.auth.login.classList.contains('show') &&
       !$app.qr.modal.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show')) {
+      !$app.rewards.modal.classList.contains('show') &&
+      !$app.survey.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
 }
@@ -989,7 +980,7 @@ function backToAuthGate(kind) {
   closeAuthModal(kind);
   showAuthGate();
 }
-  
+
 function enableAppUI(user) {
   if (!user || !user.id || !user.name || !user.email) {
     console.error('Invalid user data:', user);
@@ -1004,6 +995,7 @@ function enableAppUI(user) {
   $app.auth.login?.classList.remove('show');
   $app.qr.modal?.classList.remove('show');
   $app.rewards.modal?.classList.remove('show');
+  $app.survey.modal?.classList.remove('show');
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
@@ -1022,7 +1014,6 @@ function enableAppUI(user) {
   
   setTimeout(() => {
     layoutBoothIcons();
-    syncBubbleHeights();
   }, 100);
 }
 
@@ -1037,7 +1028,8 @@ function closeQrModal() {
   $app.qr.modal.classList.remove('show');
   if (!$app.auth.signin.classList.contains('show') &&
       !$app.auth.login.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show')) {
+      !$app.rewards.modal.classList.contains('show') &&
+      !$app.survey.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
 }
@@ -1074,7 +1066,46 @@ function renderUserQr(uuid) {
   }
 }
 
-/******************* Rewards Modal *******************/
+function openSurveyModal() {
+  $app.auth.backdrop.classList.add('show');
+  $app.survey.modal.classList.add('show');
+}
+
+function closeSurveyModal() {
+  $app.survey.modal.classList.remove('show');
+  if (!$app.auth.signin.classList.contains('show') &&
+      !$app.auth.login.classList.contains('show') &&
+      !$app.qr.modal.classList.contains('show') &&
+      !$app.rewards.modal.classList.contains('show')) {
+    $app.auth.backdrop.classList.remove('show');
+  }
+}
+
+async function completeSurvey() {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+
+  try {
+    const result = await callEdgeFunction('complete-survey', {
+      userId: state.user.id
+    });
+
+    if (result.success) {
+      state.surveyCompleted = true;
+      state.user.survey_completed = true;
+      saveLocalUser(state.user);
+      closeSurveyModal();
+      showToast('✅ アンケートありがとうございました！');
+      openRewardsModal();
+    }
+  } catch (err) {
+    console.error('Survey completion failed:', err);
+    showToast('エラーが発生しました');
+  }
+}
+
 function openRewardsModal() {
   if (!state.user?.id) { 
     showToast('ログインしてください'); 
@@ -1089,42 +1120,44 @@ function closeRewardsModal() {
   $app.rewards.modal.classList.remove('show');
   if (!$app.auth.signin.classList.contains('show') &&
       !$app.auth.login.classList.contains('show') &&
-      !$app.qr.modal.classList.contains('show')) {
+      !$app.qr.modal.classList.contains('show') &&
+      !$app.survey.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
   }
 }
 
 function renderRewardsModal() {
-  const isPreRegistration = state.user?.registration_type === 'pre_registration';
+  const points = state.points;
+  const alreadyClaimed = state.claimedRewards.size > 0;
   
-  const preRegReward = document.getElementById('pre-registration-reward');
-  if (preRegReward) {
-    preRegReward.style.display = isPreRegistration ? 'block' : 'none';
-  }
-  
-  updateRewardButton('pre-registration', 0, isPreRegistration);
-  updateRewardButton('normal-badge', 2, true);
-  updateRewardButton('gold-badge', 4, true);
-  updateRewardButton('quo-card', 5, true);
-}
+  $app.rewards.pointsDisplay.textContent = `${points}pt`;
+  $app.rewards.exchangeInfo.textContent = alreadyClaimed 
+    ? '交換済み' 
+    : `${points}枚交換可能 (${points * 500}円分)`;
 
-function updateRewardButton(rewardId, requiredPoints, isVisible) {
-  if (!isVisible) return;
-  
-  const btn = document.querySelector(`button[data-reward="${rewardId}"]`);
-  if (!btn) return;
-  
-  const rewardItem = btn.closest('.reward-item');
-  const isClaimed = state.claimedRewards.has(rewardId);
-  const hasEnoughPoints = state.points >= requiredPoints;
-  
-  if (isClaimed) {
-    rewardItem.classList.add('claimed');
-    btn.outerHTML = '<div class="claimed-badge">交換済み</div>';
-  } else if (!hasEnoughPoints) {
+  $app.rewards.boothGrid.innerHTML = '';
+  BOOTH_DATA.forEach(booth => {
+    const isAcquired = state.acquiredStamps.has(booth.id);
+    const item = document.createElement('div');
+    item.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
+    item.innerHTML = `
+      <div class="booth-icon">
+        <img src="${booth.img}" alt="${booth.name}" />
+      </div>
+      <div class="booth-label">${booth.id}</div>
+    `;
+    $app.rewards.boothGrid.appendChild(item);
+  });
+
+  const btn = $app.rewards.claimBtn;
+  if (alreadyClaimed) {
     btn.disabled = true;
     btn.classList.add('opacity-50', 'cursor-not-allowed');
-    btn.textContent = `${requiredPoints}pt必要`;
+    btn.textContent = '交換済み';
+  } else if (points === 0) {
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.textContent = 'ブースを回ってください';
   } else {
     btn.disabled = false;
     btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -1132,48 +1165,52 @@ function updateRewardButton(rewardId, requiredPoints, isVisible) {
   }
 }
 
-async function claimReward(rewardId, requiredPoints) {
+async function claimReward() {
   if (!state.user?.id) {
     showToast('ログインしてください');
     return;
   }
-  
-  if (state.claimedRewards.has(rewardId)) {
+
+  if (state.points === 0) {
+    showToast('ポイントがありません');
+    return;
+  }
+
+  if (state.claimedRewards.size > 0) {
     showToast('既に交換済みです');
     return;
   }
-  
-  if (state.points < requiredPoints) {
-    showToast(`${requiredPoints}pt必要です（現在${state.points}pt）`);
+
+  if (!state.surveyCompleted && !state.user.survey_completed) {
+    showToast('アンケートへの回答が必要です');
+    closeRewardsModal();
+    setTimeout(() => openSurveyModal(), 300);
     return;
   }
-  
+
   try {
+    const rewardId = `quo-card-${state.points}`;
     const result = await callEdgeFunction('claim-reward', {
       userId: state.user.id,
       rewardId: rewardId
     });
-    
+
     if (result.success) {
       state.claimedRewards.add(rewardId);
-      
-      const rewardNames = {
-        'pre-registration': '事前申込特典',
-        'normal-badge': 'ピンバッジ',
-        'gold-badge': 'ゴールドピンバッジ',
-        'quo-card': 'QUOカード'
-      };
-      
-      showToast(`✅ ${rewardNames[rewardId]}を交換しました！`);
+      showToast(`✅ QUOカード${state.points}枚 (${state.points * 500}円分)を交換しました！`);
       renderRewardsModal();
     }
   } catch (err) {
     console.error('Failed to claim reward:', err);
-    showToast('特典の交換に失敗しました');
+    if (err.message && err.message.includes('アンケート')) {
+      closeRewardsModal();
+      setTimeout(() => openSurveyModal(), 300);
+    } else {
+      showToast('特典の交換に失敗しました');
+    }
   }
 }
 
-/******************* Auth Storage *******************/
 const LS_KEY_USER = 'app_user';
 const LS_KEY_TOKEN = 'auth_token';
 
@@ -1194,7 +1231,6 @@ function clearLocalUser() {
   localStorage.removeItem(LS_KEY_TOKEN);
 }
 
-/******************* Points Management *******************/
 async function syncPointsFromServer() {
   if (!state.user?.id) {
     console.log('[syncPointsFromServer] No user ID');
@@ -1213,11 +1249,18 @@ async function syncPointsFromServer() {
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
     state.claimedRewards = new Set(data.claimed_rewards || []);
+    state.surveyCompleted = data.survey_completed || false;
+    
+    if (state.user) {
+      state.user.survey_completed = state.surveyCompleted;
+      saveLocalUser(state.user);
+    }
     
     console.log('[syncPointsFromServer] State updated:', {
       points: state.points,
       acquiredStamps: Array.from(state.acquiredStamps),
-      claimedRewards: Array.from(state.claimedRewards)
+      claimedRewards: Array.from(state.claimedRewards),
+      surveyCompleted: state.surveyCompleted
     });
     
     await updatePercentile();
@@ -1247,7 +1290,6 @@ async function updatePercentile() {
   }
 }
 
-/******************* RENDER FUNCTIONS *******************/
 function renderAll() {
   renderProgress();
   updateActivePage();
@@ -1284,17 +1326,7 @@ function renderBoothList() {
 
 function renderProgress() {
   const n = state.points;
-  
-  let progressPercent = 0;
-  if (n >= 5) {
-    progressPercent = 80 + ((n - 5) / 5) * 20;
-  } else if (n >= 4) {
-    progressPercent = 50 + ((n - 4) / 1) * 30;
-  } else if (n >= 2) {
-    progressPercent = 20 + ((n - 2) / 2) * 30;
-  } else if (n > 0) {
-    progressPercent = (n / 2) * 20;
-  }
+  const progressPercent = (n / MAX_POINTS) * 100;
 
   $app.progress.badge.textContent = `${n}pt`;
   $app.progress.bar.style.width = `${progressPercent}%`;
@@ -1307,67 +1339,33 @@ function renderProgress() {
     $app.progress.rankPercentile.classList.add('hidden');
   }
 
-  $app.progress.bubble2.classList.toggle('is-achieved', n >= 2);
-  $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
-  $app.progress.bubble5.classList.toggle('is-achieved', n >= 5);
-  
-  if (n >= 5) {
-    $app.progress.msg.innerHTML = '🎉 <strong>全ての特典をゲット！</strong> おめでとうございます！';
-  } else if (n >= 4) {
-    $app.progress.msg.innerHTML = `🏅 <strong>ゴールドピンバッジゲット！</strong> あと<strong>${5 - n}pt</strong>でQuoカードも獲得！`;
-  } else if (n >= 2) {
-    $app.progress.msg.innerHTML = `🎖️ <strong>ノーマルピンバッジゲット！</strong> あと<strong>${4 - n}pt</strong>でゴールドピンバッジ！`;
+  const progressTrack = document.getElementById('progress-track');
+  const existingMarkers = progressTrack.querySelectorAll('.progress-marker');
+  existingMarkers.forEach(m => m.remove());
+
+  for (let i = 1; i <= MAX_POINTS; i++) {
+    const marker = document.createElement('div');
+    marker.className = `progress-marker ${n >= i ? 'is-active' : ''}`;
+    marker.style.left = `${(i / MAX_POINTS) * 100}%`;
+    marker.innerHTML = `<span class="label">${i}</span>`;
+    progressTrack.appendChild(marker);
+  }
+
+  if (n >= MAX_POINTS) {
+    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> QUOカードと交換できます！';
   } else {
-    $app.progress.msg.innerHTML = `あと<strong>${2 - n}pt</strong>で最初の特典（ノーマルピンバッジ）をゲット！`;
+    $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
   }
 
   const achievementPercent = Math.round((n / MAX_POINTS) * 100);
   $app.progress.percent.querySelector('.text-2xl').textContent = `${achievementPercent}%`;
 
-  const onMilestone = (n === 2 || n === 4 || n === 5);
-  $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
-  
-  $app.progress.marker2.classList.toggle('is-active', n >= 2);
-  $app.progress.marker4.classList.toggle('is-active', n >= 4);
-  $app.progress.marker5.classList.toggle('is-active', n >= 5);
-
   updateAcquiredBadges();
 
   state.prevCount = n;
-  syncBubbleHeights();
 }
 
 function updateAcquiredBadges() {
-  const stageAcquired = state.acquiredStamps.has('stage');
-  const stageBadge = document.getElementById('stage-acquired-badge');
-  if (stageBadge) {
-    stageBadge.style.display = stageAcquired ? 'flex' : 'none';
-  }
-  
-  const stageCard = document.querySelector('.stamp-category-card[data-category="stage"]');
-  if (stageCard) {
-    if (stageAcquired) {
-      stageCard.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
-    } else {
-      stageCard.style.background = '';
-    }
-  }
-  
-  const presentationAcquired = state.acquiredStamps.has('presentation');
-  const presentationBadge = document.getElementById('presentation-acquired-badge');
-  if (presentationBadge) {
-    presentationBadge.style.display = presentationAcquired ? 'flex' : 'none';
-  }
-  
-  const presentationCard = document.querySelector('.stamp-category-card[data-category="presentation"]');
-  if (presentationCard) {
-    if (presentationAcquired) {
-      presentationCard.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
-    } else {
-      presentationCard.style.background = '';
-    }
-  }
-  
   const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
   const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
   const boothProgress = document.getElementById('booth-progress');
@@ -1421,7 +1419,7 @@ function openCategorySheet(categoryKey) {
     $app.categorySheet.title.textContent = '企業ブース';
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-3">
-        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。各ブース1ptずつ獲得できます。</p>
+        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。各ブース1pt (500円分QUOカード) ずつ獲得できます。</p>
         ${BOOTH_DATA.map(booth => {
           const isAcquired = state.acquiredStamps.has(booth.id);
           return `
@@ -1454,21 +1452,19 @@ function openCategorySheet(categoryKey) {
     });
   } else {
     const category = CATEGORY_DATA[categoryKey];
-    const isAcquired = state.acquiredStamps.has(categoryKey);
     $app.categorySheet.title.textContent = category.title;
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-4">
-        ${isAcquired ? '<div class="px-3 py-2 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-700 font-semibold text-sm text-center">✓ 取得済み</div>' : ''}
         <div class="flex items-center gap-2 text-sm">
           <span class="text-3xl">${category.icon}</span>
           <div>
             <div class="font-semibold text-slate-800">${category.time}</div>
-            <div class="text-sky-600 font-semibold">獲得ポイント: ${category.points}pt</div>
+            <div class="text-slate-600">ポイント付与なし</div>
           </div>
         </div>
         <p class="text-sm text-slate-700 leading-relaxed">${category.desc}</p>
         <div class="liquid-glass rounded-xl p-3 border border-white/40">
-          <div class="text-xs font-semibold text-slate-700 mb-1">スタンプ獲得条件</div>
+          <div class="text-xs font-semibold text-slate-700 mb-1">参加条件</div>
           <div class="text-sm text-slate-600">${category.condition}</div>
         </div>
       </div>
@@ -1518,7 +1514,6 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
-/******************* QR Scanner (Fullscreen) *******************/
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
@@ -1559,7 +1554,7 @@ async function startCamera() {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
       if (caps && 'torch' in caps) {
-        trackWithTorch = track;
+        trackWithTorch =track;
         $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
       } else {
         $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
@@ -1698,13 +1693,13 @@ async function handleScanResult(text) {
 
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-/******************* Auth Flow *******************/
 async function ensureAuth() {
   const local = loadLocalUser();
   const token = localStorage.getItem(LS_KEY_TOKEN);
   
   if (local && local.id && token) {
     state.user = local;
+    state.surveyCompleted = local.survey_completed || false;
     enableAppUI(state.user);
     await syncPointsFromServer();
     return true;
@@ -1743,12 +1738,14 @@ async function handleSignin(e) {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
-        registration_type: result.user.registration_type || 'on_site'
+        registration_type: result.user.registration_type || 'on_site',
+        survey_completed: false
       };
       
       saveLocalUser(user);
       localStorage.setItem(LS_KEY_TOKEN, result.token);
       state.user = user;
+      state.surveyCompleted = false;
       
       closeAuthModal('signin');
       enableAppUI(user);
@@ -1789,7 +1786,8 @@ async function handleLogin(e) {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
-        registration_type: result.user.registration_type || 'pre_registration'
+        registration_type: result.user.registration_type || 'pre_registration',
+        survey_completed: false
       };
       
       saveLocalUser(user);
@@ -1807,7 +1805,6 @@ async function handleLogin(e) {
   }
 }
 
-/******************* UI Utilities *******************/
 function showToast(msg) {
   const el = $app.toast;
   const box = el.firstElementChild;
@@ -1868,16 +1865,16 @@ function layoutBoothIcons() {
     shadowMid.setAttribute('filter', 'blur(4px)');
     group.appendChild(shadowMid);
     
-    const base = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    base.setAttribute('x', x + 1);
-    base.setAttribute('y', y + 1);
-    base.setAttribute('width', size);
-    base.setAttribute('height', size);
-    base.setAttribute('rx', size * 0.18);
-    base.setAttribute('fill', isAcquired ? 'linear-gradient(135deg, #6ee7b7, #34d399)' : 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
-    base.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
-    base.setAttribute('stroke-width', '2');
-    group.appendChild(base);
+    const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    baseRect.setAttribute('x', x + 1);
+    baseRect.setAttribute('y', y + 1);
+    baseRect.setAttribute('width', size);
+    baseRect.setAttribute('height', size);
+    baseRect.setAttribute('rx', size * 0.18);
+    baseRect.setAttribute('fill', isAcquired ? 'linear-gradient(135deg, #6ee7b7, #34d399)' : 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
+    baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
+    baseRect.setAttribute('stroke-width', '2');
+    group.appendChild(baseRect);
     
     const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
     border.setAttribute('x', x);
@@ -2064,18 +2061,6 @@ function layoutBoothIcons() {
   }));
 }
 
-function syncBubbleHeights() {
-  const b2 = document.querySelector('#reward-bubble-2 .reward-bubble-content');
-  const b4 = document.querySelector('#reward-bubble-4 .reward-bubble-content');
-  const b5 = document.querySelector('#reward-bubble-5 .reward-bubble-content');
-  if (!b2 || !b4 || !b5) return;
-  const h = Math.max(50, b2.getBoundingClientRect().height, b4.getBoundingClientRect().height, b5.getBoundingClientRect().height);
-  b2.style.minHeight = h + 'px';
-  b4.style.minHeight = h + 'px';
-  b5.style.minHeight = h + 'px';
-}
-
-/******************* Initialization *******************/
 function init() {
   console.log('[init] starting');
   
@@ -2134,7 +2119,6 @@ function init() {
     if (state.activePage === 'map') {
       layoutBoothIcons();
     }
-    syncBubbleHeights();
   });
 
   if ($app.scan.openCard) {
@@ -2156,18 +2140,15 @@ function init() {
   if ($app.rewards.closeBtn) {
     $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
   }
-  
-  if ($app.rewards.content) {
-    $app.rewards.content.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-reward]');
-      if (!btn || btn.disabled) return;
-      
-      const rewardId = btn.dataset.reward;
-      const rewardItem = btn.closest('.reward-item');
-      const requiredPoints = parseInt(rewardItem?.dataset.rewardPoints || '0');
-      
-      claimReward(rewardId, requiredPoints);
-    });
+  if ($app.rewards.claimBtn) {
+    $app.rewards.claimBtn.addEventListener('click', claimReward);
+  }
+
+  if ($app.survey.closeBtn) {
+    $app.survey.closeBtn.addEventListener('click', closeSurveyModal);
+  }
+  if ($app.survey.completeBtn) {
+    $app.survey.completeBtn.addEventListener('click', completeSurvey);
   }
 
   ensureAuth().then(ok => {
@@ -2196,6 +2177,8 @@ function init() {
         closeQrModal();
       } else if ($app.rewards.modal.classList.contains('show')) {
         closeRewardsModal();
+      } else if ($app.survey.modal.classList.contains('show')) {
+        closeSurveyModal();
       }
     }
   });
