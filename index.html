@@ -12,14 +12,14 @@
   <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
   <style>
     :root {
-  --bg-light: #f0f4f8;
-  --accent-sky: #0ea5e9;
-  --text-main: #1e293b;
-  --text-sub: #64748b;
-  --bar-width-pct: 78%;
-  --dot-size: 28px;
-  --dot-border: 4px;
-  --chip-size: 64px;
+      --bg-light: #f0f4f8;
+      --accent-sky: #0ea5e9;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --bar-width-pct: 78%;
+      --dot-size: 28px;
+      --dot-border: 4px;
+      --chip-size: 64px;
     }
     html { font-family: 'Inter', sans-serif; }
     body {
@@ -85,60 +85,9 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: -1;
     }
-    #nav-indicator::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      opacity: .7;
-    }
 
     .nav-btn { z-index: 1; }
     .nav-btn.active { color: #0c4a6e; }
-
-    .chip {
-      width: var(--chip-size);
-      height: var(--chip-size);
-      border-radius: 20px;
-      border: 1.5px solid rgba(255,255,255,0.7);
-      background: #fff;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(0, 150, 200, 0.15);
-      overflow: hidden;
-      transition: all .3s ease;
-      position: relative;
-    }
-    .chip::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(148, 163, 184, 0.3);
-      opacity: 1;
-      transition: opacity .3s ease;
-      pointer-events: none;
-    }
-    .chip.on::before {
-      opacity: 0;
-    }
-    .chip.on { 
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 0 24px rgba(52, 211, 153, .55);
-      transform: scale(1.05);
-    }
-    .chip img { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-      display: block;
-      filter: grayscale(80%) brightness(1.1);
-      transition: filter .3s ease;
-    }
-    .chip.on img {
-      filter: grayscale(0%) brightness(1);
-    }
-
-    .chip-name { max-width: 88px; height: 2.4em; margin-top: 6px; font-size: 11px; line-height: 1.2; color: #0f172a; text-align: center; font-weight: 600; white-space: normal; display: flex; align-items: center; justify-content: center; }
 
     .bottom-sheet-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
     .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform .4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -163,16 +112,6 @@
       transition: width .5s ease-in-out;
       position: relative;
     }
-    #progress-bar::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
-      border-radius: 0 9999px 9999px 0;
-    }
 
     .progress-marker { 
       position: absolute; 
@@ -193,21 +132,12 @@
       border-color: #3b82f6;
       background: #3b82f6;
       box-shadow: 0 0 16px rgba(59,130,246,.6);
-      animation: pulse-marker 2s ease-in-out infinite;
-    }
-    .progress-marker.is-active .label {
-      color: white;
     }
     .progress-marker .label {
       font-size: 14px;
       font-weight: 800;
       color: #334155;
       user-select: none;
-    }
-
-    @keyframes pulse-marker {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.1); }
     }
 
     #progress-dot { 
@@ -240,7 +170,7 @@
 
     .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(6px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
-    .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; }
+    .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
     .auth-modal.show { display:flex; }
 
     .fullscreen-scanner {
@@ -283,22 +213,6 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
 
-    .stamp-category-card .acquired-badge {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #34d399, #10b981);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 14px;
-      box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
-    }
-
     .booth-progress {
       font-size: 11px;
       color: #059669;
@@ -329,55 +243,6 @@
       color: white;
       font-size: 12px;
       box-shadow: 0 2px 6px rgba(52, 211, 153, 0.4);
-    }
-
-    .reward-item {
-      transition: all 0.3s ease;
-    }
-
-    .reward-item.claimed {
-      opacity: 0.6;
-      background: rgba(148, 163, 184, 0.2) !important;
-    }
-
-    .reward-item .reward-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid rgba(148, 163, 184, 0.3);
-    }
-
-    .reward-item.claimed .reward-icon {
-      filter: grayscale(1);
-    }
-
-    .reward-item .reward-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .reward-item .claim-btn {
-      transition: all 0.2s ease;
-    }
-
-    .reward-item .claim-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .reward-item .claimed-badge {
-      background: linear-gradient(135deg, #94a3b8, #64748b);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
     }
 
     .progress-info-grid {
@@ -428,6 +293,168 @@
     .progress-booth-item.acquired .booth-label {
       color: #059669;
     }
+
+    /* Survey Styles */
+    .survey-field {
+      margin-bottom: 1.5rem;
+    }
+
+    .survey-label {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .survey-required {
+      color: #ef4444;
+      margin-left: 0.25rem;
+    }
+
+    .survey-radio-group, .survey-checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .survey-option {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .survey-option:hover {
+      background: rgba(226, 232, 240, 0.5);
+    }
+
+    .survey-option input {
+      margin-right: 0.75rem;
+      cursor: pointer;
+    }
+
+    .survey-option.checked {
+      border-color: #0ea5e9;
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    .survey-textarea, .survey-text-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.75rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .survey-textarea:focus, .survey-text-input:focus {
+      outline: none;
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .survey-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Reward Styles */
+    .reward-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+    }
+
+    .reward-image-wrapper {
+      width: 140px;
+      height: 140px;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: white;
+      border: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .reward-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.5rem;
+    }
+
+    .reward-details {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .reward-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .reward-description {
+      font-size: 0.875rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .staff-instruction {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(252, 211, 77, 0.1), rgba(251, 146, 60, 0.1));
+      border: 2px solid #fbbf24;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .staff-instruction-title {
+      font-weight: 700;
+      color: #d97706;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .staff-instruction-text {
+      font-size: 0.875rem;
+      color: #d97706;
+      line-height: 1.6;
+    }
+
+    .survey-completed-message {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+      border: 2px solid #10b981;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .survey-completed-message-title {
+      font-weight: 700;
+      color: #059669;
+      margin-bottom: 0.25rem;
+    }
+
+    .survey-completed-message-text {
+      font-size: 0.875rem;
+      color: #059669;
+    }
   </style>
 </head>
 <body>
@@ -446,7 +473,7 @@
 
   <!-- Signin Modal -->
   <div id="signin-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] my-auto">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
         <button data-back="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
           <span>←</span>
@@ -472,7 +499,7 @@
 
   <!-- Login Modal -->
   <div id="login-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] my-auto">
       <div class="p-5 border-b border-white/50 flex items-center justify-between">
         <button data-back="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
           <span>←</span>
@@ -499,7 +526,7 @@
 
   <!-- User QR Modal -->
   <div id="qr-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)]">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)] my-auto">
       <div class="p-4 border-b border-white/50 flex items-center justify-between">
         <h3 class="text-lg font-semibold text-slate-800">あなたのQRコード</h3>
         <button id="close-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
@@ -508,7 +535,7 @@
         <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
         <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
         <div class="flex gap-2">
-          <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600">画像を保存</a>
+          <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600 cursor-pointer">画像を保存</a>
         </div>
       </div>
     </div>
@@ -516,29 +543,137 @@
 
   <!-- Survey Modal -->
   <div id="survey-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,640px)] max-h-[85dvh] overflow-y-auto">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,640px)] max-h-[85dvh] overflow-y-auto my-auto">
       <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
-        <h3 class="text-lg font-semibold text-slate-800">アンケート</h3>
+        <h3 class="text-lg font-semibold text-slate-800">簡単アンケート</h3>
         <button id="close-survey" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">✕</button>
       </div>
-      <div class="p-4">
-        <p class="text-sm text-slate-600 mb-4">特典交換の前に、簡単なアンケートにご協力ください。</p>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdFBa6-Jsv8bSZKlVS7n5i6fN4eswzvM1xvYydpnCU7o912Cw/viewform?embedded=true" width="640" height="715" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます…</iframe>
-        <button id="survey-complete" class="w-full mt-4 px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
-          回答完了
+      <form id="survey-form" class="p-4 space-y-4">
+        <!-- Q1: 学年 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q1. あなたの学年は？
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="grade" value="高1" required />
+              <span>高1</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="grade" value="高2" />
+              <span>高2</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="grade" value="高3" />
+              <span>高3</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="grade" value="大学生" />
+              <span>大学生</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="grade" value="その他" />
+              <span>その他</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2: 興味分野 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q2. 興味のある分野は？（複数選択可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="interest" value="電子工学" />
+              <span>電子工学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="interest" value="材料工学" />
+              <span>材料工学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="interest" value="製造技術" />
+              <span>製造技術</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="interest" value="営業・企画" />
+              <span>営業・企画</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="interest" value="その他" />
+              <span>その他</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: 開催地 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q3. どこからご来場ですか？
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="location" value="宮城県内" required />
+              <span>宮城県内</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="location" value="東北地方（宮城以外）" />
+              <span>東北地方（宮城以外）</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="location" value="その他の地域" />
+              <span>その他の地域</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q4: 今後の連絡 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q4. 将来のキャリアについて企業から連絡を受けたいですか？
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="future_contact" value="はい" required />
+              <span>はい</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="future_contact" value="いいえ" />
+              <span>いいえ</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q5: 自由記述 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q5. 本日のイベントについてご感想やご要望があればお聞かせください
+          </label>
+          <textarea name="feedback" class="survey-textarea" placeholder="ご感想をお聞かせください..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+          回答を送信
         </button>
-      </div>
+        <p id="survey-error" class="text-sm text-red-600"></p>
+      </form>
     </div>
   </div>
 
   <!-- Rewards Modal -->
   <div id="rewards-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto">
-      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm">
-        <h3 class="text-lg font-semibold text-slate-800">QUOカード交換</h3>
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto my-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+        <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
         <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
       <div id="rewards-content" class="p-4 space-y-4">
+        <!-- Points Display -->
         <div class="liquid-glass rounded-2xl p-4 border border-white/50">
           <div class="text-center mb-4">
             <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
@@ -548,25 +683,64 @@
             <!-- ブースアイコンがここに動的生成される -->
           </div>
         </div>
-        
-        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-          <div class="flex items-center gap-4">
-            <div class="reward-icon">
-              <img src="quo.png" alt="QUOカード" />
+
+        <!-- Pre-survey message -->
+        <div id="pre-survey-section" class="space-y-4">
+          <div class="liquid-glass rounded-2xl p-4 border border-white/50">
+            <div class="text-center">
+              <div class="text-5xl mb-3">🎁</div>
+              <div class="font-semibold text-slate-800 mb-2">QUOカード交換</div>
+              <div class="text-sm text-slate-600 mb-4">1ブース = 500円分のQUOカード</div>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold text-slate-800">QUOカード (500円 × 枚数)</div>
-              <div class="text-xs text-slate-600 mt-1">1ブース = 500円分のQUOカード</div>
-              <div class="text-xs text-purple-600 font-semibold mt-1" id="rewards-exchange-info">0枚交換可能</div>
-            </div>
-            <button id="claim-reward-btn" class="claim-btn px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold text-sm ripple">
-              交換する
-            </button>
           </div>
+
+          <div class="staff-instruction">
+            <div class="staff-instruction-title">
+              📋 ご注意ください
+            </div>
+            <div class="staff-instruction-text">
+              特典の受け取りの前に、アンケートへの回答が必要です。下のボタンからアンケートにご協力ください。アンケート回答後に、L404にて特典を交換ください。
+            </div>
+          </div>
+
+          <button id="open-survey-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+            アンケートに回答する
+          </button>
         </div>
 
-        <div class="text-xs text-slate-500 text-center">
-          ※交換したQUOカードは受付でお受け取りください
+        <!-- Post-survey section (hidden initially) -->
+        <div id="post-survey-section" class="space-y-4 hidden">
+          <div class="survey-completed-message">
+            <div class="survey-completed-message-title">✅ アンケートありがとうございました！</div>
+            <div class="survey-completed-message-text">次に、スタッフの前で交換ボタンを押してください</div>
+          </div>
+
+          <div class="reward-card liquid-glass rounded-2xl border border-white/50">
+            <div class="reward-image-wrapper">
+              <img src="quo.png" alt="QUOカード" />
+            </div>
+            <div class="reward-details">
+              <div class="reward-name">QUOカード（500円分）</div>
+              <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
+            </div>
+          </div>
+
+          <div class="staff-instruction">
+            <div class="staff-instruction-title">
+              👨‍💼 スタッフ確認
+            </div>
+            <div class="staff-instruction-text">
+              スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
+            </div>
+          </div>
+
+          <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
+            🎁 交換する
+          </button>
+
+          <div class="text-xs text-slate-500 text-center">
+            ※交換したQUOカードは受付（L404）でお受け取りください
+          </div>
         </div>
       </div>
     </div>
@@ -924,15 +1098,18 @@ const $app = {
     closeBtn: document.getElementById('close-rewards'),
     openBtn: document.getElementById('open-rewards-btn'),
     claimBtn: document.getElementById('claim-reward-btn'),
+    openSurveyBtn: document.getElementById('open-survey-btn'),
     pointsDisplay: document.getElementById('rewards-points-display'),
-    exchangeInfo: document.getElementById('rewards-exchange-info'),
-    boothGrid: document.getElementById('rewards-booth-grid')
+    exchangeInfo: document.getElementById('reward-exchange-info'),
+    boothGrid: document.getElementById('rewards-booth-grid'),
+    preSurveySection: document.getElementById('pre-survey-section'),
+    postSurveySection: document.getElementById('post-survey-section')
   },
   survey: {
     modal: document.getElementById('survey-modal'),
+    form: document.getElementById('survey-form'),
     closeBtn: document.getElementById('close-survey'),
-    completeBtn: document.getElementById('survey-complete'),
-    iframe: document.getElementById('survey-iframe')
+    error: document.getElementById('survey-error')
   }
 };
 
@@ -1072,15 +1249,33 @@ function closeSurveyModal() {
   }
 }
 
-async function completeSurvey() {
+async function submitSurvey(e) {
+  e.preventDefault();
   if (!state.user?.id) {
     showToast('ログインしてください');
     return;
   }
 
+  // フォームデータを収集
+  const formData = new FormData($app.survey.form);
+  const surveyData = {
+    grade: formData.get('grade'),
+    location: formData.get('location'),
+    future_contact: formData.get('future_contact'),
+    feedback: formData.get('feedback'),
+    interests: []
+  };
+
+  // チェックボックスで複数選択されたものを収集
+  formData.getAll('interest').forEach(interest => {
+    surveyData.interests.push(interest);
+  });
+
   try {
-    const result = await callEdgeFunction('complete-survey', {
-      userId: state.user.id
+    $app.survey.error.textContent = '';
+    const result = await callEdgeFunction('submit-survey', {
+      userId: state.user.id,
+      surveyData: surveyData
     });
 
     if (result.success) {
@@ -1089,11 +1284,15 @@ async function completeSurvey() {
       saveLocalUser(state.user);
       closeSurveyModal();
       showToast('✅ アンケートありがとうございました！');
-      openRewardsModal();
+      
+      // 少し遅延させてから報酬画面を更新
+      setTimeout(() => {
+        renderRewardsModal();
+      }, 300);
     }
   } catch (err) {
-    console.error('Survey completion failed:', err);
-    showToast('エラーが発生しました');
+    console.error('Survey submission failed:', err);
+    $app.survey.error.textContent = 'アンケート送信に失敗しました。もう一度お試しください。';
   }
 }
 
@@ -1120,11 +1319,9 @@ function closeRewardsModal() {
 function renderRewardsModal() {
   const points = state.points;
   const alreadyClaimed = state.claimedRewards.size > 0;
+  const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
   
   $app.rewards.pointsDisplay.textContent = `${points}pt`;
-  $app.rewards.exchangeInfo.textContent = alreadyClaimed 
-    ? '交換済み' 
-    : `${points}枚交換可能 (${points * 500}円分)`;
 
   $app.rewards.boothGrid.innerHTML = '';
   BOOTH_DATA.forEach(booth => {
@@ -1140,19 +1337,33 @@ function renderRewardsModal() {
     $app.rewards.boothGrid.appendChild(item);
   });
 
-  const btn = $app.rewards.claimBtn;
-  if (alreadyClaimed) {
-    btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
-    btn.textContent = '交換済み';
-  } else if (points === 0) {
-    btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
-    btn.textContent = 'ブースを回ってください';
+  // アンケート未完了の場合
+  if (!isSurveyCompleted) {
+    $app.rewards.preSurveySection.classList.remove('hidden');
+    $app.rewards.postSurveySection.classList.add('hidden');
   } else {
-    btn.disabled = false;
-    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-    btn.textContent = '交換する';
+    // アンケート完了後
+    $app.rewards.preSurveySection.classList.add('hidden');
+    $app.rewards.postSurveySection.classList.remove('hidden');
+
+    $app.rewards.exchangeInfo.textContent = alreadyClaimed 
+      ? '交換済み' 
+      : `${points}枚交換可能`;
+
+    const btn = $app.rewards.claimBtn;
+    if (alreadyClaimed) {
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      btn.textContent = '交換済み';
+    } else if (points === 0) {
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      btn.textContent = 'ブースを回ってください';
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      btn.textContent = '🎁 交換する';
+    }
   }
 }
 
@@ -1183,7 +1394,8 @@ async function claimReward() {
     const rewardId = `quo-card-${state.points}`;
     const result = await callEdgeFunction('claim-reward', {
       userId: state.user.id,
-      rewardId: rewardId
+      rewardId: rewardId,
+      points: state.points
     });
 
     if (result.success) {
@@ -1545,7 +1757,7 @@ async function startCamera() {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
       if (caps && 'torch' in caps) {
-        trackWithTorch =track;
+        trackWithTorch = track;
         $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
       } else {
         $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
@@ -2052,6 +2264,26 @@ function layoutBoothIcons() {
   }));
 }
 
+function setupSurveyInteractivity() {
+  // ラジオボタンのチェック表示
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const group = e.target.name;
+      document.querySelectorAll(`input[name="${group}"]`).forEach(r => {
+        r.closest('.survey-option').classList.remove('checked');
+      });
+      e.target.closest('.survey-option').classList.add('checked');
+    });
+  });
+
+  // チェックボックスのチェック表示
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      e.target.closest('.survey-option').classList.toggle('checked', e.target.checked);
+    });
+  });
+}
+
 function init() {
   console.log('[init] starting');
   
@@ -2134,13 +2366,21 @@ function init() {
   if ($app.rewards.claimBtn) {
     $app.rewards.claimBtn.addEventListener('click', claimReward);
   }
+  if ($app.rewards.openSurveyBtn) {
+    $app.rewards.openSurveyBtn.addEventListener('click', () => {
+      closeRewardsModal();
+      setTimeout(() => openSurveyModal(), 300);
+    });
+  }
 
   if ($app.survey.closeBtn) {
     $app.survey.closeBtn.addEventListener('click', closeSurveyModal);
   }
-  if ($app.survey.completeBtn) {
-    $app.survey.completeBtn.addEventListener('click', completeSurvey);
+  if ($app.survey.form) {
+    $app.survey.form.addEventListener('submit', submitSurvey);
   }
+
+  setupSurveyInteractivity();
 
   ensureAuth().then(ok => {
     if (ok) {
