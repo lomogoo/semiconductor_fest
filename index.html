@@ -1399,18 +1399,14 @@ async function claimReward() {
       // サーバーから返された残りポイントを使用
       state.points = result.remainingPoints || 0;
       
-      // 交換完了メッセージを表示
+      // 交換完了メッセージを表示（モーダルは開いたままの状態）
       showRewardClaimedMessage(quoCards);
-      
-      // モーダルを更新
-      renderRewardsModal();
     }
   } catch (err) {
     console.error('Failed to claim reward:', err);
     showToast('特典の交換に失敗しました');
   }
 }
-
 function showRewardClaimedMessage(quoCards) {
   // 既存のコンテンツを隠す
   $app.rewards.preSurveySection.classList.add('hidden');
@@ -1447,10 +1443,22 @@ function showRewardClaimedMessage(quoCards) {
   
   $app.rewards.content.innerHTML = messageHTML;
   
-  // 閉じるボタンのイベントリスナー
-  document.getElementById('close-reward-message-btn').addEventListener('click', () => {
-    renderRewardsModal();
-  });
+  // 閉じるボタンのイベントリスナーを追加
+  const closeBtn = document.getElementById('close-reward-message-btn');
+  closeBtn.addEventListener('click', handleCloseRewardMessage);
+}
+
+function handleCloseRewardMessage() {
+  // モーダルを完全にリセット
+  $app.rewards.content.innerHTML = '';
+  
+  // 特典交換モーダルを閉じる
+  closeRewardsModal();
+  
+  // 100ms後に特典モーダルを再度開く（post-survey画面表示）
+  setTimeout(() => {
+    openRewardsModal();
+  }, 100);
 }
   
 const LS_KEY_USER = 'app_user';
