@@ -677,7 +677,7 @@
       <div class="liquid-glass rounded-2xl p-4 border border-white/50">
         <div class="text-center mb-4">
           <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
-          <div class="text-xs text-slate-600 mt-1">獲得ポイント</div>
+          <div class="text-xs text-slate-600 mt-1">交換可能ポイント</div>
         </div>
         <div class="progress-info-grid" id="rewards-booth-grid">
           <!-- ブースアイコンがここに動的生成される -->
@@ -1364,7 +1364,7 @@ function renderRewardsModal() {
     }
   }
 }
-
+  
 async function claimReward() {
   if (!state.user?.id) {
     showToast('ログインしてください');
@@ -1407,6 +1407,8 @@ async function claimReward() {
     showToast('特典の交換に失敗しました');
   }
 }
+
+  
 function showRewardClaimedMessage(quoCards) {
   // 既存のコンテンツを隠す
   $app.rewards.preSurveySection.classList.add('hidden');
@@ -1455,10 +1457,10 @@ function handleCloseRewardMessage() {
   // 特典交換モーダルを閉じる
   closeRewardsModal();
   
-  // 100ms後に特典モーダルを再度開く（post-survey画面表示）
+  // 300ms後に特典モーダルを再度開く（post-survey画面表示）
   setTimeout(() => {
-    openRewardsModal();
-  }, 100);
+    renderRewardsModal();
+  }, 300);
 }
   
 const LS_KEY_USER = 'app_user';
@@ -1496,6 +1498,7 @@ async function syncPointsFromServer() {
     
     console.log('[syncPointsFromServer] Data received:', data);
     
+    // ポイントは累計で管理（サーバーから返されたポイント）
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
     state.claimedRewards = new Set(data.claimed_rewards || []);
@@ -1521,7 +1524,7 @@ async function syncPointsFromServer() {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
   }
 }
-
+  
 async function updatePercentile() {
   if (!state.user?.id || state.points === 0) {
     state.percentile = null;
@@ -1614,7 +1617,7 @@ function renderProgress() {
 
   state.prevCount = n;
 }
-
+  
 function updateAcquiredBadges() {
   const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
   const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
