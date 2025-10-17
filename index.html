@@ -1396,8 +1396,15 @@ async function claimReward() {
     if (result.success) {
       state.claimedRewards.add(rewardId);
       
-      // サーバーから返された残りポイントを使用
-      state.points = result.remainingPoints || 0;
+      // ポイントはそのまま保持（累計で管理）
+      // サーバーから返された points は累計ポイント数
+      if (result.points !== undefined) {
+        state.points = result.points;
+      }
+      // もしくはremainingPointsの場合
+      if (result.remainingPoints !== undefined) {
+        state.points = result.remainingPoints;
+      }
       
       // 交換完了メッセージを表示（モーダルは開いたままの状態）
       showRewardClaimedMessage(quoCards);
@@ -1407,6 +1414,7 @@ async function claimReward() {
     showToast('特典の交換に失敗しました');
   }
 }
+
 
   
 function showRewardClaimedMessage(quoCards) {
@@ -1447,18 +1455,19 @@ function showRewardClaimedMessage(quoCards) {
   
   // 閉じるボタンのイベントリスナーを追加
   const closeBtn = document.getElementById('close-reward-message-btn');
-  closeBtn.addEventListener('click', handleCloseRewardMessage);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', handleCloseRewardMessage);
+  }
 }
 
 function handleCloseRewardMessage() {
-  // モーダルを完全にリセット
-  $app.rewards.content.innerHTML = '';
-  
   // 特典交換モーダルを閉じる
   closeRewardsModal();
   
   // 300ms後に特典モーダルを再度開く（post-survey画面表示）
   setTimeout(() => {
+    $app.auth.backdrop.classList.add('show');
+    $app.rewards.modal.classList.add('show');
     renderRewardsModal();
   }, 300);
 }
@@ -1498,7 +1507,7 @@ async function syncPointsFromServer() {
     
     console.log('[syncPointsFromServer] Data received:', data);
     
-    // ポイントは累計で管理（サーバーから返されたポイント）
+    // ポイントはサーバーから取得した値を使用（これが累計）
     state.points = data.points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
     state.claimedRewards = new Set(data.claimed_rewards || []);
