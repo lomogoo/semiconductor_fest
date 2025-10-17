@@ -1384,8 +1384,8 @@ async function claimReward() {
   }
 
   try {
-    const quoCards = state.points; // 交換する枚数
-    const rewardId = `quo-card-${Date.now()}`; // 一意のID（タイムスタンプ使用）
+    const quoCards = state.points;
+    const rewardId = `quo-card-${Date.now()}`;
     
     const result = await callEdgeFunction('claim-reward', {
       userId: state.user.id,
@@ -1397,23 +1397,17 @@ async function claimReward() {
       state.claimedRewards.add(rewardId);
       showToast(`✅ QUOカード${quoCards}枚 (${quoCards * 500}円分)を交換しました！`);
       
-      // ポイントをリセット（交換完了したため）
-      state.points = 0;
+      // サーバーから返された残りポイントを使用
+      state.points = result.remainingPoints || 0;
       state.acquiredStamps.clear();
       
       renderRewardsModal();
     }
   } catch (err) {
     console.error('Failed to claim reward:', err);
-    if (err.message && err.message.includes('アンケート')) {
-      closeRewardsModal();
-      setTimeout(() => openSurveyModal(), 300);
-    } else {
-      showToast('特典の交換に失敗しました');
-    }
+    showToast('特典の交換に失敗しました');
   }
 }
-
 const LS_KEY_USER = 'app_user';
 const LS_KEY_TOKEN = 'auth_token';
 
