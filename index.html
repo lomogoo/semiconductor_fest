@@ -666,86 +666,86 @@
   </div>
 
   <!-- Rewards Modal -->
-  <div id="rewards-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto my-auto">
-      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
-        <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
-        <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+<div id="rewards-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto my-auto">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+      <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
+      <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+    </div>
+    <div id="rewards-content" class="p-4 space-y-4">
+      <!-- ポイント表示 -->
+      <div class="liquid-glass rounded-2xl p-4 border border-white/50">
+        <div class="text-center mb-4">
+          <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
+          <div class="text-xs text-slate-600 mt-1">獲得ポイント</div>
+        </div>
+        <div class="progress-info-grid" id="rewards-booth-grid">
+          <!-- ブースアイコンがここに動的生成される -->
+        </div>
       </div>
-      <div id="rewards-content" class="p-4 space-y-4">
-        <!-- Points Display -->
+
+      <!-- Pre-survey message -->
+      <div id="pre-survey-section" class="space-y-4">
         <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-          <div class="text-center mb-4">
-            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
-            <div class="text-xs text-slate-600 mt-1">獲得ポイント</div>
-          </div>
-          <div class="progress-info-grid" id="rewards-booth-grid">
-            <!-- ブースアイコンがここに動的生成される -->
+          <div class="text-center">
+            <div class="text-5xl mb-3">🎁</div>
+            <div class="font-semibold text-slate-800 mb-2">QUOカード交換</div>
+            <div class="text-sm text-slate-600 mb-4">1ブース = 500円分のQUOカード</div>
           </div>
         </div>
 
-        <!-- Pre-survey message -->
-        <div id="pre-survey-section" class="space-y-4">
-          <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-            <div class="text-center">
-              <div class="text-5xl mb-3">🎁</div>
-              <div class="font-semibold text-slate-800 mb-2">QUOカード交換</div>
-              <div class="text-sm text-slate-600 mb-4">1ブース = 500円分のQUOカード</div>
-            </div>
+        <div class="staff-instruction">
+          <div class="staff-instruction-title">
+            📋 ご注意ください
           </div>
-
-          <div class="staff-instruction">
-            <div class="staff-instruction-title">
-              📋 ご注意ください
-            </div>
-            <div class="staff-instruction-text">
-              特典の受け取りの前に、アンケートへの回答が必要です。下のボタンからアンケートにご協力ください。アンケート回答後に、L404にて特典を交換ください。
-            </div>
+          <div class="staff-instruction-text">
+            特典の受け取りの前に、アンケートへの回答が必要です。下のボタンからアンケートにご協力ください。アンケート回答後に、L404にて特典を交換ください。
           </div>
-
-          <button id="open-survey-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
-            アンケートに回答する
-          </button>
         </div>
 
-        <!-- Post-survey section (hidden initially) -->
-        <div id="post-survey-section" class="space-y-4 hidden">
-          <div class="survey-completed-message">
-            <div class="survey-completed-message-title">✅ アンケートありがとうございました！</div>
-            <div class="survey-completed-message-text">次に、スタッフの前で交換ボタンを押してください</div>
-          </div>
+        <button id="open-survey-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+          アンケートに回答する
+        </button>
+      </div>
 
-          <div class="reward-card liquid-glass rounded-2xl border border-white/50">
-            <div class="reward-image-wrapper">
-              <img src="quo.png" alt="QUOカード" />
-            </div>
-            <div class="reward-details">
-              <div class="reward-name">QUOカード（500円分）</div>
-              <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
-            </div>
-          </div>
+      <!-- Post-survey section (hidden initially) -->
+      <div id="post-survey-section" class="space-y-4 hidden">
+        <div class="survey-completed-message">
+          <div class="survey-completed-message-title">✅ アンケートありがとうございました！</div>
+          <div class="survey-completed-message-text">次に、スタッフの前で交換ボタンを押してください</div>
+        </div>
 
-          <div class="staff-instruction">
-            <div class="staff-instruction-title">
-              👨‍💼 スタッフ確認
-            </div>
-            <div class="staff-instruction-text">
-              スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
-            </div>
+        <div class="reward-card liquid-glass rounded-2xl border border-white/50">
+          <div class="reward-image-wrapper">
+            <img src="quo.png" alt="QUOカード" />
           </div>
-
-          <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
-            🎁 交換する
-          </button>
-
-          <div class="text-xs text-slate-500 text-center">
-            ※交換したQUOカードは受付（L404）でお受け取りください
+          <div class="reward-details">
+            <div class="reward-name">QUOカード（500円分）</div>
+            <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
           </div>
+        </div>
+
+        <div class="staff-instruction">
+          <div class="staff-instruction-title">
+            👨‍💼 スタッフ確認
+          </div>
+          <div class="staff-instruction-text">
+            スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
+          </div>
+        </div>
+
+        <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
+          🎁 交換する
+        </button>
+
+        <div class="text-xs text-slate-500 text-center">
+          ※交換したQUOカードは受付（L404）でお受け取りください
         </div>
       </div>
     </div>
   </div>
-
+</div>
+  
   <!-- Stamp Category Detail Sheet -->
   <div id="category-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
@@ -1395,12 +1395,14 @@ async function claimReward() {
 
     if (result.success) {
       state.claimedRewards.add(rewardId);
-      showToast(`✅ QUOカード${quoCards}枚 (${quoCards * 500}円分)を交換しました！`);
       
       // サーバーから返された残りポイントを使用
       state.points = result.remainingPoints || 0;
-      state.acquiredStamps.clear();
       
+      // 交換完了メッセージを表示
+      showRewardClaimedMessage(quoCards);
+      
+      // モーダルを更新
       renderRewardsModal();
     }
   } catch (err) {
@@ -1408,6 +1410,49 @@ async function claimReward() {
     showToast('特典の交換に失敗しました');
   }
 }
+
+function showRewardClaimedMessage(quoCards) {
+  // 既存のコンテンツを隠す
+  $app.rewards.preSurveySection.classList.add('hidden');
+  $app.rewards.postSurveySection.classList.add('hidden');
+  
+  // 成功メッセージを表示
+  const messageHTML = `
+    <div class="space-y-4">
+      <div class="text-center py-8">
+        <div class="text-6xl mb-4">🎉</div>
+        <div class="text-2xl font-bold text-green-600 mb-2">交換完了！</div>
+        <div class="text-lg text-slate-700 mb-4">
+          QUOカード<span class="text-3xl font-bold text-purple-600">${quoCards}枚</span>
+        </div>
+        <div class="text-sm text-slate-600">
+          (${quoCards * 500}円分)
+        </div>
+      </div>
+
+      <div class="staff-instruction">
+        <div class="staff-instruction-title">
+          📍 受け取り場所
+        </div>
+        <div class="staff-instruction-text">
+          受付（L404）でQUOカードをお受け取りください。
+        </div>
+      </div>
+
+      <button id="close-reward-message-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+        閉じる
+      </button>
+    </div>
+  `;
+  
+  $app.rewards.content.innerHTML = messageHTML;
+  
+  // 閉じるボタンのイベントリスナー
+  document.getElementById('close-reward-message-btn').addEventListener('click', () => {
+    renderRewardsModal();
+  });
+}
+  
 const LS_KEY_USER = 'app_user';
 const LS_KEY_TOKEN = 'auth_token';
 
