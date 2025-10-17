@@ -1263,7 +1263,6 @@ async function submitSurvey(e) {
     return;
   }
 
-  // フォームデータを収集
   const formData = new FormData($app.survey.form);
   const surveyData = {
     grade: formData.get('grade'),
@@ -1273,7 +1272,6 @@ async function submitSurvey(e) {
     interests: []
   };
 
-  // チェックボックスで複数選択されたものを収集
   formData.getAll('interest').forEach(interest => {
     surveyData.interests.push(interest);
   });
@@ -1292,17 +1290,14 @@ async function submitSurvey(e) {
       closeSurveyModal();
       showToast('✅ アンケートありがとうございました！');
       
-      // 少し遅延させてから報酬画面を更新
-      setTimeout(() => {
-        renderRewardsModal();
-      }, 300);
+      // 即座にモーダルを更新（特典交換ボタンを表示）
+      renderRewardsModal();
     }
   } catch (err) {
     console.error('Survey submission failed:', err);
     $app.survey.error.textContent = 'アンケート送信に失敗しました。もう一度お試しください。';
   }
 }
-
 function openRewardsModal() {
   if (!state.user?.id) { 
     showToast('ログインしてください'); 
@@ -1325,7 +1320,6 @@ function closeRewardsModal() {
 
 function renderRewardsModal() {
   const points = state.points;
-  const alreadyClaimed = state.claimedRewards.size > 0;
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
   
   $app.rewards.pointsDisplay.textContent = `${points}pt`;
@@ -1344,7 +1338,6 @@ function renderRewardsModal() {
     $app.rewards.boothGrid.appendChild(item);
   });
 
-  // アンケート未完了の場合
   if (!isSurveyCompleted) {
     $app.rewards.preSurveySection.classList.remove('hidden');
     $app.rewards.postSurveySection.classList.add('hidden');
@@ -1353,23 +1346,21 @@ function renderRewardsModal() {
     $app.rewards.preSurveySection.classList.add('hidden');
     $app.rewards.postSurveySection.classList.remove('hidden');
 
-    $app.rewards.exchangeInfo.textContent = alreadyClaimed 
-      ? '交換済み' 
-      : `${points}枚交換可能`;
+    // 交換可能かチェック
+    const canExchange = points > 0;
+    $app.rewards.exchangeInfo.textContent = canExchange 
+      ? `${points}枚交換可能` 
+      : '全ブースを回ってください';
 
     const btn = $app.rewards.claimBtn;
-    if (alreadyClaimed) {
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
-      btn.textContent = '交換済み';
-    } else if (points === 0) {
+    if (canExchange) {
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      btn.textContent = `🎁 ${points}枚交換する`;
+    } else {
       btn.disabled = true;
       btn.classList.add('opacity-50', 'cursor-not-allowed');
       btn.textContent = 'ブースを回ってください';
-    } else {
-      btn.disabled = false;
-      btn.classList.remove('opacity-50', 'cursor-not-allowed');
-      btn.textContent = '🎁 交換する';
     }
   }
 }
@@ -1385,11 +1376,6 @@ async function claimReward() {
     return;
   }
 
-  if (state.claimedRewards.size > 0) {
-    showToast('既に交換済みです');
-    return;
-  }
-
   if (!state.surveyCompleted && !state.user.survey_completed) {
     showToast('アンケートへの回答が必要です');
     closeRewardsModal();
@@ -1398,16 +1384,23 @@ async function claimReward() {
   }
 
   try {
-    const rewardId = `quo-card-${state.points}`;
+    const quoCards = state.points; // 交換する枚数
+    const rewardId = `quo-card-${Date.now()}`; // 一意のID（タイムスタンプ使用）
+    
     const result = await callEdgeFunction('claim-reward', {
       userId: state.user.id,
       rewardId: rewardId,
-      points: state.points
+      points: quoCards
     });
 
     if (result.success) {
       state.claimedRewards.add(rewardId);
-      showToast(`✅ QUOカード${state.points}枚 (${state.points * 500}円分)を交換しました！`);
+      showToast(`✅ QUOカード${quoCards}枚 (${quoCards * 500}円分)を交換しました！`);
+      
+      // ポイントをリセット（交換完了したため）
+      state.points = 0;
+      state.acquiredStamps.clear();
+      
       renderRewardsModal();
     }
   } catch (err) {
