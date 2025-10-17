@@ -947,17 +947,24 @@ async function callEdgeFunction(functionName, body = {}) {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
   };
+  // トークンがあれば追加（なくても動作するように）
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/${functionName}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      }
+    );
+    
+    // 401エラーをより詳しく表示
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error(`API Response:`, response.status, error);
       throw new Error(error.error || `API Error: ${response.status}`);
     }
     return await response.json();
