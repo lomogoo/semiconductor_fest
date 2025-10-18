@@ -230,20 +230,20 @@
     }
 
     .company-mini-card .acquired-check {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #34d399, #10b981);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 12px;
-      box-shadow: 0 2px 6px rgba(52, 211, 153, 0.4);
-    }
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(52, 211, 153, 0.4);
+}
 
     .progress-info-grid {
       display: grid;
@@ -1567,11 +1567,10 @@ function renderBoothList() {
     const li = document.createElement('li');
     li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer';
     if (isAcquired) {
-      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.15))';
+      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3))';  // ← 色を濃くした
     }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
-      ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
       <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
         <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
@@ -1589,7 +1588,7 @@ function renderProgress() {
   const n = state.totalPoints;  // ← 累計ポイントで計算
   const progressPercent = (n / MAX_POINTS) * 100;
 
-  $app.progress.badge.textContent = `${state.points}pt`;  // ← 交換可能ポイント表示
+  $app.progress.badge.textContent = `${state.totalPoints}pt`;  // ← 累計ポイント表示に変更
   $app.progress.bar.style.width = `${progressPercent}%`;
   $app.progress.dot.style.left = `${progressPercent}%`;
 
@@ -1684,7 +1683,7 @@ function openCategorySheet(categoryKey) {
         ${BOOTH_DATA.map(booth => {
           const isAcquired = state.acquiredStamps.has(booth.id);
           return `
-          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-50/50 to-green-50/50' : ''}" data-booth-id="${booth.id}">
+          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-100/60 to-green-100/60' : ''}" data-booth-id="${booth.id}">
             ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
