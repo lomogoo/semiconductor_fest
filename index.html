@@ -1565,12 +1565,13 @@ function renderBoothList() {
   BOOTH_DATA.forEach((b, i) => {
     const isAcquired = state.acquiredStamps.has(b.id);
     const li = document.createElement('li');
-    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer';
+    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer relative';
     if (isAcquired) {
-      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3))';  // ← 色を濃くした
+      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3))';
     }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
+      ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
       <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
         <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
@@ -1578,7 +1579,8 @@ function renderBoothList() {
         <div class="font-semibold text-slate-800">${b.name}</div>
         <div class="text-xs text-slate-500 truncate">${b.desc}</div>
       </div>
-      <div class="text-xl ${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold">${isAcquired ? '✓' : '1pt'}</div>`;
+      <div class="text-xl ${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold">${isAcquired ? '' : '1pt'}</div>
+    `;
     li.addEventListener('click', () => openBoothSheet(b));
     $app.boothList.appendChild(li);
   });
