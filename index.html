@@ -1013,7 +1013,8 @@ const CATEGORY_DATA = {
 };
 
 const state = { 
-  points: 0, 
+  points: 0,              // 交換可能ポイント
+  totalPoints: 0,         // 累計ポイント（進捗バー用）
   activePage: 'home', 
   prevCount: 0, 
   user: null,
@@ -1022,6 +1023,7 @@ const state = {
   claimedRewards: new Set(),
   surveyCompleted: false
 };
+
 
 const $app = {
   header: document.getElementById('header'),
@@ -1319,7 +1321,7 @@ function closeRewardsModal() {
 }
 
 function renderRewardsModal() {
-  const points = state.points;
+  const points = state.points;  // 交換可能ポイント
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
   
   $app.rewards.pointsDisplay.textContent = `${points}pt`;
@@ -1364,8 +1366,7 @@ function renderRewardsModal() {
     }
   }
 }
-  
-async function claimReward() {
+  async function claimReward() {
   if (!state.user?.id) {
     showToast('ログインしてください');
     return;
@@ -1384,7 +1385,7 @@ async function claimReward() {
   }
 
   try {
-    const quoCards = state.points;
+    const quoCards = state.points;  // 交換可能ポイント
     const rewardId = `quo-card-${Date.now()}`;
     
     const result = await callEdgeFunction('claim-reward', {
@@ -1396,25 +1397,19 @@ async function claimReward() {
     if (result.success) {
       state.claimedRewards.add(rewardId);
       
-      // ポイントはそのまま保持（累計で管理）
-      // サーバーから返された points は累計ポイント数
-      if (result.points !== undefined) {
-        state.points = result.points;
-      }
-      // もしくはremainingPointsの場合
-      if (result.remainingPoints !== undefined) {
-        state.points = result.remainingPoints;
-      }
+      // エッジ関数から返された値でstateを更新
+      state.points = result.redeemablePoints || 0;  // 交換可能ポイント
+      state.totalPoints = result.totalPoints || state.totalPoints;  // 累計は変わらない
       
-      // 交換完了メッセージを表示（モーダルは開いたままの状態）
+      // 交換完了メッセージを表示
       showRewardClaimedMessage(quoCards);
+      renderAll();
     }
   } catch (err) {
     console.error('Failed to claim reward:', err);
     showToast('特典の交換に失敗しました');
   }
 }
-
 
   
 function showRewardClaimedMessage(quoCards) {
@@ -1507,8 +1502,10 @@ async function syncPointsFromServer() {
     
     console.log('[syncPointsFromServer] Data received:', data);
     
-    // ポイントはサーバーから取得した値を使用（これが累計）
+    // 交換可能ポイント
     state.points = data.points || 0;
+    // 累計ポイント（リロード後も保持される）
+    state.totalPoints = data.total_points || 0;
     state.acquiredStamps = new Set(data.acquired_stamps || []);
     state.claimedRewards = new Set(data.claimed_rewards || []);
     state.surveyCompleted = data.survey_completed || false;
@@ -1520,6 +1517,7 @@ async function syncPointsFromServer() {
     
     console.log('[syncPointsFromServer] State updated:', {
       points: state.points,
+      totalPoints: state.totalPoints,
       acquiredStamps: Array.from(state.acquiredStamps),
       claimedRewards: Array.from(state.claimedRewards),
       surveyCompleted: state.surveyCompleted
@@ -1534,8 +1532,9 @@ async function syncPointsFromServer() {
   }
 }
   
+  
 async function updatePercentile() {
-  if (!state.user?.id || state.points === 0) {
+  if (!state.user?.id || state.totalPoints === 0) {  // ← 累計で判定
     state.percentile = null;
     return;
   }
@@ -1551,7 +1550,7 @@ async function updatePercentile() {
     state.percentile = null;
   }
 }
-
+  
 function renderAll() {
   renderProgress();
   updateActivePage();
@@ -1587,10 +1586,10 @@ function renderBoothList() {
 }
 
 function renderProgress() {
-  const n = state.points;
+  const n = state.totalPoints;  // ← 累計ポイントで計算
   const progressPercent = (n / MAX_POINTS) * 100;
 
-  $app.progress.badge.textContent = `${n}pt`;
+  $app.progress.badge.textContent = `${state.points}pt`;  // ← 交換可能ポイント表示
   $app.progress.bar.style.width = `${progressPercent}%`;
   $app.progress.dot.style.left = `${progressPercent}%`;
 
