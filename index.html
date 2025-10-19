@@ -229,10 +229,12 @@
       background: rgba(255,255,255,0.8);
     }
 
-    .company-mini-card .acquired-check {
+  .company-mini-card .acquired-check, 
+li .acquired-check {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: -6px;   /* ロゴの上端から少しはみ出す */
+  right: -6px; /* ロゴの右端から少しはみ出す */
+　z-index: 10; /* ロゴ画像の上に表示する */
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -1571,8 +1573,8 @@ function renderBoothList() {
     }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
-      ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
-      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
+      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0 relative">
+        ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
         <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
       <div class="min-w-0 flex-1">
@@ -1686,9 +1688,9 @@ function openCategorySheet(categoryKey) {
           const isAcquired = state.acquiredStamps.has(booth.id);
           return `
           <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-100/60 to-green-100/60' : ''}" data-booth-id="${booth.id}">
-            ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0 relative">
+                ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
                 <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
               </div>
               <div class="flex-1 min-w-0">
@@ -2133,7 +2135,8 @@ function layoutBoothIcons() {
     baseRect.setAttribute('width', size);
     baseRect.setAttribute('height', size);
     baseRect.setAttribute('rx', size * 0.18);
-    baseRect.setAttribute('fill', isAcquired ? 'linear-gradient(135deg, #6ee7b7, #34d399)' : 'linear-gradient(135deg, #cbd5e1, #94a3b8)');
+    /* ★バグ修正: CSSグラデーションをSVGで使えるソリッドカラーに変更 */
+    baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1'); 
     baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
     baseRect.setAttribute('stroke-width', '2');
     group.appendChild(baseRect);
@@ -2147,7 +2150,8 @@ function layoutBoothIcons() {
     border.setAttribute('fill', 'white');
     border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
     border.setAttribute('stroke-width', '4');
-    border.setAttribute('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
+    /* ★フィルターを変更: isAcquiredでグローを適用 */
+    border.setAttribute('filter', isAcquired ? 'url(#acquired-glow)' : 'url(#std-shadow)'); 
     group.appendChild(border);
     
     const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -2313,6 +2317,32 @@ function layoutBoothIcons() {
     acquiredGrad.appendChild(astop2);
     acquiredGrad.appendChild(astop3);
     defs.appendChild(acquiredGrad);
+
+    /* ▼▼▼ ここから追加 ▼▼▼ */
+    // 標準の影フィルター
+    const stdShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    stdShadowFilter.setAttribute('id', 'std-shadow');
+    const feStdShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    feStdShadow.setAttribute('dx', '0');
+    feStdShadow.setAttribute('dy', '2');
+    feStdShadow.setAttribute('stdDeviation', '6');
+    feStdShadow.setAttribute('flood-color', '#000000');
+    feStdShadow.setAttribute('flood-opacity', '0.2');
+    stdShadowFilter.appendChild(feStdShadow);
+    defs.appendChild(stdShadowFilter);
+
+    // 取得済みのグロー（輝き）フィルター
+    const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    glowFilter.setAttribute('id', 'acquired-glow');
+    const feGlowShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    feGlowShadow.setAttribute('dx', '0');
+    feGlowShadow.setAttribute('dy', '4');
+    feGlowShadow.setAttribute('stdDeviation', '10');
+    feGlowShadow.setAttribute('flood-color', '#10b981'); /* 緑色の輝き */
+    feGlowShadow.setAttribute('flood-opacity', '0.75');
+    glowFilter.appendChild(feGlowShadow);
+    defs.appendChild(glowFilter);
+    /* ▲▲▲ ここまで追加 ▲▲▲ */
     
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
