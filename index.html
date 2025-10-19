@@ -943,6 +943,37 @@ li .acquired-check {
       </div>
     </main>
 
+    <div id="staff-confirm-modal" class="auth-modal">
+      <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,480px)] my-auto">
+        <div class="p-4 border-b border-white/50">
+          <h3 class="text-lg font-semibold text-slate-800 text-center">スタッフ確認</h3>
+        </div>
+        <div class="p-5 text-center space-y-4">
+          <p class="text-lg font-semibold text-sky-700 leading-relaxed">
+            スタッフにこの画面を
+            <br>
+            見せてください
+          </p>
+          
+          <div class="liquid-glass rounded-2xl p-4 border border-white/40">
+            <div class="text-sm text-slate-600">交換枚数</div>
+            <div id="staff-confirm-count" class="text-3xl font-bold text-purple-600">0枚</div>
+          </div>
+
+          <p class="text-xs text-slate-600">スタッフが「交換」ボタンを押します。</p>
+          
+          <div class="grid grid-cols-2 gap-3 mt-2">
+            <button id="staff-confirm-cancel" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">
+              戻る
+            </button>
+            <button id="staff-confirm-execute" class="px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
+              🎁 交換
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div id="toast" class="toast hidden">
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
     </div>
@@ -1114,6 +1145,12 @@ const $app = {
     loginError: document.getElementById('login-error'),
   },
   toast: document.getElementById('toast'),
+  staffConfirm: {
+    modal: document.getElementById('staff-confirm-modal'),
+    count: document.getElementById('staff-confirm-count'),
+    executeBtn: document.getElementById('staff-confirm-execute'),
+    cancelBtn: document.getElementById('staff-confirm-cancel')
+  },
   qr: {
     modal: document.getElementById('qr-modal'),
     box: document.getElementById('qr-box'),
@@ -1230,6 +1267,41 @@ function closeQrModal() {
       !$app.rewards.modal.classList.contains('show') &&
       !$app.survey.modal.classList.contains('show')) {
     $app.auth.backdrop.classList.remove('show');
+  }
+}
+
+  function openStaffConfirmModal() {
+  if (state.points <= 0) {
+    showToast('交換できるポイントがありません');
+    return;
+  }
+  
+  // 枚数をセット
+  $app.staffConfirm.count.textContent = `${state.points}枚`;
+  
+  // メインの特典モーダルを隠す
+  $app.rewards.modal.classList.remove('show'); 
+  
+  // 確認モーダルを表示 (backdrop は既に表示されているはず)
+  $app.auth.backdrop.classList.add('show');
+  $app.staffConfirm.modal.classList.add('show');
+}
+
+function closeStaffConfirmModal(backToRewards = false) {
+  $app.staffConfirm.modal.classList.remove('show');
+  
+  if (backToRewards) {
+    // 特典モーダルに戻る
+    $app.rewards.modal.classList.add('show');
+  } else {
+    // 完全に閉じる
+    if (!$app.auth.signin.classList.contains('show') &&
+        !$app.auth.login.classList.contains('show') &&
+        !$app.qr.modal.classList.contains('show') &&
+        !$app.rewards.modal.classList.contains('show') &&
+        !$app.survey.modal.classList.contains('show')) {
+      $app.auth.backdrop.classList.remove('show');
+    }
   }
 }
 
@@ -1410,49 +1482,54 @@ function renderRewardsModal() {
 }
   
   async function claimReward() {
-  if (!state.user?.id) {
-    showToast('ログインしてください');
-    return;
-  }
-
-  if (state.points === 0) {
-    showToast('ポイントがありません');
-    return;
-  }
-
-  if (!state.surveyCompleted && !state.user.survey_completed) {
-    showToast('アンケートへの回答が必要です');
-    closeRewardsModal();
-    setTimeout(() => openSurveyModal(), 300);
-    return;
-  }
-
-  try {
-    const quoCards = state.points;  // 交換可能ポイント
-    const rewardId = `quo-card-${Date.now()}`;
-    
-    const result = await callEdgeFunction('claim-reward', {
-      userId: state.user.id,
-      rewardId: rewardId,
-      points: quoCards
-    });
-
-    if (result.success) {
-      state.claimedRewards.add(rewardId);
-      
-      // エッジ関数から返された値でstateを更新
-      state.points = result.redeemablePoints || 0;  // 交換可能ポイント
-      state.totalPoints = result.totalPoints || state.totalPoints;  // 累計は変わらない
-      
-      // 交換完了メッセージを表示
-      showRewardClaimedMessage(quoCards);
-      renderAll();
+    if (!state.user?.id) {
+      showToast('ログインしてください');
+      return;
     }
-  } catch (err) {
-    console.error('Failed to claim reward:', err);
-    showToast('特典の交換に失敗しました');
+
+    // アンケートチェック (念のため)
+    if (!state.surveyCompleted && !state.user.survey_completed) {
+      showToast('アンケートへの回答が必要です');
+      closeStaffConfirmModal(true); // 確認モーダルを閉じ、特典モーダルに戻す
+      return;
+    }
+
+    // ポイントチェック (念のため)
+    if (state.points === 0) {
+      showToast('ポイントがありません');
+      closeStaffConfirmModal(true); // 確認モーダルを閉じ、特典モーダルに戻す
+      return;
+    }
+
+    try {
+      const quoCards = state.points;  // 交換可能ポイント
+      const rewardId = `quo-card-${Date.now()}`;
+      
+      // ▼▼▼ 確認モーダルを閉じる処理を追加 ▼▼▼
+      closeStaffConfirmModal(false); // 完全に閉じる
+      
+      const result = await callEdgeFunction('claim-reward', {
+        userId: state.user.id,
+        rewardId: rewardId,
+        points: quoCards
+      });
+
+      if (result.success) {
+        state.claimedRewards.add(rewardId);
+        
+        // エッジ関数から返された値でstateを更新
+        state.points = result.redeemablePoints || 0;  // 交換可能ポイント
+        state.totalPoints = result.totalPoints || state.totalPoints;  // 累計は変わらない
+        
+        // 交換完了メッセージを表示
+        showRewardClaimedMessage(quoCards);
+        renderAll();
+      }
+    } catch (err) {
+      console.error('Failed to claim reward:', err);
+      showToast('特典の交換に失敗しました');
+    }
   }
-}
 
   
 function showRewardClaimedMessage(quoCards) {
@@ -2493,7 +2570,7 @@ function init() {
     $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
   }
   if ($app.rewards.claimBtn) {
-    $app.rewards.claimBtn.addEventListener('click', claimReward);
+    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal);
   }
   if ($app.rewards.openSurveyBtn) {
     $app.rewards.openSurveyBtn.addEventListener('click', () => {
@@ -2530,6 +2607,15 @@ function init() {
 
   $app.userPill.addEventListener('click', openQrModal);
   $app.qr.closeBtn.addEventListener('click', closeQrModal);
+  
+  if ($app.staffConfirm.executeBtn) {
+    // 「交換」ボタンで claimReward を実行
+    $app.staffConfirm.executeBtn.addEventListener('click', claimReward); 
+  }
+  if ($app.staffConfirm.cancelBtn) {
+    // 「戻る」ボタンで特典モーダルに戻る
+    $app.staffConfirm.cancelBtn.addEventListener('click', () => closeStaffConfirmModal(true));
+  }
 
   $app.auth.backdrop.addEventListener('click', (e) => {
     if (e.target === $app.auth.backdrop) {
@@ -2539,6 +2625,8 @@ function init() {
         closeRewardsModal();
       } else if ($app.survey.modal.classList.contains('show')) {
         closeSurveyModal();
+      } else if ($app.staffConfirm.modal.classList.contains('show')) { // ▼追加
+        closeStaffConfirmModal(true); // 特典モーダルに戻る
       }
     }
   });
