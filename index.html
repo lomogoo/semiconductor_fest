@@ -1075,7 +1075,8 @@ const state = {
   surveyCompleted: false
 };
 
-
+let originalRewardsContentHTML = null;
+  
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
@@ -1163,15 +1164,17 @@ const $app = {
     content: document.getElementById('rewards-content'),
     closeBtn: document.getElementById('close-rewards'),
     openBtn: document.getElementById('open-rewards-btn'),
-    claimBtn: document.getElementById('claim-reward-btn'),
-    openSurveyBtn: document.getElementById('open-survey-btn'),
-    pointsDisplay: document.getElementById('rewards-points-display'),
-    exchangeInfo: document.getElementById('reward-exchange-info'),
-    boothGrid: document.getElementById('rewards-booth-grid'),
-    pointsDisplayPre: document.getElementById('rewards-points-display-pre'),
-    boothGridPre: document.getElementById('rewards-booth-grid-pre'),
-    preSurveySection: document.getElementById('pre-survey-section'),
-    postSurveySection: document.getElementById('post-survey-section')
+    // ▼▼▼ null で初期化 ▼▼▼
+    claimBtn: null,
+    openSurveyBtn: null,
+    pointsDisplay: null,
+    exchangeInfo: null,
+    boothGrid: null,
+    pointsDisplayPre: null,
+    boothGridPre: null,
+    preSurveySection: null,
+    postSurveySection: null
+    // ▲▲▲ ここまで ▲▲▲
   },
   survey: {
     modal: document.getElementById('survey-modal'),
@@ -1302,6 +1305,32 @@ function closeStaffConfirmModal(backToRewards = false) {
         !$app.survey.modal.classList.contains('show')) {
       $app.auth.backdrop.classList.remove('show');
     }
+  }
+}
+
+  function rebindRewardElements() {
+  // $app.rewards 内部の要素を再取得
+  $app.rewards.pointsDisplay = document.getElementById('rewards-points-display');
+  $app.rewards.exchangeInfo = document.getElementById('reward-exchange-info');
+  $app.rewards.boothGrid = document.getElementById('rewards-booth-grid');
+  $app.rewards.pointsDisplayPre = document.getElementById('rewards-points-display-pre');
+  $app.rewards.boothGridPre = document.getElementById('rewards-booth-grid-pre');
+  $app.rewards.preSurveySection = document.getElementById('pre-survey-section');
+  $app.rewards.postSurveySection = document.getElementById('post-survey-section');
+  $app.rewards.claimBtn = document.getElementById('claim-reward-btn');
+  $app.rewards.openSurveyBtn = document.getElementById('open-survey-btn');
+
+  // イベントリスナーも再設定
+  if ($app.rewards.claimBtn) {
+    // 「🎁 交換する」ボタン
+    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal); 
+  }
+  if ($app.rewards.openSurveyBtn) {
+    // 「アンケートに回答する」ボタン
+    $app.rewards.openSurveyBtn.addEventListener('click', () => {
+      closeRewardsModal();
+      setTimeout(() => openSurveyModal(), 300);
+    });
   }
 }
 
@@ -1523,6 +1552,10 @@ function renderRewardsModal() {
         
         // 交換完了メッセージを表示
         showRewardClaimedMessage(quoCards);
+
+        $app.auth.backdrop.classList.add('show');
+        $app.rewards.modal.classList.add('show');
+        
         renderAll();
       }
     } catch (err) {
@@ -1579,12 +1612,16 @@ function handleCloseRewardMessage() {
   // 特典交換モーダルを閉じる
   closeRewardsModal();
   
-  // 300ms後に特典モーダルを再度開く（post-survey画面表示）
+  // ▼▼▼ 修正 (バグ2修正) ▼▼▼
+  // 300ms待ってからモーダルの内容を元の状態に戻す
+  // (閉じるアニメーションと被らないように)
   setTimeout(() => {
-    $app.auth.backdrop.classList.add('show');
-    $app.rewards.modal.classList.add('show');
-    renderRewardsModal();
-  }, 300);
+    if (originalRewardsContentHTML) {
+      $app.rewards.content.innerHTML = originalRewardsContentHTML;
+      // DOM要素を再取得・再バインドする
+      rebindRewardElements();
+    }
+  }, 500);
 }
   
 const LS_KEY_USER = 'app_user';
@@ -2491,6 +2528,10 @@ function setupSurveyInteractivity() {
 }
 
 function init() {
+  if ($app.rewards.content) {
+    originalRewardsContentHTML = $app.rewards.content.innerHTML;
+  }
+  rebindRewardElements();
   console.log('[init] starting');
   
   $app.navButtons.forEach(btn => {
@@ -2568,15 +2609,6 @@ function init() {
   }
   if ($app.rewards.closeBtn) {
     $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
-  }
-  if ($app.rewards.claimBtn) {
-    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal);
-  }
-  if ($app.rewards.openSurveyBtn) {
-    $app.rewards.openSurveyBtn.addEventListener('click', () => {
-      closeRewardsModal();
-      setTimeout(() => openSurveyModal(), 300);
-    });
   }
 
   if ($app.survey.closeBtn) {
