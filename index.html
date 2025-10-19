@@ -1532,11 +1532,13 @@ function renderRewardsModal() {
 
     try {
       const quoCards = state.points;  // 交換可能ポイント
-      const rewardId = `quo-card-${Date.now()}`;
-      
+      const quoCards = state.points;  // 交換可能ポイント (例: 6)
+      // Date.now() を文字列に変換し、最後の一文字を削除します
+      const timestampPrefix = String(Date.now()).slice(0, -1);
+      // 新しいIDを生成: "quo-card-" + タイムスタンプ（末尾削除） + 交換枚数
+      const rewardId = `quo-card-${timestampPrefix}${quoCards}`; 
       // ▼▼▼ 確認モーダルを閉じる処理を追加 ▼▼▼
       closeStaffConfirmModal(false); // 完全に閉じる
-      
       const result = await callEdgeFunction('claim-reward', {
         userId: state.user.id,
         rewardId: rewardId,
