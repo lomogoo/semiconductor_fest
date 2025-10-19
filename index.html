@@ -473,7 +473,16 @@ li .acquired-check {
         background-position: 600px 0; /* 右側へ移動 */
       }
     }
+
+  /* 統合カード内のreward-cardのスタイルをリセット */
+    #post-survey-section .reward-card.p-0 {
+      padding: 0;
+      border: none;
+      box-shadow: none;
+    }
+  
   </style>
+  
 </head>
 <body>
   <!-- Auth: Backdrop and Launch Panel -->
@@ -691,19 +700,16 @@ li .acquired-check {
       <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
     </div>
     <div id="rewards-content" class="p-4 space-y-4">
-      <!-- ポイント表示 -->
-      <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-        <div class="text-center mb-4">
-          <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
-          <div class="text-xs text-slate-600 mt-1">交換可能ポイント</div>
-        </div>
-        <div class="progress-info-grid" id="rewards-booth-grid">
-          <!-- ブースアイコンがここに動的生成される -->
-        </div>
-      </div>
-
-      <!-- Pre-survey message -->
       <div id="pre-survey-section" class="space-y-4">
+        
+        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display-pre">0</div>
+            <div class="text-xs text-slate-600 mt-1">交換可能ポイント</div>
+          </div>
+          <div class="progress-info-grid" id="rewards-booth-grid-pre">
+            </div>
+        </div>
         <div class="liquid-glass rounded-2xl p-4 border border-white/50">
           <div class="text-center">
             <div class="text-5xl mb-3">🎁</div>
@@ -726,23 +732,27 @@ li .acquired-check {
         </button>
       </div>
 
-      <!-- Post-survey section (hidden initially) -->
       <div id="post-survey-section" class="space-y-4 hidden">
-        <div class="survey-completed-message">
-          <div class="survey-completed-message-title">✅ アンケートありがとうございました！</div>
-          <div class="survey-completed-message-text">次に、スタッフの前で交換ボタンを押してください</div>
-        </div>
-
-        <div class="reward-card liquid-glass rounded-2xl border border-white/50">
-          <div class="reward-image-wrapper">
-            <img src="quo.png" alt="QUOカード" />
+        <div class="liquid-glass rounded-2xl p-4 border border-white/50 space-y-4">
+          <div class="text-center">
+            <div class="text-xs text-slate-600 mb-1">交換可能ポイント</div>
+            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
           </div>
-          <div class="reward-details">
-            <div class="reward-name">QUOカード（500円分）</div>
-            <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
+          <div class="progress-info-grid" id="rewards-booth-grid">
+            </div>
+          <div class="reward-card p-0 border-none shadow-none">
+            <div class="reward-image-wrapper">
+              <img src="quo.png" alt="QUOカード" />
+            </div>
+            <div class="reward-details">
+              <div class="reward-name">QUOカード（500円分）</div>
+              <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
+            </div>
           </div>
         </div>
-
+        <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
+          🎁 交換する
+        </button>
         <div class="staff-instruction">
           <div class="staff-instruction-title">
             👨‍💼 スタッフ確認
@@ -751,16 +761,11 @@ li .acquired-check {
             スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
           </div>
         </div>
-
-        <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
-          🎁 交換する
-        </button>
-
         <div class="text-xs text-slate-500 text-center">
           ※交換したQUOカードは受付（L404）でお受け取りください
         </div>
       </div>
-    </div>
+      </div>
   </div>
 </div>
   
@@ -874,7 +879,6 @@ li .acquired-check {
                   <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
                   <div>
                     <div class="font-semibold text-slate-800">ステージコンテンツ</div>
-                    <div class="text-xs text-slate-600">16:00〜 | ポイント付与なし</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -888,7 +892,6 @@ li .acquired-check {
                   <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
                   <div>
                     <div class="font-semibold text-slate-800">研究発表会</div>
-                    <div class="text-xs text-slate-600">17:30〜 | ポイント付与なし</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -1128,6 +1131,8 @@ const $app = {
     pointsDisplay: document.getElementById('rewards-points-display'),
     exchangeInfo: document.getElementById('reward-exchange-info'),
     boothGrid: document.getElementById('rewards-booth-grid'),
+    pointsDisplayPre: document.getElementById('rewards-points-display-pre'),
+    boothGridPre: document.getElementById('rewards-booth-grid-pre'),
     preSurveySection: document.getElementById('pre-survey-section'),
     postSurveySection: document.getElementById('post-survey-section')
   },
@@ -1341,21 +1346,41 @@ function renderRewardsModal() {
   const points = state.points;  // 交換可能ポイント
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
   
-  $app.rewards.pointsDisplay.textContent = `${points}pt`;
+  // ▼▼▼ ここから変更 ▼▼▼
+  // 両方のセクションのポイント表示を更新
+  if ($app.rewards.pointsDisplay) $app.rewards.pointsDisplay.textContent = `${points}pt`;
+  if ($app.rewards.pointsDisplayPre) $app.rewards.pointsDisplayPre.textContent = `${points}pt`;
 
-  $app.rewards.boothGrid.innerHTML = '';
+  // 両方のグリッドをクリア
+  if ($app.rewards.boothGrid) $app.rewards.boothGrid.innerHTML = '';
+  if ($app.rewards.boothGridPre) $app.rewards.boothGridPre.innerHTML = '';
+  
   BOOTH_DATA.forEach(booth => {
     const isAcquired = state.acquiredStamps.has(booth.id);
-    const item = document.createElement('div');
-    item.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
-    item.innerHTML = `
+    const itemHTML = `
       <div class="booth-icon">
         <img src="${booth.img}" alt="${booth.name}" />
       </div>
       <div class="booth-label">${booth.id}</div>
     `;
-    $app.rewards.boothGrid.appendChild(item);
+    
+    // pre グリッドに追加 (アンケート前)
+    if ($app.rewards.boothGridPre) {
+      const itemPre = document.createElement('div');
+      itemPre.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
+      itemPre.innerHTML = itemHTML;
+      $app.rewards.boothGridPre.appendChild(itemPre);
+    }
+    
+    // post グリッドに追加 (アンケート後)
+    if ($app.rewards.boothGrid) {
+      const itemPost = document.createElement('div');
+      itemPost.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
+      itemPost.innerHTML = itemHTML;
+      $app.rewards.boothGrid.appendChild(itemPost);
+    }
   });
+  // ▲▲▲ 変更ここまで ▲▲▲
 
   if (!isSurveyCompleted) {
     $app.rewards.preSurveySection.classList.remove('hidden');
@@ -1383,6 +1408,7 @@ function renderRewardsModal() {
     }
   }
 }
+  
   async function claimReward() {
   if (!state.user?.id) {
     showToast('ログインしてください');
@@ -1738,7 +1764,6 @@ function openCategorySheet(categoryKey) {
           <span class="text-3xl">${category.icon}</span>
           <div>
             <div class="font-semibold text-slate-800">${category.time}</div>
-            <div class="text-slate-600">ポイント付与なし</div>
           </div>
         </div>
         <p class="text-sm text-slate-700 leading-relaxed">${category.desc}</p>
