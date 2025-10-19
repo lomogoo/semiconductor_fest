@@ -1573,7 +1573,7 @@ function renderBoothList() {
     }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
-      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0 relative">
+      <div class="w-12 h-12 rounded-lg bg-white flex-shrink-0 relative">
         ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
         <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
       </div>
@@ -1689,7 +1689,7 @@ function openCategorySheet(categoryKey) {
           return `
           <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-100/60 to-green-100/60' : ''}" data-booth-id="${booth.id}">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0 relative">
+              <div class="w-10 h-10 rounded-lg bg-white flex-shrink-0 relative">
                 ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
                 <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
               </div>
