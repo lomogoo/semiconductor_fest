@@ -876,24 +876,39 @@ li .acquired-check {
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
-            <!-- ステージコンテンツ -->
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-purple-500 text-white grid place-items-center text-2xl">🎤</div>
+                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="monomaker.png" alt="" class="max-w-full max-h-full object-contain">
+                  </div>
                   <div>
-                    <div class="font-semibold text-slate-800">ステージコンテンツ</div>
+                    <div class="font-semibold text-slate-800">特別セミナー！ものづくり太郎氏</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
-            <!-- 研究発表会 -->
+            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="talksession">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="talksession.png" alt="" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">トークセッション</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-blue-500 text-white grid place-items-center text-2xl">📊</div>
+                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                     <img src="student_presentation.png" alt="" class="max-w-full max-h-full object-contain">
+                  </div>
                   <div>
                     <div class="font-semibold text-slate-800">研究発表会</div>
                   </div>
@@ -902,11 +917,12 @@ li .acquired-check {
               </div>
             </div>
 
-            <!-- 企業ブース -->
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-green-500 text-white grid place-items-center text-2xl">🏢</div>
+                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                     <img src="firm booth.png" alt="" class="max-w-full max-h-full object-contain">
+                  </div>
                   <div>
                     <div class="font-semibold text-slate-800">企業ブース</div>
                     <div class="text-xs text-slate-600">6社 | 各1pt (500円分)</div>
@@ -1052,15 +1068,27 @@ const BOOTH_DATA = [
 
 const CATEGORY_DATA = {
   stage: {
-    title: 'ステージコンテンツ',
-    icon: '🎤',
+    title: '特別セミナー：ものづくり太郎氏',
+    icon: '🎤', // 予備として残す
+    imgPath: 'monomaker.png', // ★画像パスを追加
     time: '16:00〜',
     desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。',
     condition: 'ステージイベントに参加'
   },
+  // ▼▼▼ トークセッションを追加 ▼▼▼
+  talksession: {
+    title: 'トークセッション',
+    icon: '💬', // 予備アイコン
+    imgPath: 'talksession.png',
+    time: '時間未定', // ★必要に応じて時間を設定してください
+    desc: 'ここにトークセッションの説明文を入力します。', // ★説明文を設定してください
+    condition: 'トークセッションに参加' // ★条件を設定してください
+  },
+  // ▲▲▲ ここまで ▲▲▲
   presentation: {
     title: '研究発表会',
-    icon: '📊',
+    icon: '📊', // 予備として残す
+    imgPath: 'student_presentation.png', // ★画像パスを追加
     time: '17:30〜',
     desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
     condition: '研究発表会に参加'
@@ -1887,8 +1915,10 @@ function openCategorySheet(categoryKey) {
     $app.categorySheet.title.textContent = category.title;
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-4">
-        <div class="flex items-center gap-2 text-sm">
-          <span class="text-3xl">${category.icon}</span>
+        <div class="flex items-center gap-3 text-sm">
+          <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
+             <img src="${category.imgPath || ''}" alt="" class="max-w-full max-h-full object-contain">
+          </div>
           <div>
             <div class="font-semibold text-slate-800">${category.time}</div>
           </div>
