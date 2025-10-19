@@ -700,24 +700,26 @@ li .acquired-check {
       <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
     </div>
     <div id="rewards-content" class="p-4 space-y-4">
-      <div id="pre-survey-section" class="space-y-4">
+     <div id="pre-survey-section" class="space-y-4">
         
-        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-          <div class="text-center mb-4">
+        <div class="liquid-glass rounded-2xl p-4 border border-white/50 space-y-4">
+          
+          <div class="text-center">
+            <div class="text-xs text-slate-600 mb-1">交換可能ポイント</div>
             <div class="text-3xl font-bold text-purple-600" id="rewards-points-display-pre">0</div>
-            <div class="text-xs text-slate-600 mt-1">交換可能ポイント</div>
           </div>
+
           <div class="progress-info-grid" id="rewards-booth-grid-pre">
             </div>
-        </div>
-        <div class="liquid-glass rounded-2xl p-4 border border-white/50">
-          <div class="text-center">
+
+          <div class="reward-card p-0 border-none shadow-none">
             <div class="text-5xl mb-3">🎁</div>
-            <div class="font-semibold text-slate-800 mb-2">QUOカード交換</div>
-            <div class="text-sm text-slate-600 mb-4">1ブース = 500円分のQUOカード</div>
+            <div class="reward-details" style="gap: 0.25rem;">
+              <div class="reward-name">QUOカード交換</div>
+              <div class="reward-description">1ブース = 500円分のQUOカード</div>
+            </div>
           </div>
         </div>
-
         <div class="staff-instruction">
           <div class="staff-instruction-title">
             📋 ご注意ください
@@ -1412,11 +1414,14 @@ async function submitSurvey(e) {
       state.surveyCompleted = true;
       state.user.survey_completed = true;
       saveLocalUser(state.user);
-      closeSurveyModal();
+      
+      // アンケートモーダルだけを閉じる (backdropは残す)
+      $app.survey.modal.classList.remove('show');
       showToast('✅ アンケートありがとうございました！');
       
-      // 即座にモーダルを更新（特典交換ボタンを表示）
-      renderRewardsModal();
+      // すぐに特典交換モーダルを開く
+      // (renderRewardsModalは openRewardsModal の中で呼ばれます)
+      openRewardsModal(); 
     }
   } catch (err) {
     console.error('Survey submission failed:', err);
