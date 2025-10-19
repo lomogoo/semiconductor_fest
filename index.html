@@ -879,7 +879,7 @@ li .acquired-check {
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
                     <img src="monomaker.png" alt="" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
@@ -893,7 +893,7 @@ li .acquired-check {
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="talksession">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
                     <img src="talksession.png" alt="" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
@@ -906,11 +906,11 @@ li .acquired-check {
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
                      <img src="student_presentation.png" alt="" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
-                    <div class="font-semibold text-slate-800">研究発表会</div>
+                    <div class="font-semibold text-slate-800">企業研究発表会</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -920,8 +920,8 @@ li .acquired-check {
             <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                     <img src="firm booth.png" alt="" class="max-w-full max-h-full object-contain">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                     <img src="firmbooth.png" alt="" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">企業ブース</div>
@@ -1086,7 +1086,7 @@ const CATEGORY_DATA = {
   },
   // ▲▲▲ ここまで ▲▲▲
   presentation: {
-    title: '研究発表会',
+    title: '企業研究発表会',
     icon: '📊', // 予備として残す
     imgPath: 'student_presentation.png', // ★画像パスを追加
     time: '17:30〜',
@@ -1916,7 +1916,7 @@ function openCategorySheet(categoryKey) {
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-4">
         <div class="flex items-center gap-3 text-sm">
-          <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
              <img src="${category.imgPath || ''}" alt="" class="max-w-full max-h-full object-contain">
           </div>
           <div>
