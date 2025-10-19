@@ -1611,7 +1611,7 @@ function renderProgress() {
   $app.progress.bar.style.width = `${progressPercent}%`;
 
   if (state.percentile !== null) {
-    $app.progress.rankPercentile.textContent = `上位 ${100 - state.percentile}%`;
+    $app.progress.rankPercentile.textContent = `上位 ${state.percentile}%`;
     $app.progress.rankPercentile.classList.remove('hidden');
   } else {
     $app.progress.rankPercentile.classList.add('hidden');
