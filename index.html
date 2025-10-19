@@ -713,10 +713,12 @@ li .acquired-check {
             </div>
 
           <div class="reward-card p-0 border-none shadow-none">
-            <div class="text-5xl mb-3">🎁</div>
-            <div class="reward-details" style="gap: 0.25rem;">
-              <div class="reward-name">QUOカード交換</div>
-              <div class="reward-description">1ブース = 500円分のQUOカード</div>
+            <div class="reward-image-wrapper">
+              <img src="quo.png" alt="QUOカード" />
+            </div>
+            <div class="reward-details">
+              <div class="reward-name">QUOカード（500円分）</div>
+              <div class="reward-description" id="reward-exchange-info-pre">0枚交換可能</div>
             </div>
           </div>
         </div>
@@ -1175,7 +1177,8 @@ const $app = {
     pointsDisplayPre: null,
     boothGridPre: null,
     preSurveySection: null,
-    postSurveySection: null
+    postSurveySection: null,
+    exchangeInfoPre: null
     // ▲▲▲ ここまで ▲▲▲
   },
   survey: {
@@ -1321,7 +1324,7 @@ function closeStaffConfirmModal(backToRewards = false) {
   $app.rewards.postSurveySection = document.getElementById('post-survey-section');
   $app.rewards.claimBtn = document.getElementById('claim-reward-btn');
   $app.rewards.openSurveyBtn = document.getElementById('open-survey-btn');
-
+  $app.rewards.exchangeInfoPre = document.getElementById('reward-exchange-info-pre');
   // イベントリスナーも再設定
   if ($app.rewards.claimBtn) {
     // 「🎁 交換する」ボタン
@@ -1498,9 +1501,13 @@ function renderRewardsModal() {
 
     // 交換可能かチェック
     const canExchange = points > 0;
-    $app.rewards.exchangeInfo.textContent = canExchange 
+    const exchangeText = canExchange 
       ? `${points}枚交換可能` 
       : '全ブースを回ってください';
+    
+    // 両方のセクションの交換情報を更新
+    if ($app.rewards.exchangeInfo) $app.rewards.exchangeInfo.textContent = exchangeText;
+    if ($app.rewards.exchangeInfoPre) $app.rewards.exchangeInfoPre.textContent = exchangeText;
 
     const btn = $app.rewards.claimBtn;
     if (canExchange) {
