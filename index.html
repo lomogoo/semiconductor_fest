@@ -1609,7 +1609,6 @@ function renderProgress() {
 
   $app.progress.badge.textContent = `${state.totalPoints}pt`;  // ← 累計ポイント表示に変更
   $app.progress.bar.style.width = `${progressPercent}%`;
-  $app.progress.dot.style.left = `${progressPercent}%`;
 
   if (state.percentile !== null) {
     $app.progress.rankPercentile.textContent = `上位 ${100 - state.percentile}%`;
