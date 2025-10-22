@@ -1536,7 +1536,7 @@ async function submitSurvey(e) {
   try {
     $app.survey.error.textContent = '';
     const result = await callEdgeFunction('submit-survey', {
-      userId: state.user.id,
+      user_id: state.user.id,  // ← "userId" から "user_id" に修正
       surveyData: surveyData
     });
 
