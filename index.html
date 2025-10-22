@@ -109,41 +109,73 @@
     .progress-area { position: relative; padding-top: 3rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
-    .progress-track { position: relative; width: 100%; height: 16px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
-    #progress-bar { 
-      height: 100%; 
-      border-radius: 9999px; 
-      background: linear-gradient(90deg, #34d399, #10b981, var(--accent-sky), #3b82f6); 
-      transition: width .5s ease-in-out;
+    .progress-track {
       position: relative;
-      overflow: hidden; /* ← この行を追加 */
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 9999px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+      overflow: visible;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    #progress-bar {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9, #0284c7);
+      transition: width .6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    #progress-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2.5s infinite;
+    }
+    #progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+      border-radius: 9999px 9999px 0 0;
     }
 
-    .progress-marker { 
-      position: absolute; 
-      top: 50%; 
-      width: 32px; 
-      height: 32px; 
-      border-radius: 50%; 
-      transform: translate(-50%, -50%); 
+    .progress-marker {
+      position: absolute;
+      top: 50%;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
       background: white;
       border: 3px solid #cbd5e1;
-      box-shadow: 0 0 8px rgba(0,0,0,.12);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 12;
       display: grid;
       place-items: center;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .progress-marker.is-active {
-      border-color: #3b82f6;
-      background: #3b82f6;
-      box-shadow: 0 0 16px rgba(59,130,246,.6);
+      border-color: #0ea5e9;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5), 0 0 30px rgba(14, 165, 233, 0.3);
+      transform: translate(-50%, -55%);
     }
     .progress-marker .label {
       font-size: 14px;
       font-weight: 800;
       color: #334155;
       user-select: none;
+    }
+    .progress-marker.is-active .label {
+      color: white;
     }
     
     .map-wrap { aspect-ratio:2/3; margin-top: 0; }
@@ -845,30 +877,32 @@ li .acquired-check {
 
     <main class="flex-1 pb-28">
       <div id="page-home" class="page active p-4 space-y-6">
-        <div class="liquid-glass rounded-3xl p-4">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
-            <div class="flex items-center gap-2">
-              <span id="rank-percentile" class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium"></span>
-              <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
-            </div>
-          </div>
-          <div class="progress-area">
-            <div id="progress-wrapper">
-              <div id="progress-track" class="progress-track">
-                <div id="progress-bar" style="width:0%"></div>
+        <div class="liquid-glass rounded-3xl p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%); box-shadow: 0 8px 24px rgba(14, 165, 233, 0.15);">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
+              <div class="flex items-center gap-2">
+                <span id="rank-percentile" class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium"></span>
+                <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
               </div>
             </div>
-          </div>
-          <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
-          <div id="progress-percent" class="mt-2 text-center">
-            <span class="text-2xl font-bold text-sky-600">0%</span>
-            <span class="text-xs text-slate-500 ml-1">達成</span>
-          </div>
-          <div class="mt-4 text-center">
-            <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
-              🎁 QUOカードを交換する
-            </button>
+            <div class="progress-area">
+              <div id="progress-wrapper">
+                <div id="progress-track" class="progress-track">
+                  <div id="progress-bar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+            <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
+            <div id="progress-percent" class="mt-2 text-center">
+              <span class="text-2xl font-bold text-sky-600">0%</span>
+              <span class="text-xs text-slate-500 ml-1">達成</span>
+            </div>
+            <div class="mt-4 text-center">
+              <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
+                🎁 QUOカードを交換する
+              </button>
+            </div>
           </div>
         </div>
 
