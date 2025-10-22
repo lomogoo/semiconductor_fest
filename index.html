@@ -101,6 +101,11 @@
     .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) skewX(-12deg); }
+      100% { transform: translateX(200%) skewX(-12deg); }
+    }
+
     .progress-area { position: relative; padding-top: 3rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
@@ -816,17 +821,11 @@ li .acquired-check {
         <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
         <div class="min-w-0 flex-1">
           <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
-          <div id="booth-sheet-tags" class="mt-2 flex flex-wrap gap-2"></div>
         </div>
         <button id="close-booth-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
       </div>
       <div class="p-4 space-y-4 text-sm">
         <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
-        <div class="text-slate-600 space-y-2">
-          <div><strong class="font-medium text-slate-800">獲得ポイント:</strong><span class="text-sky-600 font-semibold">1pt (500円分QUOカード)</span></div>
-          <div><strong class="font-medium text-slate-800">スタンプ条件:</strong><span id="booth-sheet-condition">-</span></div>
-          <div><strong class="font-medium text-slate-800">ノベルティ:</strong><span id="booth-sheet-giveaway">-</span></div>
-        </div>
       </div>
     </div>
   </div>
@@ -873,6 +872,27 @@ li .acquired-check {
           </div>
         </div>
 
+        <!-- QRスキャンカード -->
+        <button id="scan-card" class="w-full relative overflow-hidden rounded-3xl p-6 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);">
+          <div class="relative z-10 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm grid place-items-center text-4xl animate-pulse">
+                📷
+              </div>
+              <div class="text-left">
+                <div class="font-bold text-xl text-white mb-1">QRスキャン</div>
+                <div class="text-sm text-sky-100">スタンプを集めよう</div>
+              </div>
+            </div>
+            <div class="text-white text-lg font-bold">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
+        </button>
+
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
@@ -885,7 +905,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">株式会社レスター</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -900,7 +919,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -915,7 +933,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -930,7 +947,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -945,7 +961,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -960,7 +975,6 @@ li .acquired-check {
                   </div>
                   <div>
                     <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
-                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
@@ -971,20 +985,7 @@ li .acquired-check {
         </div>
       </div>
 
-      <div id="page-map" class="page p-3 pt-2 space-y-1">
-        <div class="max-w-[1200px] mx-auto">
-          <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
-              <div class="text-left">
-                <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
-                <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
-              </div>
-            </div>
-            <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
-          </button>
-        </div>
-        
+      <div id="page-map" class="page p-3 pt-2">
         <div class="map-wrap w-full max-w-[1200px] mx-auto">
           <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
             <image id="bg-image" href="assets/layout.png" xlink:href="assets/layout.png" x="0" y="0" width="1200" height="1800" />
@@ -1211,10 +1212,7 @@ const $app = {
     backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
     icon: document.getElementById('booth-sheet-icon'),
     title: document.getElementById('booth-sheet-title'),
-    tags: document.getElementById('booth-sheet-tags'),
     desc: document.getElementById('booth-sheet-desc'),
-    condition: document.getElementById('booth-sheet-condition'),
-    giveaway: document.getElementById('booth-sheet-giveaway'),
     closeBtn: document.getElementById('close-booth-sheet')
   },
   scan: {
@@ -2008,30 +2006,10 @@ function closeCategorySheet() {
 }
 
 function openBoothSheet(booth) {
-  const isAcquired = state.acquiredStamps.has(booth.id);
-  
   $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
   $app.boothSheet.title.textContent = booth.name;
   $app.boothSheet.desc.textContent = booth.desc;
-  $app.boothSheet.condition.textContent = booth.condition;
-  $app.boothSheet.giveaway.textContent = booth.giveaway;
-  
-  $app.boothSheet.tags.innerHTML = '';
-  
-  if (isAcquired) {
-    const acquiredBadge = document.createElement('span');
-    acquiredBadge.className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold';
-    acquiredBadge.textContent = '✓ 取得済み';
-    $app.boothSheet.tags.appendChild(acquiredBadge);
-  }
-  
-  booth.tags.forEach(t => {
-    const span = document.createElement('span');
-    span.className = 'px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs';
-    span.textContent = t;
-    $app.boothSheet.tags.appendChild(span);
-  });
-  
+
   $app.boothSheet.el.classList.add('is-open');
   $app.boothSheet.backdrop.classList.add('is-open');
 }
