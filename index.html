@@ -188,12 +188,12 @@
       z-index: 101;
     }
 
-    .stamp-category-card {
+    .stamp-category-card, .stamp-booth-card {
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
     }
-    .stamp-category-card:hover {
+    .stamp-category-card:hover, .stamp-booth-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
@@ -876,62 +876,97 @@ li .acquired-check {
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="stage">
+            <!-- 6社の企業ブース -->
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="monomaker.png" alt="" class="max-w-full max-h-full object-contain">
+                    <img src="assets/restar.jpeg" alt="株式会社レスター" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
-                    <div class="font-semibold text-slate-800">特別セミナー！ものづくり太郎氏</div>
+                    <div class="font-semibold text-slate-800">株式会社レスター</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="talksession">
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="talksession.png" alt="" class="max-w-full max-h-full object-contain">
+                    <img src="assets/kioxia.png" alt="キオクシア岩手株式会社" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
-                    <div class="font-semibold text-slate-800">トークセッション</div>
-                  </div>
-                </div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="presentation">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                     <img src="student_presentation.png" alt="" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">企業研究発表会</div>
+                    <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
-            <div class="stamp-category-card liquid-glass rounded-2xl p-4 border border-white/50" data-category="booths">
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                     <img src="firmbooth.png" alt="" class="max-w-full max-h-full object-contain">
+                    <img src="assets/sont.png" alt="ソニーセミコンダクタマニュファクチャリング株式会社" class="max-w-full max-h-full object-contain">
                   </div>
                   <div>
-                    <div class="font-semibold text-slate-800">企業ブース</div>
-                    <div class="text-xs text-slate-600">6社 | 各1pt (500円分)</div>
-                    <div id="booth-progress" class="booth-progress">0/6 獲得済み</div>
+                    <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
                   </div>
                 </div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/tel.png" alt="東京エレクトロン宮城株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="E">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/toppan.jpg" alt="TOPPAN株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/lapis.png" alt="ラピスセミコンダクタ株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
+                    <div class="text-xs text-slate-600">1pt (500円分)</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1003,7 +1038,7 @@ li .acquired-check {
         <div id="nav-indicator"></div>
         <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
         <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
-        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">一覧</span></button>
+        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">イベント</span></button>
       </nav>
     </div>
   </div>
@@ -1094,6 +1129,38 @@ const CATEGORY_DATA = {
     condition: '研究発表会に参加'
   }
 };
+
+// イベントページに表示するイベントリスト
+const EVENT_DATA = [
+  {
+    id: 'stage',
+    type: 'category',
+    title: '特別セミナー！ものづくり太郎氏',
+    img: 'monomaker.png',
+    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。'
+  },
+  {
+    id: 'talksession',
+    type: 'category',
+    title: 'トークセッション',
+    img: 'talksession.png',
+    desc: 'ここにトークセッションの説明文を入力します。'
+  },
+  {
+    id: 'presentation',
+    type: 'category',
+    title: '企業研究発表会',
+    img: 'student_presentation.png',
+    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。'
+  },
+  {
+    id: 'booths',
+    type: 'category',
+    title: '企業ブース',
+    img: 'firmbooth.png',
+    desc: '各企業ブースを訪問してスタンプを獲得しましょう。6社のブースがあります。'
+  }
+];
 
 const state = { 
   points: 0,              // 交換可能ポイント
@@ -1760,26 +1827,25 @@ function renderAll() {
 function renderBoothList() {
   console.log('[renderBoothList] called');
   $app.boothList.innerHTML = '';
-  BOOTH_DATA.forEach((b, i) => {
-    const isAcquired = state.acquiredStamps.has(b.id);
+  EVENT_DATA.forEach((event, i) => {
     const li = document.createElement('li');
     li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer relative';
-    if (isAcquired) {
-      li.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3))';
-    }
     li.style.animationDelay = `${i * 50}ms`;
     li.innerHTML = `
       <div class="w-12 h-12 rounded-lg bg-white flex-shrink-0 relative">
-        ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
-        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-contain bg-white" />
+        <img src="${event.img}" alt="${event.title}" class="w-full h-full object-contain bg-white" />
       </div>
       <div class="min-w-0 flex-1">
-        <div class="font-semibold text-slate-800">${b.name}</div>
-        <div class="text-xs text-slate-500 truncate">${b.desc}</div>
+        <div class="font-semibold text-slate-800">${event.title}</div>
+        <div class="text-xs text-slate-500 truncate">${event.desc}</div>
       </div>
-      <div class="text-xl ${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold">${isAcquired ? '' : '1pt'}</div>
+      <div class="text-slate-400">›</div>
     `;
-    li.addEventListener('click', () => openBoothSheet(b));
+    li.addEventListener('click', () => {
+      if (event.type === 'category') {
+        openCategorySheet(event.id);
+      }
+    });
     $app.boothList.appendChild(li);
   });
 }
@@ -1862,7 +1928,7 @@ function updateActivePage() {
     $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
   }
   
-  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'コンテンツ' };
+  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'イベント' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
 
   if (state.activePage === 'list') { 
@@ -2600,6 +2666,16 @@ function init() {
     card.addEventListener('click', () => {
       const category = card.dataset.category;
       openCategorySheet(category);
+    });
+  });
+
+  document.querySelectorAll('.stamp-booth-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const boothId = card.dataset.boothId;
+      const booth = BOOTH_DATA.find(b => b.id === boothId);
+      if (booth) {
+        openBoothSheet(booth);
+      }
     });
   });
 
