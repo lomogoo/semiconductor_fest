@@ -898,34 +898,36 @@ li .acquired-check {
               <span class="text-2xl font-bold text-sky-600">0%</span>
               <span class="text-xs text-slate-500 ml-1">達成</span>
             </div>
-            <div class="mt-4 text-center">
-              <button id="open-rewards-btn" class="px-6 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow">
-                🎁 QUOカードを交換する
+
+            <!-- アクションボタンエリア -->
+            <div class="mt-5 space-y-3">
+              <!-- QRスキャンボタン -->
+              <button id="scan-card" class="w-full relative overflow-hidden rounded-2xl p-4 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);">
+                <div class="relative z-10 flex items-center justify-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm grid place-items-center text-3xl">
+                    📷
+                  </div>
+                  <div class="text-left flex-1">
+                    <div class="font-bold text-lg text-white">QRスキャン</div>
+                    <div class="text-xs text-sky-50">スタンプを集めよう</div>
+                  </div>
+                  <div class="text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
+              </button>
+
+              <!-- QUOカード交換ボタン -->
+              <button id="open-rewards-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2">
+                <span class="text-lg">🎁</span>
+                <span>QUOカードを交換する</span>
               </button>
             </div>
           </div>
         </div>
-
-        <!-- QRスキャンカード -->
-        <button id="scan-card" class="w-full relative overflow-hidden rounded-3xl p-6 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);">
-          <div class="relative z-10 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm grid place-items-center text-4xl animate-pulse">
-                📷
-              </div>
-              <div class="text-left">
-                <div class="font-bold text-xl text-white mb-1">QRスキャン</div>
-                <div class="text-sm text-sky-100">スタンプを集めよう</div>
-              </div>
-            </div>
-            <div class="text-white text-lg font-bold">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </div>
-          </div>
-          <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
-        </button>
 
         <div class="liquid-glass rounded-3xl p-4">
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
