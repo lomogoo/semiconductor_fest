@@ -864,14 +864,26 @@ li .acquired-check {
   <div class="bottom-sheet-backdrop" data-target="booth"></div>
 
   <div id="app">
-    <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
+    <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl backdrop-blur-xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(240,249,255,0.8) 100%); border-bottom: 1px solid rgba(14, 165, 233, 0.1);">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-        <img src="logo.png" alt="Logo" class="w-10 h-10 shadow-lg rounded-lg object-contain" />
-        <div>
-          <h1 id="header-title" class="text-lg font-semibold text-sky-800">ホーム</h1>
-          <p class="text-xs text-sky-700">みやぎ半導体キャリアフェス</p>
+        <!-- ロゴエリア -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <div class="relative w-16 h-10 rounded-xl overflow-hidden bg-white shadow-md" style="box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);">
+            <img src="logo.png" alt="Logo" class="w-full h-full object-contain p-1" />
+          </div>
         </div>
-        <div id="user-pill" class="ml-auto text-xs text-slate-700 hidden"></div>
+
+        <!-- タイトルエリア -->
+        <div class="flex-1 min-w-0">
+          <h1 id="header-title" class="text-base font-bold text-sky-900 tracking-tight">ホーム</h1>
+          <p class="text-xs text-sky-600 font-medium truncate">みやぎ半導体キャリアフェス</p>
+        </div>
+
+        <!-- ユーザー情報 -->
+        <div id="user-pill" class="ml-auto text-xs text-slate-700 font-medium px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-sm shadow-sm border border-sky-100 hidden flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          <span class="truncate max-w-[120px]"></span>
+        </div>
       </div>
     </header>
 
@@ -1372,11 +1384,12 @@ function enableAppUI(user) {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
   $app.userPill.classList.remove('hidden');
-  $app.userPill.classList.add('cursor-pointer');
-  $app.userPill.innerHTML =
-    `<button class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200 hover:bg-sky-200 transition">
-       ${user.name}
-     </button>`;
+  $app.userPill.classList.add('cursor-pointer', 'hover:bg-white/80', 'transition-all');
+  // ユーザー名を2番目のspanに設定
+  const nameSpan = $app.userPill.querySelector('span:last-child');
+  if (nameSpan) {
+    nameSpan.textContent = user.name;
+  }
 
   window.scrollTo({ top: 0, behavior: 'instant' });
   
