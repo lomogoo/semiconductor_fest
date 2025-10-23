@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>運営スキャナ</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 1.5rem; color: #1a1a1a; }
+.container { max-width: 600px; margin: 0 auto; }
+h1 { font-size: 1.75rem; font-weight: 700; color: white; text-align: center; margin-bottom: 2rem; }
+.glass-card { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(40px) saturate(180%); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2); padding: 1.5rem; margin-bottom: 1.5rem; }
+.glass-card h2 { color: white; font-size: 1.25rem; margin-bottom: 1rem; }
+.input-field { margin-bottom: 1rem; }
+.input-field label { display: block; font-size: 0.875rem; font-weight: 500; color: rgba(255, 255, 255, 0.8); margin-bottom: 0.5rem; }
+.input-field input { width: 100%; padding: 0.875rem 1rem; font-size: 0.95rem; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.2); color: white; font-family: inherit; }
+.input-field input::placeholder { color: rgba(255, 255, 255, 0.6); }
+.input-field input:focus { outline: none; border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.25); }
+.helper-text { font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); margin-top: 0.5rem; }
+.error-text { color: #ff4444; font-size: 0.875rem; margin-top: 0.5rem; }
+button { padding: 1rem 1.5rem; font-size: 1rem; font-weight: 600; border: none; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; font-family: inherit; width: 100%; }
+#login-btn { background: rgba(52, 199, 89, 0.9); color: white; margin-top: 1rem; }
+#login-btn:hover:not(:disabled) { background: rgba(52, 199, 89, 1); transform: translateY(-2px); }
+#login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#scanner-section { display: none; }
+.button-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.button-group button { flex: 1; min-width: 120px; }
+#start-scan { background: rgba(52, 199, 89, 0.9); color: white; }
+#stop-scan { background: rgba(255, 59, 48, 0.9); color: white; }
+#logout-btn { background: rgba(156, 163, 175, 0.9); color: white; }
+#start-scan:disabled, #stop-scan:disabled { opacity: 0.5; }
+.camera-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1000; }
+.camera-overlay.active { display: flex; flex-direction: column; }
+#video { width: 100%; height: 100%; object-fit: cover; }
+.camera-close-btn { position: absolute; top: 2rem; right: 2rem; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); border: 2px solid rgba(255, 255, 255, 0.5); color: white; font-size: 1.5rem; cursor: pointer; z-index: 1001; }
+.camera-status { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); padding: 1rem 2rem; border-radius: 16px; color: white; z-index: 1001; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: rgba(255, 255, 255, 0.95); border-radius: 28px; padding: 2.5rem; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); position: relative; }
+.modal-close-btn { position: absolute; top: 1.5rem; right: 1.5rem; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); border: none; color: #666; font-size: 1.25rem; cursor: pointer; }
+.modal-badge { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 16px; font-size: 1rem; font-weight: 700; margin-bottom: 1.5rem; text-transform: uppercase; }
+.modal-badge-pre { background: linear-gradient(135deg, #34c759 0%, #30d158 100%); color: white; }
+.modal-badge-onsite { background: linear-gradient(135deg, #007aff 0%, #0051d5 100%); color: white; }
+.modal-user-name { font-size: 2.25rem; font-weight: 800; color: #1a1a1a; margin-bottom: 1.5rem; }
+.modal-user-info { font-size: 1.35rem; color: #333; margin-bottom: 0.75rem; font-weight: 600; }
+.modal-user-meta { font-size: 0.8rem; color: #999; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid rgba(0, 0, 0, 0.1); font-family: 'SF Mono', Monaco, monospace; }
+.result-section { min-height: 200px; }
+.result-section h2 { font-size: 1.25rem; font-weight: 600; color: white; margin-bottom: 1rem; }
+#result { background: rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 1.5rem; font-size: 0.95rem; color: white; min-height: 150px; border: 1px solid rgba(255, 255, 255, 0.2); }
+.input-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+#uuid-input { flex: 1; min-width: 200px; padding: 0.875rem 1rem; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.2); color: white; font-family: 'SF Mono', Monaco, monospace; }
+#lookup-btn { background: rgba(0, 122, 255, 0.9); color: white; padding: 0.875rem 1.5rem; flex: 0 0 auto; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>半導体キャリアフェス 受付</h1>
+<div id="login-section" class="glass-card">
+<h2>運営スタッフ ログイン</h2>
+<form id="login-form">
+<div class="input-field">
+<label for="login-email">メールアドレス</label>
+<input type="email" id="login-email" required placeholder="staff@example.com">
+</div>
+<div class="input-field">
+<label for="login-password">パスワード</label>
+<input type="password" id="login-password" required placeholder="********">
+<p class="helper-text">Supabase Authで作成したパスワードを入力してください</p>
+</div>
+<button type="submit" id="login-btn">ログイン</button>
+<p id="login-error" class="error-text"></p>
+</form>
+</div>
+<div id="scanner-section">
+<div class="glass-card">
+<div class="button-group">
+<button id="start-scan">📷 カメラ起動</button>
+<button id="stop-scan" disabled>⏹ 停止</button>
+<button id="logout-btn">ログアウト</button>
+</div>
+</div>
+<div class="glass-card">
+<div class="input-group">
+<input id="uuid-input" placeholder="UUID手入力（テスト用）">
+<button id="lookup-btn">検索</button>
+</div>
+</div>
+<div class="glass-card result-section">
+<h2>最近のスキャン</h2>
+<div id="result">QRコードをスキャンしてください</div>
+</div>
+</div>
+</div>
+<div class="camera-overlay" id="camera-overlay">
+<button class="camera-close-btn" id="camera-close">✕</button>
+<video id="video" autoplay playsinline muted></video>
+<div class="camera-status" id="camera-status">QRコードをカメラにかざしてください</div>
+</div>
+<div class="modal-overlay" id="modal-overlay">
+<div class="modal-content">
+<button class="modal-close-btn" id="modal-close">✕</button>
+<div id="modal-result"></div>
+</div>
+</div>
+<script>
+const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
+
+let sb = null;
+
+function initializeSupabaseClient(jwt = null) {
+    const options = {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false
+        }
+    };
+
+    if (jwt) {
+        options.global = {
+            headers: { 'Authorization': `Bearer ${jwt}` }
+        };
+    }
+
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, options);
+    console.log("Supabase client initialized", jwt ? "with JWT" : "without JWT");
+}
+
+const els = {
+  loginSection: document.getElementById('login-section'),
+  loginForm: document.getElementById('login-form'),
+  loginEmail: document.getElementById('login-email'),
+  loginPassword: document.getElementById('login-password'),
+  loginBtn: document.getElementById('login-btn'),
+  loginError: document.getElementById('login-error'),
+  scannerSection: document.getElementById('scanner-section'),
+  logoutBtn: document.getElementById('logout-btn'),
+  start: document.getElementById('start-scan'),
+  stop: document.getElementById('stop-scan'),
+  video: document.getElementById('video'),
+  result: document.getElementById('result'),
+  uuidInput: document.getElementById('uuid-input'),
+  lookupBtn: document.getElementById('lookup-btn'),
+  cameraOverlay: document.getElementById('camera-overlay'),
+  cameraClose: document.getElementById('camera-close'),
+  cameraStatus: document.getElementById('camera-status'),
+  modalOverlay: document.getElementById('modal-overlay'),
+  modalResult: document.getElementById('modal-result'),
+  modalClose: document.getElementById('modal-close')
+};
+
+function setResult(html) {
+  els.result.innerHTML = html;
+}
+
+function setCameraStatus(text) {
+  els.cameraStatus.textContent = text;
+}
+
+function showModal(html) {
+  els.modalResult.innerHTML = html;
+  els.modalOverlay.classList.add('active');
+}
+
+function hideModal() {
+  els.modalOverlay.classList.remove('active');
+}
+
+function formatModalResult(data) {
+  const badgeClass = data.registration_type === 'pre_registration' ? 'modal-badge-pre' : 'modal-badge-onsite';
+  const badgeText = data.registration_type === 'pre_registration' ? '✅ 事前登録済み' : '🟦 当日受付';
+
+  return `
+    <div class="modal-badge ${badgeClass}">${badgeText}</div>
+    <div class="modal-user-name">${data.name || '-'}</div>
+    <div class="modal-user-info">📧 ${data.email || '-'}</div>
+    <div class="modal-user-meta">
+      UUID: ${data.id}<br>
+      登録区分: ${data.registration_type === 'pre_registration' ? '事前登録' : '当日受付'}
+    </div>
+  `;
+}
+
+function formatResult(data) {
+  const badgeClass = data.registration_type === 'pre_registration' ? 'badge-pre' : 'badge-onsite';
+  const badgeText = data.registration_type === 'pre_registration' ? '✅ 事前登録' : '🟦 当日受付';
+
+  return `
+    <div class="badge ${badgeClass}" style="background: ${badgeClass === 'badge-pre' ? 'rgba(52, 199, 89, 0.3)' : 'rgba(0, 122, 255, 0.3)'}; color: ${badgeClass === 'badge-pre' ? '#34c759' : '#007aff'}; display: inline-block; padding: 0.5rem 1rem; border-radius: 12px; font-weight: 700; margin-bottom: 1rem;">${badgeText}</div>
+    <div class="user-name">${data.name || '-'}</div>
+    <div class="user-info">📧 ${data.email || '-'}</div>
+  `;
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    console.log('ログインボタンがクリックされました');
+
+    els.loginError.textContent = '';
+    els.loginBtn.disabled = true;
+    els.loginBtn.textContent = 'ログイン中...';
+
+    const email = els.loginEmail.value.trim();
+    const password = els.loginPassword.value.trim();
+
+    console.log('入力値:', { email, password });
+
+    if (!email || !password) {
+        els.loginError.textContent = 'メールアドレスとパスワードを入力してください。';
+        els.loginBtn.disabled = false;
+        els.loginBtn.textContent = 'ログイン';
+        return;
+    }
+
+    try {
+        if (!sb) {
+            initializeSupabaseClient();
+        }
+
+        console.log('ログイン試行中...');
+        const { data, error } = await sb.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        console.log('ログイン結果:', { data, error });
+
+        if (error) {
+            console.error("Login Error:", error);
+            els.loginError.textContent = error.message || 'ログインに失敗しました';
+            els.loginBtn.disabled = false;
+            els.loginBtn.textContent = 'ログイン';
+            return;
+        }
+
+        if (data.session && data.user) {
+            console.log("ログイン成功:", data.user.email);
+            const jwt = data.session.access_token;
+            localStorage.setItem('scanner_auth_token', jwt);
+            localStorage.setItem('scanner_user_email', data.user.email);
+
+            initializeSupabaseClient(jwt);
+            showScannerUI();
+        } else {
+            throw new Error('セッション情報が取得できませんでした。');
+        }
+
+    } catch (error) {
+        console.error('予期しないエラー:', error);
+        els.loginError.textContent = 'エラーが発生しました。Consoleを確認してください。';
+        els.loginBtn.disabled = false;
+        els.loginBtn.textContent = 'ログイン';
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('scanner_auth_token');
+    localStorage.removeItem('scanner_user_email');
+    initializeSupabaseClient(null);
+    showLoginUI();
+    stopZXing();
+    console.log("ログアウトしました。");
+}
+
+function showLoginUI() {
+    els.loginSection.style.display = 'block';
+    els.scannerSection.style.display = 'none';
+    els.loginPassword.value = '';
+}
+
+function showScannerUI() {
+    els.loginSection.style.display = 'none';
+    els.scannerSection.style.display = 'block';
+    els.loginError.textContent = '';
+    els.loginBtn.disabled = false;
+    els.loginBtn.textContent = 'ログイン';
+}
+
+async function lookupByUuid(id, showInModal = false) {
+  setCameraStatus('🔍 照会中…');
+  setResult('🔍 照会中…');
+  try {
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRe.test(id)) throw new Error('UUID形式が不正です');
+
+    if (!sb) {
+      throw new Error('Supabaseクライアントが初期化されていません');
+    }
+
+    console.log('lookup_user呼び出し:', id);
+
+    const { data, error } = await sb
+      .rpc('lookup_user', { p_id: id })
+      .maybeSingle();
+
+    console.log('RPC結果:', { data, error });
+
+    if (error) {
+      console.error('RPC Error:', error);
+      throw error;
+    }
+
+    if (!data) {
+      const errorMsg = '❌ 該当なし<br><span style="font-size:0.9rem;opacity:0.8;">このUUIDは登録されていません</span>';
+      if (showInModal) {
+        showModal(errorMsg);
+      } else {
+        setResult(errorMsg);
+      }
+      return;
+    }
+
+    if (showInModal) {
+      showModal(formatModalResult(data));
+    }
+    setResult(formatResult(data));
+
+  } catch (e) {
+    console.error('Lookup error:', e);
+    const errorMsg = '⚠️ エラー<br><span style="font-size:0.9rem;opacity:0.8;">' + (e.message || String(e)) + '</span>';
+    if (showInModal) {
+      showModal(errorMsg);
+    } else {
+      setResult(errorMsg);
+    }
+  }
+}
+
+let codeReader = null;
+let currentDeviceId = null;
+
+async function pickBackCamera(devices) {
+  const byLabel = devices.find(d =>
+    /back|rear|environment|後面|背面/i.test(d.label || '')
+  );
+  if (byLabel) return byLabel.deviceId;
+  return devices.length ? devices[devices.length - 1].deviceId : null;
+}
+
+async function startZXing() {
+  els.cameraOverlay.classList.add('active');
+  setCameraStatus('📷 初期化中…');
+  try {
+    if (!window.ZXing || !window.ZXing.BrowserMultiFormatReader) {
+      throw new Error('ZXing の読み込みに失敗しました');
+    }
+
+    if (!codeReader) codeReader = new ZXing.BrowserMultiFormatReader();
+    const devices = await codeReader.listVideoInputDevices();
+    if (!devices || devices.length === 0) {
+      setCameraStatus('❌ カメラが見つかりません');
+      return;
+    }
+    currentDeviceId = await pickBackCamera(devices);
+
+    els.start.disabled = true;
+    els.stop.disabled = false;
+
+    await codeReader.decodeFromVideoDevice(
+      currentDeviceId,
+      els.video,
+      async (result, err) => {
+        if (result) {
+          const text = (result.getText() || '').trim();
+          await lookupByUuid(text, true);
+          stopZXing();
+        } else if (err && !(err instanceof ZXing.NotFoundException)) {
+          setCameraStatus('⚠️ 読み取りエラー');
+        }
+      }
+    );
+
+    els.video.setAttribute('playsinline', 'true');
+    els.video.muted = true;
+
+    setCameraStatus('👀 QRコードをカメラにかざしてください');
+  } catch (e) {
+    setCameraStatus('⚠️ 初期化失敗: ' + (e.message || String(e)));
+  }
+}
+
+function stopZXing() {
+  try { if (codeReader) codeReader.reset(); } catch {}
+  els.start.disabled = false;
+  els.stop.disabled = true;
+  const stream = els.video.srcObject;
+  if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+  els.video.srcObject = null;
+  els.cameraOverlay.classList.remove('active');
+}
+
+els.loginForm.addEventListener('submit', handleLogin);
+els.logoutBtn.addEventListener('click', handleLogout);
+
+els.start.addEventListener('click', startZXing);
+els.stop.addEventListener('click', stopZXing);
+els.cameraClose.addEventListener('click', stopZXing);
+els.modalClose.addEventListener('click', hideModal);
+els.modalOverlay.addEventListener('click', (e) => {
+  if (e.target === els.modalOverlay) hideModal();
+});
+els.lookupBtn.addEventListener('click', () => {
+  const id = (els.uuidInput.value || '').trim();
+  if (!id) return;
+  lookupByUuid(id, true);
+});
+
+function initializeApp() {
+    const token = localStorage.getItem('scanner_auth_token');
+
+    initializeSupabaseClient(token || null);
+
+    if (token) {
+        console.log("既存のトークンが見つかりました。");
+        showScannerUI();
+    } else {
+        console.log("ログイン画面を表示します。");
+        showLoginUI();
+    }
+}
+
+initializeApp();
+</script>
+</body>
+</html>
