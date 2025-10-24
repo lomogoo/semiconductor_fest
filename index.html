@@ -2180,11 +2180,13 @@ async function autoGrantStamp(stampId) {
 async function ensureAuth() {
   // 匿名UUID方式：認証不要、即利用可能
   let uuid = localStorage.getItem('user_uuid');
+  let isNewUser = false;
 
   if (!uuid) {
     // 新規ユーザー：UUIDを自動生成
     uuid = crypto.randomUUID();
     localStorage.setItem('user_uuid', uuid);
+    isNewUser = true;
     console.log('[Anonymous User] New UUID created:', uuid);
   } else {
     console.log('[Anonymous User] Existing UUID loaded:', uuid);
@@ -2201,6 +2203,22 @@ async function ensureAuth() {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
 
+  // 新規ユーザーの場合、まずユーザーをサーバーに登録
+  if (isNewUser) {
+    try {
+      console.log('[Anonymous User] Creating new user in database...');
+      const result = await callEdgeFunction('onsite-intake', {
+        name: '匿名参加者',
+        email: `${uuid}@anonymous.local`,
+        user_id: uuid
+      });
+      console.log('[Anonymous User] User created successfully:', result);
+    } catch (error) {
+      console.error('[ensureAuth] Failed to create user:', error);
+      // 作成失敗してもアプリは使えるように続行
+    }
+  }
+
   // サーバーからデータ同期してユーザー番号を取得
   try {
     const userData = await callEdgeFunction('get-user-data', { userId: uuid });
@@ -2216,6 +2234,30 @@ async function ensureAuth() {
     }
   } catch (error) {
     console.error('[ensureAuth] Failed to get user data:', error);
+    // ユーザーデータ取得失敗時、既存ユーザーでも作成を試みる
+    if (!isNewUser) {
+      try {
+        console.log('[Anonymous User] User not found, attempting to create...');
+        await callEdgeFunction('onsite-intake', {
+          name: '匿名参加者',
+          email: `${uuid}@anonymous.local`,
+          user_id: uuid
+        });
+        // 作成後に再度取得
+        const userData = await callEdgeFunction('get-user-data', { userId: uuid });
+        if (userData && userData.user) {
+          const userNumber = userData.user.user_number || 0;
+          const formattedNumber = String(userNumber).padStart(5, '0');
+          const userNumberElement = document.getElementById('user-number');
+          if (userNumberElement) {
+            userNumberElement.textContent = formattedNumber;
+          }
+          console.log('[Anonymous User] User number:', formattedNumber);
+        }
+      } catch (createError) {
+        console.error('[ensureAuth] Failed to create user after error:', createError);
+      }
+    }
   }
 
   await syncPointsFromServer();
