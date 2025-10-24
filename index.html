@@ -23,44 +23,65 @@
     }
     html { font-family: 'Inter', sans-serif; }
     body {
-      background-color: var(--bg-light);
-      background-image:
-        radial-gradient(at 10% 20%, hsla(210, 80%, 95%, 0.7) 0px, transparent 50%),
-        radial-gradient(at 80% 15%, hsla(200, 70%, 90%, 0.6) 0px, transparent 50%),
-        radial-gradient(at 20% 90%, hsla(220, 75%, 92%, 0.5) 0px, transparent 50%),
-        radial-gradient(at 90% 85%, hsla(190, 60%, 90%, 0.6) 0px, transparent 50%);
+      background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f8 25%, #f5f8fa 50%, #e8f0f8 75%, #f2f6f9 100%);
       background-attachment: fixed;
       color: var(--text-main);
       overscroll-behavior: none;
       height: 100dvh;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
-    #app { flex: 1; display: flex; flex-direction: column; }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(at 15% 25%, hsla(210, 85%, 97%, 0.5) 0px, transparent 60%),
+        radial-gradient(at 85% 20%, hsla(200, 75%, 95%, 0.4) 0px, transparent 55%),
+        radial-gradient(at 25% 85%, hsla(220, 80%, 96%, 0.35) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, hsla(190, 70%, 94%, 0.45) 0px, transparent 58%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
     main { flex: 1; overflow-y: auto; position: relative; }
 
     .page { display: none; width: 100%; position: relative; }
     .page.active { display: block; }
 
     .liquid-glass {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(32px) saturate(180%);
-      -webkit-backdrop-filter: blur(32px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.5) 100%
+      );
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow:
-        inset 0 2px 2px rgba(255, 255, 255, 0.8),
-        0 16px 40px rgba(37, 37, 85, 0.12);
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.4),
+        0 20px 60px -10px rgba(14, 165, 233, 0.08),
+        0 8px 20px -5px rgba(14, 165, 233, 0.06);
     }
 
     .floating-nav {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(32px) saturate(180%);
-      -webkit-backdrop-filter: blur(32px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.35) 0%,
+        rgba(255, 255, 255, 0.25) 100%
+      );
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       box-shadow:
-        inset 0 2px 2px rgba(255, 255, 255, 0.7),
-        0 16px 40px rgba(37, 37, 85, 0.18);
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.3),
+        0 20px 50px -8px rgba(14, 165, 233, 0.15),
+        0 10px 25px -5px rgba(14, 165, 233, 0.08);
       position: relative;
       border-radius: 1.5rem;
     }
@@ -879,10 +900,10 @@ li .acquired-check {
           <p class="text-xs text-sky-600 font-medium truncate">みやぎ半導体キャリアフェス</p>
         </div>
 
-        <!-- ユーザー情報 -->
-        <div id="user-pill" class="ml-auto text-xs text-slate-700 font-medium px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-sm shadow-sm border border-sky-100 hidden flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-          <span class="truncate max-w-[120px]"></span>
+        <!-- 匿名参加インジケーター -->
+        <div class="ml-auto text-xs text-slate-500 font-medium px-3 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-slate-200 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+          <span>匿名参加</span>
         </div>
       </div>
     </header>
@@ -2246,20 +2267,70 @@ async function handleScanResult(text) {
 
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-async function ensureAuth() {
-  const local = loadLocalUser();
-  const token = localStorage.getItem(LS_KEY_TOKEN);
-  
-  if (local && local.id && token) {
-    state.user = local;
-    state.surveyCompleted = local.survey_completed || false;
-    enableAppUI(state.user);
-    await syncPointsFromServer();
-    return true;
+async function autoGrantStamp(stampId) {
+  console.log('[autoGrantStamp] Processing stamp:', stampId);
+
+  if (!state.user?.id) {
+    showToast('エラー: ユーザーIDが見つかりません', 'error');
+    return false;
   }
-  
-  showAuthGate();
-  return false;
+
+  try {
+    showToast('スタンプを確認中...', 'info');
+
+    const result = await callEdgeFunction('grant-stamp', {
+      userId: state.user.id,
+      qrCode: stampId.toLowerCase()
+    });
+
+    if (result.success) {
+      showToast(`✅ ${result.pointsAdded}pt獲得！`, 'success');
+      await syncPointsFromServer();
+      return true;
+    }
+  } catch (error) {
+    console.error('[autoGrantStamp] Error:', error);
+
+    if (error.message.includes('既に取得済み')) {
+      showToast('⚠️ 既に取得済みです', 'warning');
+    } else if (error.message.includes('未対応')) {
+      showToast('❌ 無効なQRコードです', 'error');
+    } else {
+      showToast('❌ エラーが発生しました', 'error');
+    }
+
+    return false;
+  }
+}
+
+async function ensureAuth() {
+  // 匿名UUID方式：認証不要、即利用可能
+  let uuid = localStorage.getItem('user_uuid');
+
+  if (!uuid) {
+    // 新規ユーザー：UUIDを自動生成
+    uuid = crypto.randomUUID();
+    localStorage.setItem('user_uuid', uuid);
+    console.log('[Anonymous User] New UUID created:', uuid);
+  } else {
+    console.log('[Anonymous User] Existing UUID loaded:', uuid);
+  }
+
+  // 匿名ユーザーとして設定
+  state.user = {
+    id: uuid,
+    name: '匿名参加者',
+    registration_type: 'anonymous'
+  };
+
+  // アプリUIを有効化（認証ゲート不要）
+  const root = document.getElementById('app');
+  root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
+
+  // サーバーからデータ同期
+  await syncPointsFromServer();
+
+  return true;
 }
 
 async function handleSignin(e) {
@@ -2662,12 +2733,27 @@ function setupSurveyInteractivity() {
   });
 }
 
-function init() {
+async function init() {
   if ($app.rewards.content) {
     originalRewardsContentHTML = $app.rewards.content.innerHTML;
   }
   rebindRewardElements();
   console.log('[init] starting');
+
+  // ネイティブカメラからのQRコード対応
+  const urlParams = new URLSearchParams(window.location.search);
+  const stampId = urlParams.get('stamp');
+
+  // 匿名ユーザー初期化（認証不要）
+  await ensureAuth();
+
+  // URLパラメータにstampがあれば自動的にスタンプ付与
+  if (stampId) {
+    console.log('[Native Camera] Detected stamp parameter:', stampId);
+    await autoGrantStamp(stampId);
+    // URLパラメータをクリーンアップ（履歴に残さない）
+    window.history.replaceState({}, '', window.location.pathname);
+  }
   
   $app.navButtons.forEach(btn => {
     if (!btn) return;
