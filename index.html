@@ -500,26 +500,61 @@ li .acquired-check {
       font-size: 0.875rem;
       color: #059669;
     }
-    /* キラキラエフェクトの本体 */
-    #progress-bar::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
+    /* 企業ロゴグリッドのスタイル */
+    #company-logo-grid {
+      padding: 0.5rem;
+    }
+
+    .company-logo-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .company-logo-item img {
       width: 100%;
       height: 100%;
-      /* 斜めの白い光（キラキラ） */
-      background: linear-gradient(
-        110deg, 
-        rgba(255, 255, 255, 0) 40%, 
-        rgba(255, 255, 255, 0.4) 50%, 
-        rgba(255, 255, 255, 0) 60%
-      );
-      background-size: 200px 100%; /* 光の太さ */
-      background-repeat: no-repeat;
-      /* アニメーションを指定 */
-      animation: shine 2.5s linear infinite;
-      opacity: 0.8;
+      object-fit: contain;
+      padding: 8px;
+      transition: filter 0.3s ease;
+    }
+
+    .company-logo-item.not-acquired img {
+      filter: grayscale(100%) brightness(1.1);
+      opacity: 0.4;
+    }
+
+    .company-logo-item.acquired {
+      border-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .company-logo-item.acquired img {
+      filter: grayscale(0%);
+      opacity: 1;
+    }
+
+    .company-logo-item.acquired::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
     }
 
     /* キラキラを動かすアニメーション */
@@ -543,71 +578,8 @@ li .acquired-check {
   
 </head>
 <body>
-  <!-- Auth: Backdrop and Launch Panel -->
-  <div id="auth-backdrop" class="auth-backdrop"></div>
-  <div id="auth-launch" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
-      <h2 class="text-xl font-semibold text-slate-800">ご利用前にサインイン/ログイン</h2>
-      <p class="text-sm text-slate-600 mt-1">当日受付の方は「サインイン」で氏名・メールアドレスを登録してください。事前申込済みの方は「ログイン」へ。</p>
-      <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">当日受付の方</button>
-        <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">事前申込済みの方</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Signin Modal -->
-  <div id="signin-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] my-auto">
-      <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <button data-back="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
-          <span>←</span>
-          <span>戻る</span>
-        </button>
-        <h3 class="text-lg font-semibold text-slate-800">当日受付の方</h3>
-        <div class="w-16"></div>
-      </div>
-      <form id="signin-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:東北 太郎" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-700">メールアドレス</label>
-          <input id="si-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例:taro@example.com" />
-        </div>
-        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録</button>
-        <p id="signin-error" class="text-sm text-red-600"></p>
-      </form>
-    </div>
-  </div>
-
-  <!-- Login Modal -->
-  <div id="login-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] my-auto">
-      <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <button data-back="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1">
-          <span>←</span>
-          <span>戻る</span>
-        </button>
-        <h3 class="text-lg font-semibold text-slate-800">ログイン（登録済み）</h3>
-        <div class="w-16"></div>
-      </div>
-      <form id="login-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-700">メールアドレス</label>
-          <input id="li-email" type="email" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録したメールアドレス" />
-        </div>
-        <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
-        <p class="text-xs text-slate-500">※事前にGoogleフォームに入力した内容でお答えください。</p>
-        <p id="login-error" class="text-sm text-red-600"></p>
-      </form>
-    </div>
-  </div>
+  <!-- General Modal Backdrop -->
+  <div id="modal-backdrop" class="auth-backdrop"></div>
 
   <!-- User QR Modal -->
   <div id="qr-modal" class="auth-modal">
@@ -900,10 +872,10 @@ li .acquired-check {
           <p class="text-xs text-sky-600 font-medium truncate">みやぎ半導体キャリアフェス</p>
         </div>
 
-        <!-- 匿名参加インジケーター -->
-        <div class="ml-auto text-xs text-slate-500 font-medium px-3 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-slate-200 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-          <span>匿名参加</span>
+        <!-- ユーザー番号表示 -->
+        <div id="user-number-display" class="ml-auto text-xs text-slate-700 font-mono font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-sky-50 to-blue-50 backdrop-blur-sm border border-sky-300 flex items-center gap-1.5 shadow-sm">
+          <span class="text-sky-600">#</span>
+          <span id="user-number">00000</span>
         </div>
       </div>
     </header>
@@ -919,17 +891,14 @@ li .acquired-check {
                 <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
               </div>
             </div>
-            <div class="progress-area">
-              <div id="progress-wrapper">
-                <div id="progress-track" class="progress-track">
-                  <div id="progress-bar" style="width:0%"></div>
-                </div>
-              </div>
+            <!-- 企業ロゴグリッド (2×3) -->
+            <div id="company-logo-grid" class="grid grid-cols-3 gap-3 mt-3">
+              <!-- ロゴはJavaScriptで動的に生成 -->
             </div>
             <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
             <div id="progress-percent" class="mt-2 text-center">
-              <span class="text-2xl font-bold text-sky-600">0%</span>
-              <span class="text-xs text-slate-500 ml-1">達成</span>
+              <span id="stamp-count" class="text-2xl font-bold text-sky-600">0</span>
+              <span class="text-xs text-slate-500 ml-1">/ 6 スタンプ</span>
             </div>
 
             <!-- アクションボタンエリア -->
@@ -1257,12 +1226,11 @@ const $app = {
   boothList: document.getElementById('booth-list'),
   progress: {
     badge: document.getElementById('progress-badge'),
-    bar: document.getElementById('progress-bar'),
-    wrapper: document.getElementById('progress-wrapper'),
     msg: document.getElementById('progress-msg'),
     percent: document.getElementById('progress-percent'),
     rankPercentile: document.getElementById('rank-percentile'),
-    dot: document.getElementById('progress-dot'),
+    logoGrid: document.getElementById('company-logo-grid'),
+    stampCount: document.getElementById('stamp-count'),
   },
   map: {
     svg: document.getElementById('svg-map'),
@@ -1295,22 +1263,7 @@ const $app = {
     torchBtn: document.getElementById('fullscreen-torch'),
     switchBtn: document.getElementById('fullscreen-switch'),
   },
-  auth: {
-    backdrop: document.getElementById('auth-backdrop'),
-    launch: document.getElementById('auth-launch'),
-    signin: document.getElementById('signin-modal'),
-    login: document.getElementById('login-modal'),
-    openSignin: document.getElementById('open-signin'),
-    openLogin: document.getElementById('open-login'),
-    signinForm: document.getElementById('signin-form'),
-    loginForm: document.getElementById('login-form'),
-    siName: document.getElementById('si-name'),
-    siEmail: document.getElementById('si-email'),
-    liName: document.getElementById('li-name'),
-    liEmail: document.getElementById('li-email'),
-    signinError: document.getElementById('signin-error'),
-    loginError: document.getElementById('login-error'),
-  },
+  backdrop: document.getElementById('modal-backdrop'),
   toast: document.getElementById('toast'),
   staffConfirm: {
     modal: document.getElementById('staff-confirm-modal'),
@@ -1351,93 +1304,20 @@ const $app = {
   }
 };
 
-function showAuthGate() {
-  $app.auth.backdrop.classList.add('show');
-  $app.auth.launch.classList.add('show');
-  const root = document.getElementById('app');
-  root.classList.add('opacity-0', 'pointer-events-none', 'select-none');
-}
-
-function hideAuthGate() {
-  $app.auth.backdrop.classList.remove('show');
-  $app.auth.launch.classList.remove('show');
-}
-
-function openAuthModal(kind) {
-  hideAuthGate();
-  $app.auth.backdrop.classList.add('show');
-  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
-  target.classList.add('show');
-}
-
-function closeAuthModal(kind) {
-  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
-  target.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show') &&
-      !$app.auth.login.classList.contains('show') &&
-      !$app.qr.modal.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show') &&
-      !$app.survey.modal.classList.contains('show')) {
-    $app.auth.backdrop.classList.remove('show');
-  }
-}
-
-function backToAuthGate(kind) {
-  closeAuthModal(kind);
-  showAuthGate();
-}
-
-function enableAppUI(user) {
-  if (!user || !user.id || !user.name || !user.email) {
-    console.error('Invalid user data:', user);
-    showToast('登録されていないユーザーです');
-    showAuthGate();
-    return;
-  }
-  
-  $app.auth.backdrop?.classList.remove('show');
-  $app.auth.launch?.classList.remove('show');
-  $app.auth.signin?.classList.remove('show');
-  $app.auth.login?.classList.remove('show');
-  $app.qr.modal?.classList.remove('show');
-  $app.rewards.modal?.classList.remove('show');
-  $app.survey.modal?.classList.remove('show');
-  const root = document.getElementById('app');
-  root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
-  $app.userPill.classList.remove('hidden');
-  $app.userPill.classList.add('cursor-pointer', 'hover:bg-white/80', 'transition-all');
-  // ユーザー名を2番目のspanに設定
-  const nameSpan = $app.userPill.querySelector('span:last-child');
-  if (nameSpan) {
-    nameSpan.textContent = user.name;
-  }
-
-  window.scrollTo({ top: 0, behavior: 'instant' });
-  
-  const mainEl = document.querySelector('main');
-  if (mainEl) {
-    mainEl.scrollTop = 0;
-  }
-  
-  setTimeout(() => {
-    layoutBoothIcons();
-  }, 100);
-}
+// Authentication functions removed - now using anonymous UUID-based system
 
 function openQrModal() {
   if (!state.user?.id) { showToast('ログインしてください'); return; }
-  $app.auth.backdrop.classList.add('show');
+  $app.backdrop.classList.add('show');
   $app.qr.modal.classList.add('show');
   renderUserQr(state.user.id);
 }
 
 function closeQrModal() {
   $app.qr.modal.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show') &&
-      !$app.auth.login.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show') &&
+  if (!$app.rewards.modal.classList.contains('show') &&
       !$app.survey.modal.classList.contains('show')) {
-    $app.auth.backdrop.classList.remove('show');
+    $app.backdrop.classList.remove('show');
   }
 }
 
@@ -1446,32 +1326,30 @@ function closeQrModal() {
     showToast('交換できるポイントがありません');
     return;
   }
-  
+
   // 枚数をセット
   $app.staffConfirm.count.textContent = `${state.points}枚`;
-  
+
   // メインの特典モーダルを隠す
-  $app.rewards.modal.classList.remove('show'); 
-  
+  $app.rewards.modal.classList.remove('show');
+
   // 確認モーダルを表示 (backdrop は既に表示されているはず)
-  $app.auth.backdrop.classList.add('show');
+  $app.backdrop.classList.add('show');
   $app.staffConfirm.modal.classList.add('show');
 }
 
 function closeStaffConfirmModal(backToRewards = false) {
   $app.staffConfirm.modal.classList.remove('show');
-  
+
   if (backToRewards) {
     // 特典モーダルに戻る
     $app.rewards.modal.classList.add('show');
   } else {
     // 完全に閉じる
-    if (!$app.auth.signin.classList.contains('show') &&
-        !$app.auth.login.classList.contains('show') &&
-        !$app.qr.modal.classList.contains('show') &&
+    if (!$app.qr.modal.classList.contains('show') &&
         !$app.rewards.modal.classList.contains('show') &&
         !$app.survey.modal.classList.contains('show')) {
-      $app.auth.backdrop.classList.remove('show');
+      $app.backdrop.classList.remove('show');
     }
   }
 }
@@ -1535,17 +1413,15 @@ function renderUserQr(uuid) {
 }
 
 function openSurveyModal() {
-  $app.auth.backdrop.classList.add('show');
+  $app.backdrop.classList.add('show');
   $app.survey.modal.classList.add('show');
 }
 
 function closeSurveyModal() {
   $app.survey.modal.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show') &&
-      !$app.auth.login.classList.contains('show') &&
-      !$app.qr.modal.classList.contains('show') &&
+  if (!$app.qr.modal.classList.contains('show') &&
       !$app.rewards.modal.classList.contains('show')) {
-    $app.auth.backdrop.classList.remove('show');
+    $app.backdrop.classList.remove('show');
   }
 }
 
@@ -1594,22 +1470,20 @@ async function submitSurvey(e) {
   }
 }
 function openRewardsModal() {
-  if (!state.user?.id) { 
-    showToast('ログインしてください'); 
-    return; 
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
   }
-  $app.auth.backdrop.classList.add('show');
+  $app.backdrop.classList.add('show');
   $app.rewards.modal.classList.add('show');
   renderRewardsModal();
 }
 
 function closeRewardsModal() {
   $app.rewards.modal.classList.remove('show');
-  if (!$app.auth.signin.classList.contains('show') &&
-      !$app.auth.login.classList.contains('show') &&
-      !$app.qr.modal.classList.contains('show') &&
+  if (!$app.qr.modal.classList.contains('show') &&
       !$app.survey.modal.classList.contains('show')) {
-    $app.auth.backdrop.classList.remove('show');
+    $app.backdrop.classList.remove('show');
   }
 }
 
@@ -1728,9 +1602,9 @@ function renderRewardsModal() {
         // 交換完了メッセージを表示
         showRewardClaimedMessage(quoCards);
 
-        $app.auth.backdrop.classList.add('show');
+        $app.backdrop.classList.add('show');
         $app.rewards.modal.classList.add('show');
-        
+
         renderAll();
       }
     } catch (err) {
@@ -1919,10 +1793,8 @@ function renderBoothList() {
 
 function renderProgress() {
   const n = state.totalPoints;  // ← 累計ポイントで計算
-  const progressPercent = (n / MAX_POINTS) * 100;
 
   $app.progress.badge.textContent = `${state.totalPoints}pt`;  // ← 累計ポイント表示に変更
-  $app.progress.bar.style.width = `${progressPercent}%`;
 
   if (state.percentile !== null) {
     const displayPercentile = (state.percentile === 0) ? 1 : state.percentile;
@@ -1932,16 +1804,21 @@ function renderProgress() {
     $app.progress.rankPercentile.classList.add('hidden');
   }
 
-  const progressTrack = document.getElementById('progress-track');
-  const existingMarkers = progressTrack.querySelectorAll('.progress-marker');
-  existingMarkers.forEach(m => m.remove());
+  // 企業ロゴグリッドを描画
+  if ($app.progress.logoGrid) {
+    $app.progress.logoGrid.innerHTML = '';
+    BOOTH_DATA.forEach(booth => {
+      const isAcquired = state.acquiredStamps.has(booth.id);
+      const logoItem = document.createElement('div');
+      logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
+      logoItem.innerHTML = `<img src="${booth.img}" alt="${booth.name}" />`;
+      $app.progress.logoGrid.appendChild(logoItem);
+    });
+  }
 
-  for (let i = 1; i <= MAX_POINTS; i++) {
-    const marker = document.createElement('div');
-    marker.className = `progress-marker ${n >= i ? 'is-active' : ''}`;
-    marker.style.left = `${(i / MAX_POINTS) * 100}%`;
-    marker.innerHTML = `<span class="label">${i}</span>`;
-    progressTrack.appendChild(marker);
+  // スタンプカウントを更新
+  if ($app.progress.stampCount) {
+    $app.progress.stampCount.textContent = n;
   }
 
   if (n >= MAX_POINTS) {
@@ -1949,9 +1826,6 @@ function renderProgress() {
   } else {
     $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
   }
-
-  const achievementPercent = Math.round((n / MAX_POINTS) * 100);
-  $app.progress.percent.querySelector('.text-2xl').textContent = `${achievementPercent}%`;
 
   updateAcquiredBadges();
 
@@ -2327,107 +2201,29 @@ async function ensureAuth() {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
 
-  // サーバーからデータ同期
+  // サーバーからデータ同期してユーザー番号を取得
+  try {
+    const userData = await callEdgeFunction('get-user-data', { userId: uuid });
+    if (userData && userData.user) {
+      // ユーザー番号を5桁でゼロパディング表示
+      const userNumber = userData.user.user_number || 0;
+      const formattedNumber = String(userNumber).padStart(5, '0');
+      const userNumberElement = document.getElementById('user-number');
+      if (userNumberElement) {
+        userNumberElement.textContent = formattedNumber;
+      }
+      console.log('[Anonymous User] User number:', formattedNumber);
+    }
+  } catch (error) {
+    console.error('[ensureAuth] Failed to get user data:', error);
+  }
+
   await syncPointsFromServer();
 
   return true;
 }
 
-async function handleSignin(e) {
-  e.preventDefault();
-  $app.auth.signinError.textContent = '';
-
-  const name = $app.auth.siName.value.trim();
-  const email = $app.auth.siEmail.value.trim();
-  
-  if (!name || !email) {
-    $app.auth.signinError.textContent = '未入力の項目があります。';
-    return;
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    $app.auth.signinError.textContent = '正しいメールアドレスを入力してください。';
-    return;
-  }
-
-  try {
-    const result = await callEdgeFunction('onsite-intake', {
-      name,
-      email
-    });
-
-    if (result.user && result.token) {
-      const user = {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
-        registration_type: result.user.registration_type || 'on_site',
-        survey_completed: false
-      };
-      
-      saveLocalUser(user);
-      localStorage.setItem(LS_KEY_TOKEN, result.token);
-      state.user = user;
-      state.surveyCompleted = false;
-      
-      closeAuthModal('signin');
-      enableAppUI(user);
-      await syncPointsFromServer();
-      showToast('登録が完了しました。ようこそ！');
-    }
-  } catch (err) {
-    console.error(err);
-    $app.auth.signinError.textContent = err.message || '登録に失敗しました';
-  }
-}
-
-async function handleLogin(e) {
-  e.preventDefault();
-  $app.auth.loginError.textContent = '';
-  
-  const name = $app.auth.liName.value.trim();
-  const email = $app.auth.liEmail.value.trim();
-  if (!name || !email) {
-    $app.auth.loginError.textContent = '氏名とメールアドレスを入力してください。';
-    return;
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    $app.auth.loginError.textContent = '正しいメールアドレスを入力してください。';
-    return;
-  }
-  
-  try {
-    const result = await callEdgeFunction('login', {
-      name,
-      email
-    });
-    
-    if (result.user && result.token) {
-      const user = {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
-        registration_type: result.user.registration_type || 'pre_registration',
-        survey_completed: false
-      };
-      
-      saveLocalUser(user);
-      localStorage.setItem(LS_KEY_TOKEN, result.token);
-      state.user = user;
-      
-      closeAuthModal('login');
-      enableAppUI(user);
-      await syncPointsFromServer();
-      showToast('ログインしました。');
-    }
-  } catch (err) {
-    console.error(err);
-    $app.auth.loginError.textContent = err.message || 'ログインに失敗しました。入力内容を確認してください。';
-  }
-}
+// handleSignin and handleLogin functions removed - now using anonymous UUID-based system
 
 function showToast(msg) {
   const el = $app.toast;
@@ -2560,27 +2356,8 @@ function layoutBoothIcons() {
     img.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(img);
     
-    const highlight = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    highlight.setAttribute('x', x + 5);
-    highlight.setAttribute('y', y + 5);
-    highlight.setAttribute('width', size - 10);
-    highlight.setAttribute('height', (size - 10) * 0.5);
-    highlight.setAttribute('rx', size * 0.15);
-    highlight.setAttribute('fill', 'url(#highlight-gradient)');
-    highlight.setAttribute('opacity', '0.5');
-    highlight.setAttribute('clip-path', `url(#${clipId})`);
-    group.appendChild(highlight);
-    
-    const gloss = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-    gloss.setAttribute('cx', x + size * 0.3);
-    gloss.setAttribute('cy', y + size * 0.25);
-    gloss.setAttribute('rx', size * 0.15);
-    gloss.setAttribute('ry', size * 0.1);
-    gloss.setAttribute('fill', 'white');
-    gloss.setAttribute('opacity', '0.6');
-    gloss.setAttribute('clip-path', `url(#${clipId})`);
-    group.appendChild(gloss);
-    
+    // Reflection effects removed per user request
+
     if (isAcquired) {
       const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
       checkBg.setAttribute('cx', x + size - 20);
@@ -2851,22 +2628,8 @@ async function init() {
 
   setupSurveyInteractivity();
 
-  ensureAuth().then(ok => {
-    if (ok) {
-      enableAppUI(state.user);
-    }
-  });
-
-  $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
-  $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
-  document.querySelectorAll('[data-back="signin"]').forEach(el => 
-    el.addEventListener('click', () => backToAuthGate('signin'))
-  );
-  document.querySelectorAll('[data-back="login"]').forEach(el => 
-    el.addEventListener('click', () => backToAuthGate('login'))
-  );
-  $app.auth.signinForm.addEventListener('submit', handleSignin);
-  $app.auth.loginForm.addEventListener('submit', handleLogin);
+  // 匿名ユーザーとして自動初期化
+  await ensureAuth();
 
   $app.userPill.addEventListener('click', openQrModal);
   $app.qr.closeBtn.addEventListener('click', closeQrModal);
@@ -2880,15 +2643,15 @@ async function init() {
     $app.staffConfirm.cancelBtn.addEventListener('click', () => closeStaffConfirmModal(true));
   }
 
-  $app.auth.backdrop.addEventListener('click', (e) => {
-    if (e.target === $app.auth.backdrop) {
+  $app.backdrop.addEventListener('click', (e) => {
+    if (e.target === $app.backdrop) {
       if ($app.qr.modal.classList.contains('show')) {
         closeQrModal();
       } else if ($app.rewards.modal.classList.contains('show')) {
         closeRewardsModal();
       } else if ($app.survey.modal.classList.contains('show')) {
         closeSurveyModal();
-      } else if ($app.staffConfirm.modal.classList.contains('show')) { // ▼追加
+      } else if ($app.staffConfirm.modal.classList.contains('show')) {
         closeStaffConfirmModal(true); // 特典モーダルに戻る
       }
     }
