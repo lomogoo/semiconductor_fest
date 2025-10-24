@@ -2201,21 +2201,72 @@ async function ensureAuth() {
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
 
-  // サーバーからデータ同期してユーザー番号を取得
+  // Supabaseに直接アクセスしてユーザーを作成/取得
   try {
-    const userData = await callEdgeFunction('get-user-data', { userId: uuid });
-    if (userData && userData.user) {
-      // ユーザー番号を5桁でゼロパディング表示
-      const userNumber = userData.user.user_number || 0;
-      const formattedNumber = String(userNumber).padStart(5, '0');
-      const userNumberElement = document.getElementById('user-number');
-      if (userNumberElement) {
-        userNumberElement.textContent = formattedNumber;
+    // まず既存ユーザーを確認
+    const checkResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_users?id=eq.${uuid}&select=id,user_number,survey_completed`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        }
       }
-      console.log('[Anonymous User] User number:', formattedNumber);
+    );
+
+    let userNumber = 0;
+
+    if (checkResponse.ok) {
+      const users = await checkResponse.json();
+
+      if (users && users.length > 0) {
+        // 既存ユーザー
+        userNumber = users[0].user_number || 0;
+        console.log('[Anonymous User] Existing user, number:', userNumber);
+      } else {
+        // 新規ユーザーを作成
+        const insertResponse = await fetch(
+          `${SUPABASE_URL}/rest/v1/app_users`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              id: uuid,
+              name: null,
+              email: null,
+              registration_type: 'anonymous'
+            })
+          }
+        );
+
+        if (insertResponse.ok) {
+          const newUsers = await insertResponse.json();
+          if (newUsers && newUsers.length > 0) {
+            userNumber = newUsers[0].user_number || 0;
+            console.log('[Anonymous User] New user created, number:', userNumber);
+          }
+        } else {
+          const error = await insertResponse.text();
+          console.error('[Anonymous User] Failed to create user:', error);
+        }
+      }
     }
+
+    // ユーザー番号を5桁でゼロパディング表示
+    const formattedNumber = String(userNumber).padStart(5, '0');
+    const userNumberElement = document.getElementById('user-number');
+    if (userNumberElement) {
+      userNumberElement.textContent = formattedNumber;
+    }
+    console.log('[Anonymous User] Displaying number:', formattedNumber);
+
   } catch (error) {
-    console.error('[ensureAuth] Failed to get user data:', error);
+    console.error('[ensureAuth] Failed to get/create user:', error);
   }
 
   await syncPointsFromServer();
