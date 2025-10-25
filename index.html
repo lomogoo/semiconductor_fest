@@ -1081,7 +1081,6 @@ li .acquired-check {
       </nav>
     </div>
   </div>
-
 <script>
 const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
@@ -1112,57 +1111,109 @@ async function callEdgeFunction(functionName, body = {}) {
   }
 }
 
+// 定数・データ定義
 const IMG_DEFAULT = 'logo.jpg';
 const MAX_POINTS = 6;
 
 const BOOTH_ANCHORS = {
-  A: { x: 0.85, y: 0.22 }, 
-  B: { x: 0.83, y: 0.35 }, 
+  A: { x: 0.85, y: 0.22 },
+  B: { x: 0.83, y: 0.35 },
   C: { x: 0.82, y: 0.60 },
-  D: { x: 0.175, y: 0.60 }, 
-  E: { x: 0.175, y: 0.83 }, 
+  D: { x: 0.175, y: 0.60 },
+  E: { x: 0.175, y: 0.83 },
   F: { x: 0.82, y: 0.83 }
 };
 
 const BOOTH_DATA = [
-  { id: 'A', name: '株式会社レスター', img: 'assets/restar.jpeg', icon: '⚡', desc: '国内屈指の売上を誇る半導体商社。半導体製品を専門とした買い付け・販売に加え、顧客の納品管理等のサポートも行う。', tags:['エッチング', '製造装置', 'プラズマ'], giveaway:'TELオリジナルウエハーストラップ', condition:'エッチング工程に関するクイズに正解' },
-  { id: 'B', name: 'キオクシア岩手株式会社', img: 'assets/kioxia.png', icon: '🖼️', desc: '国内唯一のメモリ半導体メーカー「キオクシア」のグループ企業。東北地域の半導体人材育成等に取り組む「東北半導体・エレクトロニクスデザインコンソーシアム」の事務局も務めている。', tags:['フォトマスク', 'EUV', 'リソグラフィ'], giveaway:'フォトマスクデザイン定規', condition:'ミニチュアマスクの重ね合わせ体験' },
-  { id: 'C', name: 'ソニーセミコンダクタマニュファクチャリング株式会社', img: 'assets/sont.png', icon: '💡', desc: 'ソニーグループの半導体生産会社。スマートフォンのカメラ等に使用される「イメージセンサ」で世界トップのシェアを誇る。白石市にレーザー半導体の生産工場が立地している。', tags:['LSI', 'MCU', 'IoT'], giveaway:'オリジナルICチップキーホルダー', condition:'IoTデバイスのデモを体験' },
-  { id: 'D', name: '東京エレクトロン宮城株式会社', img: 'assets/tel.png', icon: '🔥', desc: '国内トップ、世界でも第4位の半導体製造装置メーカーのグループ企業であり、大和町でプラズマエッチング装置の製造等を行っている。', tags:['セラミックス', '装置部品', '静電チャック'], giveaway:'セラミック製コースター', condition:'セラミックスの熱伝導実験に参加' },
-  { id: 'E', name: 'TOPPAN株式会社', img: 'assets/toppan.jpg', icon: '🏺', desc: '印刷・微細加工技術を駆使した半導体パッケージ基板等の部素材メーカーとして世界屈指の技術力を誇る。', tags:['材料', 'セラミックス', '高純度'], giveaway:'ミニチュアセラミックプレート', condition:'製品サンプルに触れてみる' },
-  { id: 'F', name: 'ラピスセミコンダクタ株式会社', img: 'assets/lapis.png', icon: '🌡️', desc: '国内第4位の半導体メーカー「ローム株式会社」のグループ企業。大衡村に半導体製造工場が立地している。', tags:['計測', '成膜', 'コントローラー'], giveaway:'液晶温度計カード', condition:'膜厚計のデモンストレーションを見学' },
+  {
+    id: 'A',
+    name: '株式会社レスター',
+    img: 'assets/restar.jpeg',
+    icon: '⚡',
+    desc: '国内屈指の売上を誇る半導体商社。半導体製品を専門とした買い付け・販売に加え、顧客の納品管理等のサポートも行う。',
+    tags:['エッチング', '製造装置', 'プラズマ'],
+    giveaway:'TELオリジナルウエハーストラップ',
+    condition:'エッチング工程に関するクイズに正解'
+  },
+  {
+    id: 'B',
+    name: 'キオクシア岩手株式会社',
+    img: 'assets/kioxia.png',
+    icon: '🖼️',
+    desc: '国内唯一のメモリ半導体メーカー「キオクシア」のグループ企業。東北地域の半導体人材育成等に取り組む「東北半導体・エレクトロニクスデザインコンソーシアム」の事務局も務めている。',
+    tags:['フォトマスク', 'EUV', 'リソグラフィ'],
+    giveaway:'フォトマスクデザイン定規',
+    condition:'ミニチュアマスクの重ね合わせ体験'
+  },
+  {
+    id: 'C',
+    name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
+    img: 'assets/sont.png',
+    icon: '💡',
+    desc: 'ソニーグループの半導体生産会社。スマートフォンのカメラ等に使用される「イメージセンサ」で世界トップのシェアを誇る。白石市にレーザー半導体の生産工場が立地している。',
+    tags:['LSI', 'MCU', 'IoT'],
+    giveaway:'オリジナルICチップキーホルダー',
+    condition:'IoTデバイスのデモを体験'
+  },
+  {
+    id: 'D',
+    name: '東京エレクトロン宮城株式会社',
+    img: 'assets/tel.png',
+    icon: '🔥',
+    desc: '国内トップ、世界でも第4位の半導体製造装置メーカーのグループ企業であり、大和町でプラズマエッチング装置の製造等を行っている。',
+    tags:['セラミックス', '装置部品', '静電チャック'],
+    giveaway:'セラミック製コースター',
+    condition:'セラミックスの熱伝導実験に参加'
+  },
+  {
+    id: 'E',
+    name: 'TOPPAN株式会社',
+    img: 'assets/toppan.jpg',
+    icon: '🏺',
+    desc: '印刷・微細加工技術を駆使した半導体パッケージ基板等の部素材メーカーとして世界屈指の技術力を誇る。',
+    tags:['材料', 'セラミックス', '高純度'],
+    giveaway:'ミニチュアセラミックプレート',
+    condition:'製品サンプルに触れてみる'
+  },
+  {
+    id: 'F',
+    name: 'ラピスセミコンダクタ株式会社',
+    img: 'assets/lapis.png',
+    icon: '🌡️',
+    desc: '国内第4位の半導体メーカー「ローム株式会社」のグループ企業。大衡村に半導体製造工場が立地している。',
+    tags:['計測', '成膜', 'コントローラー'],
+    giveaway:'液晶温度計カード',
+    condition:'膜厚計のデモンストレーションを見学'
+  },
 ];
 
 const CATEGORY_DATA = {
   stage: {
     title: '特別セミナー：ものづくり太郎氏',
-    icon: '🎤', // 予備として残す
-    imgPath: 'monomaker.png', // ★画像パスを追加
+    icon: '🎤',
+    imgPath: 'monomaker.png',
     time: '16:00〜',
     desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。',
     condition: 'ステージイベントに参加'
   },
-  // ▼▼▼ トークセッションを追加 ▼▼▼
   talksession: {
     title: 'トークセッション',
-    icon: '💬', // 予備アイコン
+    icon: '💬',
     imgPath: 'talksession.png',
-    time: '時間未定', // ★必要に応じて時間を設定してください
-    desc: 'ここにトークセッションの説明文を入力します。', // ★説明文を設定してください
-    condition: 'トークセッションに参加' // ★条件を設定してください
+    time: '時間未定',
+    desc: 'ここにトークセッションの説明文を入力します。',
+    condition: 'トークセッションに参加'
   },
-  // ▲▲▲ ここまで ▲▲▲
   presentation: {
     title: '企業研究発表会',
-    icon: '📊', // 予備として残す
-    imgPath: 'student_presentation.png', // ★画像パスを追加
+    icon: '📊',
+    imgPath: 'student_presentation.png',
     time: '17:30〜',
     desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
     condition: '研究発表会に参加'
   }
 };
 
-// イベントページに表示するイベントリスト
 const EVENT_DATA = [
   {
     id: 'stage',
@@ -1194,20 +1245,22 @@ const EVENT_DATA = [
   }
 ];
 
-const state = { 
+// アプリ状態
+const state = {
   points: 0,                // 交換可能ポイント（redeemable_points）
   totalPoints: 0,           // 累計ポイント（total_points）
-  activePage: 'home', 
-  prevCount: 0, 
+  activePage: 'home',
+  prevCount: 0,
   user: null,
   percentile: null,
-  acquiredStamps: new Set(), // ユーザーが回ったブースID
-  claimedRewards: new Set(), // 交換済み景品 (未実装でも置いとく)
+  acquiredStamps: new Set(), // 回ったブースID
+  claimedRewards: new Set(), // 交換済み景品
   surveyCompleted: false
 };
 
 let originalRewardsContentHTML = null;
-  
+
+// DOM参照
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
@@ -1276,7 +1329,6 @@ const $app = {
     content: document.getElementById('rewards-content'),
     closeBtn: document.getElementById('close-rewards'),
     openBtn: document.getElementById('open-rewards-btn'),
-    // ▼▼▼ null で初期化 ▼▼▼
     claimBtn: null,
     openSurveyBtn: null,
     pointsDisplay: null,
@@ -1287,7 +1339,6 @@ const $app = {
     preSurveySection: null,
     postSurveySection: null,
     exchangeInfoPre: null
-    // ▲▲▲ ここまで ▲▲▲
   },
   survey: {
     modal: document.getElementById('survey-modal'),
@@ -1297,82 +1348,100 @@ const $app = {
   }
 };
 
-// Authentication functions removed - now using anonymous UUID-based system
+// ========== localStorage管理 ==========
+const LS_KEY_USER = 'app_user';
 
+function saveLocalUser(u) {
+  localStorage.setItem(LS_KEY_USER, JSON.stringify(u));
+}
+function loadLocalUser() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY_USER) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+// ========== モーダル / UI オープン・クローズ ==========
 function openQrModal() {
   if (!state.user?.id) { showToast('ログインしてください'); return; }
   $app.backdrop.classList.add('show');
   $app.qr.modal.classList.add('show');
   renderUserQr(state.user.id);
 }
-
 function closeQrModal() {
   $app.qr.modal.classList.remove('show');
-  if (!$app.rewards.modal.classList.contains('show') &&
-      !$app.survey.modal.classList.contains('show')) {
+  if (
+    !$app.rewards.modal.classList.contains('show') &&
+    !$app.survey.modal.classList.contains('show')
+  ) {
     $app.backdrop.classList.remove('show');
   }
 }
 
-  function openStaffConfirmModal() {
+function openSurveyModal() {
+  $app.backdrop.classList.add('show');
+  $app.survey.modal.classList.add('show');
+}
+function closeSurveyModal() {
+  $app.survey.modal.classList.remove('show');
+  if (
+    !$app.qr.modal.classList.contains('show') &&
+    !$app.rewards.modal.classList.contains('show')
+  ) {
+    $app.backdrop.classList.remove('show');
+  }
+}
+
+function openRewardsModal() {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+  $app.backdrop.classList.add('show');
+  $app.rewards.modal.classList.add('show');
+  renderRewardsModal();
+}
+function closeRewardsModal() {
+  $app.rewards.modal.classList.remove('show');
+  if (
+    !$app.qr.modal.classList.contains('show') &&
+    !$app.survey.modal.classList.contains('show')
+  ) {
+    $app.backdrop.classList.remove('show');
+  }
+}
+
+// スタッフ確認(交換直前)モーダル
+function openStaffConfirmModal() {
   if (state.points <= 0) {
     showToast('交換できるポイントがありません');
     return;
   }
 
-  // 枚数をセット
   $app.staffConfirm.count.textContent = `${state.points}枚`;
 
-  // メインの特典モーダルを隠す
   $app.rewards.modal.classList.remove('show');
-
-  // 確認モーダルを表示 (backdrop は既に表示されているはず)
   $app.backdrop.classList.add('show');
   $app.staffConfirm.modal.classList.add('show');
 }
-
 function closeStaffConfirmModal(backToRewards = false) {
   $app.staffConfirm.modal.classList.remove('show');
 
   if (backToRewards) {
-    // 特典モーダルに戻る
     $app.rewards.modal.classList.add('show');
   } else {
-    // 完全に閉じる
-    if (!$app.qr.modal.classList.contains('show') &&
-        !$app.rewards.modal.classList.contains('show') &&
-        !$app.survey.modal.classList.contains('show')) {
+    if (
+      !$app.qr.modal.classList.contains('show') &&
+      !$app.rewards.modal.classList.contains('show') &&
+      !$app.survey.modal.classList.contains('show')
+    ) {
       $app.backdrop.classList.remove('show');
     }
   }
 }
 
-  function rebindRewardElements() {
-  // $app.rewards 内部の要素を再取得
-  $app.rewards.pointsDisplay = document.getElementById('rewards-points-display');
-  $app.rewards.exchangeInfo = document.getElementById('reward-exchange-info');
-  $app.rewards.boothGrid = document.getElementById('rewards-booth-grid');
-  $app.rewards.pointsDisplayPre = document.getElementById('rewards-points-display-pre');
-  $app.rewards.boothGridPre = document.getElementById('rewards-booth-grid-pre');
-  $app.rewards.preSurveySection = document.getElementById('pre-survey-section');
-  $app.rewards.postSurveySection = document.getElementById('post-survey-section');
-  $app.rewards.claimBtn = document.getElementById('claim-reward-btn');
-  $app.rewards.openSurveyBtn = document.getElementById('open-survey-btn');
-  $app.rewards.exchangeInfoPre = document.getElementById('reward-exchange-info-pre');
-  // イベントリスナーも再設定
-  if ($app.rewards.claimBtn) {
-    // 「🎁 交換する」ボタン
-    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal); 
-  }
-  if ($app.rewards.openSurveyBtn) {
-    // 「アンケートに回答する」ボタン
-    $app.rewards.openSurveyBtn.addEventListener('click', () => {
-      closeRewardsModal();
-      setTimeout(() => openSurveyModal(), 300);
-    });
-  }
-}
-
+// ========== QRコード表示 ==========
 function renderUserQr(uuid) {
   $app.qr.box.innerHTML = '';
   $app.qr.uuid.textContent = uuid;
@@ -1405,19 +1474,7 @@ function renderUserQr(uuid) {
   }
 }
 
-function openSurveyModal() {
-  $app.backdrop.classList.add('show');
-  $app.survey.modal.classList.add('show');
-}
-
-function closeSurveyModal() {
-  $app.survey.modal.classList.remove('show');
-  if (!$app.qr.modal.classList.contains('show') &&
-      !$app.rewards.modal.classList.contains('show')) {
-    $app.backdrop.classList.remove('show');
-  }
-}
-
+// ========== アンケート提出 ==========
 async function submitSurvey(e) {
   e.preventDefault();
   if (!state.user?.id) {
@@ -1433,186 +1490,185 @@ async function submitSurvey(e) {
     feedback: formData.get('feedback'),
     interests: []
   };
-
-  formData.getAll('interest').forEach(interest => {
-    surveyData.interests.push(interest);
-  });
+  formData.getAll('interest').forEach(v => surveyData.interests.push(v));
 
   try {
     $app.survey.error.textContent = '';
     const result = await callEdgeFunction('submit-survey', {
-      surveyData: surveyData  // user_idは不要（サーバーがJWTから取得）
+      surveyData // ← サーバー側がuserId/JWTから紐付ける想定
     });
 
     if (result.success) {
       state.surveyCompleted = true;
       state.user.survey_completed = true;
       saveLocalUser(state.user);
-      
-      // アンケートモーダルだけを閉じる (backdropは残す)
+
       $app.survey.modal.classList.remove('show');
       showToast('✅ アンケートありがとうございました！');
-      
-      // すぐに特典交換モーダルを開く
-      // (renderRewardsModalは openRewardsModal の中で呼ばれます)
-      openRewardsModal(); 
+
+      openRewardsModal();
     }
   } catch (err) {
     console.error('Survey submission failed:', err);
     $app.survey.error.textContent = 'アンケート送信に失敗しました。もう一度お試しください。';
   }
 }
-function openRewardsModal() {
-  if (!state.user?.id) {
-    showToast('ログインしてください');
-    return;
-  }
-  $app.backdrop.classList.add('show');
-  $app.rewards.modal.classList.add('show');
-  renderRewardsModal();
-}
 
-function closeRewardsModal() {
-  $app.rewards.modal.classList.remove('show');
-  if (!$app.qr.modal.classList.contains('show') &&
-      !$app.survey.modal.classList.contains('show')) {
-    $app.backdrop.classList.remove('show');
+// ========== 特典交換UI / 交換処理 ==========
+function rebindRewardElements() {
+  $app.rewards.pointsDisplay = document.getElementById('rewards-points-display');
+  $app.rewards.exchangeInfo = document.getElementById('reward-exchange-info');
+  $app.rewards.boothGrid = document.getElementById('rewards-booth-grid');
+
+  $app.rewards.pointsDisplayPre = document.getElementById('rewards-points-display-pre');
+  $app.rewards.boothGridPre = document.getElementById('rewards-booth-grid-pre');
+
+  $app.rewards.preSurveySection = document.getElementById('pre-survey-section');
+  $app.rewards.postSurveySection = document.getElementById('post-survey-section');
+
+  $app.rewards.claimBtn = document.getElementById('claim-reward-btn');
+  $app.rewards.openSurveyBtn = document.getElementById('open-survey-btn');
+  $app.rewards.exchangeInfoPre = document.getElementById('reward-exchange-info-pre');
+
+  if ($app.rewards.claimBtn) {
+    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal);
+  }
+  if ($app.rewards.openSurveyBtn) {
+    $app.rewards.openSurveyBtn.addEventListener('click', () => {
+      closeRewardsModal();
+      setTimeout(() => openSurveyModal(), 300);
+    });
   }
 }
 
 function renderRewardsModal() {
-  const points = state.points;  // 交換可能ポイント
+  const points = state.points;
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
-  
-  // ▼▼▼ ここから変更 ▼▼▼
-  // 両方のセクションのポイント表示を更新
+
+  // ポイント表示
   if ($app.rewards.pointsDisplay) $app.rewards.pointsDisplay.textContent = `${points}pt`;
   if ($app.rewards.pointsDisplayPre) $app.rewards.pointsDisplayPre.textContent = `${points}pt`;
 
-  // 両方のグリッドをクリア
+  // ブース達成状況グリッド
   if ($app.rewards.boothGrid) $app.rewards.boothGrid.innerHTML = '';
   if ($app.rewards.boothGridPre) $app.rewards.boothGridPre.innerHTML = '';
-  
+
   BOOTH_DATA.forEach(booth => {
     const isAcquired = state.acquiredStamps.has(booth.id);
-    const itemHTML = `
+    const inner = `
       <div class="booth-icon">
         <img src="${booth.img}" alt="${booth.name}" />
       </div>
       <div class="booth-label">${booth.id}</div>
     `;
-    
-    // pre グリッドに追加 (アンケート前)
+
     if ($app.rewards.boothGridPre) {
-      const itemPre = document.createElement('div');
-      itemPre.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
-      itemPre.innerHTML = itemHTML;
-      $app.rewards.boothGridPre.appendChild(itemPre);
+      const elPre = document.createElement('div');
+      elPre.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
+      elPre.innerHTML = inner;
+      $app.rewards.boothGridPre.appendChild(elPre);
     }
-    
-    // post グリッドに追加 (アンケート後)
+
     if ($app.rewards.boothGrid) {
-      const itemPost = document.createElement('div');
-      itemPost.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
-      itemPost.innerHTML = itemHTML;
-      $app.rewards.boothGrid.appendChild(itemPost);
+      const elPost = document.createElement('div');
+      elPost.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
+      elPost.innerHTML = inner;
+      $app.rewards.boothGrid.appendChild(elPost);
     }
   });
-  // ▲▲▲ 変更ここまで ▲▲▲
 
   if (!isSurveyCompleted) {
     $app.rewards.preSurveySection.classList.remove('hidden');
     $app.rewards.postSurveySection.classList.add('hidden');
+
+    if ($app.rewards.exchangeInfoPre) {
+      $app.rewards.exchangeInfoPre.textContent = `${points}枚交換可能`;
+    }
   } else {
-    // アンケート完了後
     $app.rewards.preSurveySection.classList.add('hidden');
     $app.rewards.postSurveySection.classList.remove('hidden');
 
-    // 交換可能かチェック
     const canExchange = points > 0;
-    const exchangeText = canExchange 
-      ? `${points}枚交換可能` 
+    const exchangeText = canExchange
+      ? `${points}枚交換可能`
       : '全ブースを回ってください';
-    
-    // 両方のセクションの交換情報を更新
-    if ($app.rewards.exchangeInfo) $app.rewards.exchangeInfo.textContent = exchangeText;
-    if ($app.rewards.exchangeInfoPre) $app.rewards.exchangeInfoPre.textContent = exchangeText;
+
+    if ($app.rewards.exchangeInfo) {
+      $app.rewards.exchangeInfo.textContent = exchangeText;
+    }
+    if ($app.rewards.exchangeInfoPre) {
+      $app.rewards.exchangeInfoPre.textContent = exchangeText;
+    }
 
     const btn = $app.rewards.claimBtn;
-    if (canExchange) {
-      btn.disabled = false;
-      btn.classList.remove('opacity-50', 'cursor-not-allowed');
-      btn.textContent = `🎁 ${points}枚交換する`;
-    } else {
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
-      btn.textContent = 'ブースを回ってください';
+    if (btn) {
+      if (canExchange) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.textContent = `🎁 ${points}枚交換する`;
+      } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.textContent = 'ブースを回ってください';
+      }
     }
   }
 }
-  
-  async function claimReward() {
-    if (!state.user?.id) {
-      showToast('ログインしてください');
-      return;
-    }
 
-    // アンケートチェック (念のため)
-    if (!state.surveyCompleted && !state.user.survey_completed) {
-      showToast('アンケートへの回答が必要です');
-      closeStaffConfirmModal(true); // 確認モーダルを閉じ、特典モーダルに戻す
-      return;
-    }
-
-    // ポイントチェック (念のため)
-    if (state.points === 0) {
-      showToast('ポイントがありません');
-      closeStaffConfirmModal(true); // 確認モーダルを閉じ、特典モーダルに戻す
-      return;
-    }
-
-    try {
-      const quoCards = state.points;  // 交換可能ポイント
-      // Date.now() を文字列に変換し、最後の一文字を削除します
-      const timestampPrefix = String(Date.now()).slice(0, -1);
-      // 新しいIDを生成: "quo-card-" + タイムスタンプ（末尾削除） + 交換枚数
-      const rewardId = `quo-card-${timestampPrefix}${quoCards}`; 
-      // ▼▼▼ 確認モーダルを閉じる処理を追加 ▼▼▼
-      closeStaffConfirmModal(false); // 完全に閉じる
-      const result = await callEdgeFunction('claim-reward', {
-        userId: state.user.id,
-        rewardId: rewardId,
-        points: quoCards
-      });
-
-      if (result.success) {
-        state.claimedRewards.add(rewardId);
-        
-        // エッジ関数から返された値でstateを更新
-        state.points = result.redeemablePoints || 0;  // 交換可能ポイント
-        state.totalPoints = result.totalPoints || state.totalPoints;  // 累計は変わらない
-        
-        // 交換完了メッセージを表示
-        showRewardClaimedMessage(quoCards);
-
-        $app.backdrop.classList.add('show');
-        $app.rewards.modal.classList.add('show');
-
-        renderAll();
-      }
-    } catch (err) {
-      console.error('Failed to claim reward:', err);
-      showToast('特典の交換に失敗しました');
-    }
+async function claimReward() {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
   }
 
-  
+  if (!state.surveyCompleted && !state.user.survey_completed) {
+    showToast('アンケートへの回答が必要です');
+    closeStaffConfirmModal(true);
+    return;
+  }
+
+  if (state.points === 0) {
+    showToast('ポイントがありません');
+    closeStaffConfirmModal(true);
+    return;
+  }
+
+  try {
+    const quoCards = state.points;
+    const timestampPrefix = String(Date.now()).slice(0, -1);
+    const rewardId = `quo-card-${timestampPrefix}${quoCards}`;
+
+    closeStaffConfirmModal(false);
+
+    const result = await callEdgeFunction('claim-reward', {
+      userId: state.user.id,
+      rewardId: rewardId,
+      points: quoCards
+    });
+
+    if (result.success) {
+      state.claimedRewards.add(rewardId);
+
+      state.points = result.redeemablePoints || 0;
+      state.totalPoints = result.totalPoints || state.totalPoints;
+
+      showRewardClaimedMessage(quoCards);
+
+      $app.backdrop.classList.add('show');
+      $app.rewards.modal.classList.add('show');
+
+      renderAll();
+    }
+  } catch (err) {
+    console.error('Failed to claim reward:', err);
+    showToast('特典の交換に失敗しました');
+  }
+}
+
 function showRewardClaimedMessage(quoCards) {
-  // 既存のコンテンツを隠す
   $app.rewards.preSurveySection.classList.add('hidden');
   $app.rewards.postSurveySection.classList.add('hidden');
-  
-  // 成功メッセージを表示
+
   const messageHTML = `
     <div class="space-y-4">
       <div class="text-center py-8">
@@ -1640,10 +1696,9 @@ function showRewardClaimedMessage(quoCards) {
       </button>
     </div>
   `;
-  
+
   $app.rewards.content.innerHTML = messageHTML;
-  
-  // 閉じるボタンのイベントリスナーを追加
+
   const closeBtn = document.getElementById('close-reward-message-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', handleCloseRewardMessage);
@@ -1651,39 +1706,81 @@ function showRewardClaimedMessage(quoCards) {
 }
 
 function handleCloseRewardMessage() {
-  // 特典交換モーダルを閉じる
   closeRewardsModal();
-  
-  // ▼▼▼ 修正 (バグ2修正) ▼▼▼
-  // 300ms待ってからモーダルの内容を元の状態に戻す
-  // (閉じるアニメーションと被らないように)
+
   setTimeout(() => {
     if (originalRewardsContentHTML) {
       $app.rewards.content.innerHTML = originalRewardsContentHTML;
-      // DOM要素を再取得・再バインドする
       rebindRewardElements();
     }
   }, 500);
 }
-  
-const LS_KEY_USER = 'app_user';
 
-function saveLocalUser(u) { 
-  localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); 
-}
-function loadLocalUser() { 
-  try { 
-    return JSON.parse(localStorage.getItem(LS_KEY_USER) || 'null'); 
-  } catch { 
-    return null; 
+// ========== サーバー同期系 ==========
+
+// Supabase側でユーザーを作成/取得
+async function ensureAuth() {
+  let uuid = localStorage.getItem('user_uuid');
+
+  if (!uuid) {
+    uuid = crypto.randomUUID();
+    localStorage.setItem('user_uuid', uuid);
+    console.log('[Anonymous User] New UUID created:', uuid);
+  } else {
+    console.log('[Anonymous User] Existing UUID loaded:', uuid);
+  }
+
+  // 仮のstate.user
+  state.user = {
+    id: uuid,
+    name: '匿名参加者',
+    registration_type: 'anonymous'
+  };
+
+  // UIアンロック（もしローディングブロックしてるなら）
+  const root = document.getElementById('app');
+  root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
+
+  try {
+    const serverData = await callEdgeFunction('get-user-data', { userId: uuid });
+
+    if (serverData && serverData.user) {
+      state.user = {
+        id: serverData.user.id,
+        user_number: serverData.user.user_number || 0,
+        registration_type: serverData.user.registration_type,
+        survey_completed: serverData.user.survey_completed || false,
+        created_at: serverData.user.created_at,
+        points: serverData.user.points ?? 0,
+        total_points: serverData.user.total_points ?? 0,
+        redeemable_points: serverData.user.redeemable_points ?? 0
+      };
+
+      state.points = serverData.user.redeemable_points ?? 0;
+      state.totalPoints = serverData.user.total_points ?? 0;
+      state.surveyCompleted = serverData.user.survey_completed || false;
+
+      if (serverData.progress && Array.isArray(serverData.progress.acquiredBooths)) {
+        state.acquiredStamps = new Set(serverData.progress.acquiredBooths);
+      } else {
+        state.acquiredStamps = new Set();
+      }
+
+      const userNumberElement = document.getElementById('user-number');
+      if (userNumberElement) {
+        const formattedNumber = String(serverData.user.user_number || 0).padStart(5, '0');
+        userNumberElement.textContent = formattedNumber;
+      }
+
+      saveLocalUser(state.user);
+    }
+  } catch (err) {
+    console.error('[ensureAuth] Failed to sync user from server:', err);
+    // fail soft: アプリは動かす
   }
 }
 
-function clearLocalUser() { 
-  localStorage.removeItem(LS_KEY_USER); 
-  localStorage.removeItem(LS_KEY_TOKEN);
-}
-
+// 最新状態をDBから再取得
 async function syncPointsFromServer() {
   if (!state.user?.id) {
     console.log('[syncPointsFromServer] No user ID');
@@ -1697,13 +1794,11 @@ async function syncPointsFromServer() {
       userId: state.user.id
     });
 
-    // ユーザー情報
     if (data && data.user) {
       state.points = data.user.redeemable_points ?? 0;
       state.totalPoints = data.user.total_points ?? 0;
       state.surveyCompleted = data.user.survey_completed || false;
 
-      // user_number等アップデート
       state.user.user_number = data.user.user_number || state.user.user_number;
       state.user.survey_completed = data.user.survey_completed || false;
       state.user.points = data.user.points ?? 0;
@@ -1712,7 +1807,6 @@ async function syncPointsFromServer() {
 
       saveLocalUser(state.user);
 
-      // ヘッダー上の番号も更新
       const userNumberElement = document.getElementById('user-number');
       if (userNumberElement) {
         const formattedNumber = String(state.user.user_number || 0).padStart(5, '0');
@@ -1720,12 +1814,10 @@ async function syncPointsFromServer() {
       }
     }
 
-    // 進捗（どのブース回ったか）
     if (data && data.progress && Array.isArray(data.progress.acquiredBooths)) {
       state.acquiredStamps = new Set(data.progress.acquiredBooths);
     }
 
-    // ランキング用パーセンタイルとか表示更新（実装は元のrenderAll等を呼べばOK）
     await updatePercentile();
     renderAll();
 
@@ -1734,8 +1826,8 @@ async function syncPointsFromServer() {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
   }
 }
-  
-  
+
+// ========== ランキング系 ==========
 async function updatePercentile() {
   if (!state.user?.id || state.totalPoints === 0) {
     state.percentile = null;
@@ -1751,7 +1843,8 @@ async function updatePercentile() {
     state.percentile = null;
   }
 }
-  
+
+// ========== 進捗・ページ描画系 ==========
 function renderAll() {
   renderProgress();
   updateActivePage();
@@ -1760,8 +1853,95 @@ function renderAll() {
   }
 }
 
+function renderProgress() {
+  // totalPoints を「獲得スタンプ数」として扱う前提
+  const n = state.totalPoints;
+
+  $app.progress.badge.textContent = `${state.totalPoints}pt`;
+
+  if (state.percentile !== null) {
+    const displayPercentile = (state.percentile === 0) ? 1 : state.percentile;
+    $app.progress.rankPercentile.textContent = `上位 ${displayPercentile}%`;
+    $app.progress.rankPercentile.classList.remove('hidden');
+  } else {
+    $app.progress.rankPercentile.classList.add('hidden');
+  }
+
+  // ロゴグリッド
+  if ($app.progress.logoGrid) {
+    $app.progress.logoGrid.innerHTML = '';
+    BOOTH_DATA.forEach(booth => {
+      const isAcquired = state.acquiredStamps.has(booth.id);
+      const logoItem = document.createElement('div');
+      logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
+      logoItem.innerHTML = `<img src="${booth.img}" alt="${booth.name}" />`;
+      $app.progress.logoGrid.appendChild(logoItem);
+    });
+  }
+
+  // カウント表示
+  if ($app.progress.stampCount) {
+    $app.progress.stampCount.textContent = n;
+  }
+
+  if (n >= MAX_POINTS) {
+    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> QUOカードと交換できます！';
+  } else {
+    $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
+  }
+
+  updateAcquiredBadges();
+  state.prevCount = n;
+}
+
+function updateAcquiredBadges() {
+  const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
+  const boothProgress = document.getElementById('booth-progress');
+  if (boothProgress) {
+    boothProgress.textContent = `${acquiredBooths}/6 獲得済み`;
+    if (acquiredBooths === 6) {
+      boothProgress.style.color = '#059669';
+    }
+  }
+}
+
+function updateActivePage() {
+  $app.pages.forEach(p => {
+    const isActive = p.id === `page-${state.activePage}`;
+    p.classList.toggle('active', isActive);
+    p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+  });
+
+  let activeBtn = null;
+  $app.navButtons.forEach(btn => {
+    const isActive = btn.dataset.page === state.activePage;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
+    if (isActive) activeBtn = btn;
+  });
+
+  if (activeBtn) {
+    const btnW = activeBtn.offsetWidth;
+    const indW = Math.max(56, Math.round(btnW * 0.66));
+    const left = activeBtn.offsetLeft + (btnW - indW) / 2;
+    $app.navIndicator.style.width = `${indW}px`;
+    $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
+  }
+
+  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'イベント' };
+  $app.headerTitle.textContent = pageTitles[state.activePage];
+
+  if (state.activePage === 'list') {
+    renderBoothList();
+  }
+
+  if (state.activePage === 'map') {
+    layoutBoothIcons();
+  }
+}
+
 function renderBoothList() {
-  console.log('[renderBoothList] called');
   $app.boothList.innerHTML = '';
   EVENT_DATA.forEach((event, i) => {
     const li = document.createElement('li');
@@ -1786,96 +1966,7 @@ function renderBoothList() {
   });
 }
 
-function renderProgress() {
-  const n = state.totalPoints;  // ← 累計ポイントで計算
-
-  $app.progress.badge.textContent = `${state.totalPoints}pt`;  // ← 累計ポイント表示に変更
-
-  if (state.percentile !== null) {
-    const displayPercentile = (state.percentile === 0) ? 1 : state.percentile;
-    $app.progress.rankPercentile.textContent = `上位 ${displayPercentile}%`;
-    $app.progress.rankPercentile.classList.remove('hidden');
-  } else {
-    $app.progress.rankPercentile.classList.add('hidden');
-  }
-
-  // 企業ロゴグリッドを描画
-  if ($app.progress.logoGrid) {
-    $app.progress.logoGrid.innerHTML = '';
-    BOOTH_DATA.forEach(booth => {
-      const isAcquired = state.acquiredStamps.has(booth.id);
-      const logoItem = document.createElement('div');
-      logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
-      logoItem.innerHTML = `<img src="${booth.img}" alt="${booth.name}" />`;
-      $app.progress.logoGrid.appendChild(logoItem);
-    });
-  }
-
-  // スタンプカウントを更新
-  if ($app.progress.stampCount) {
-    $app.progress.stampCount.textContent = n;
-  }
-
-  if (n >= MAX_POINTS) {
-    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> QUOカードと交換できます！';
-  } else {
-    $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
-  }
-
-  updateAcquiredBadges();
-
-  state.prevCount = n;
-}
-  
-function updateAcquiredBadges() {
-  const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
-  const boothProgress = document.getElementById('booth-progress');
-  if (boothProgress) {
-    boothProgress.textContent = `${acquiredBooths}/6 獲得済み`;
-    if (acquiredBooths === 6) {
-      boothProgress.style.color = '#059669';
-    }
-  }
-}
-
-function updateActivePage() {
-  console.log('[updateActivePage] activePage =', state.activePage);
-  
-  $app.pages.forEach(p => {
-    const isActive = p.id === `page-${state.activePage}`;
-    p.classList.toggle('active', isActive);
-    p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-  });
-
-  let activeBtn = null;
-  $app.navButtons.forEach(btn => {
-    const isActive = btn.dataset.page === state.activePage;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
-    if (isActive) activeBtn = btn;
-  });
-  
-  if (activeBtn) {
-    const btnW = activeBtn.offsetWidth;
-    const indW = Math.max(56, Math.round(btnW * 0.66));
-    const left = activeBtn.offsetLeft + (btnW - indW) / 2;
-    $app.navIndicator.style.width = `${indW}px`;
-    $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
-  }
-  
-  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'イベント' };
-  $app.headerTitle.textContent = pageTitles[state.activePage];
-
-  if (state.activePage === 'list') { 
-    renderBoothList(); 
-  }
-  
-  if (state.activePage === 'map') {
-    layoutBoothIcons();
-  }
-}
-
+// ========== カテゴリ / ブース 詳細シート ==========
 function openCategorySheet(categoryKey) {
   if (categoryKey === 'booths') {
     $app.categorySheet.title.textContent = '企業ブース';
@@ -1898,10 +1989,11 @@ function openCategorySheet(categoryKey) {
               <div class="${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold text-sm">${isAcquired ? '' : '1pt'}</div>
             </div>
           </div>
-        `}).join('')}
+        `;
+        }).join('')}
       </div>
     `;
-    
+
     $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
       card.addEventListener('click', () => {
         const boothId = card.dataset.boothId;
@@ -1933,7 +2025,7 @@ function openCategorySheet(categoryKey) {
       </div>
     `;
   }
-  
+
   $app.categorySheet.el.classList.add('is-open');
   $app.categorySheet.backdrop.classList.add('is-open');
 }
@@ -1957,6 +2049,7 @@ function closeBoothSheet() {
   $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
+// ========== スキャナ関連 ==========
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
@@ -1976,11 +2069,11 @@ function closeFullscreenScanner() {
 async function startCamera() {
   try {
     $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
-    
+
     if (!codeReader) {
       codeReader = new ZXing.BrowserQRCodeReader();
     }
-    
+
     const constraints = {
       video: {
         facingMode: useBackCamera ? 'environment' : 'user',
@@ -1988,11 +2081,11 @@ async function startCamera() {
         height: { ideal: 720 }
       }
     };
-    
+
     scanStream = await navigator.mediaDevices.getUserMedia(constraints);
     $app.fullscreenScanner.video.srcObject = scanStream;
     await $app.fullscreenScanner.video.play();
-    
+
     try {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
@@ -2006,12 +2099,11 @@ async function startCamera() {
       console.warn('Torch not available');
       $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
     }
-    
+
     scanning = true;
     $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
-    
+
     scanQRCode();
-    
   } catch (err) {
     console.error(err);
     $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
@@ -2020,18 +2112,18 @@ async function startCamera() {
 
 async function scanQRCode() {
   if (!scanning || !$app.fullscreenScanner.video.srcObject) return;
-  
+
   try {
     const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
     if (result && result.text) {
       scanning = false;
-      const success = await handleScanResult(result.text);
+      await handleScanResult(result.text);
       return;
     }
   } catch (err) {
-    // QRコードが見つからない場合は無視
+    // 見つからない等は無視してループ継続
   }
-  
+
   if (scanning) {
     requestAnimationFrame(() => scanQRCode());
   }
@@ -2039,7 +2131,7 @@ async function scanQRCode() {
 
 async function stopCamera() {
   scanning = false;
-  
+
   if (codeReader) {
     try {
       await codeReader.reset();
@@ -2047,7 +2139,7 @@ async function stopCamera() {
       console.warn('Failed to reset code reader', e);
     }
   }
-  
+
   if (scanStream) {
     scanStream.getTracks().forEach(t => {
       t.stop();
@@ -2055,11 +2147,11 @@ async function stopCamera() {
     });
     scanStream = null;
   }
-  
+
   if ($app.fullscreenScanner.video.srcObject) {
     $app.fullscreenScanner.video.srcObject = null;
   }
-  
+
   trackWithTorch = null;
   $app.fullscreenScanner.torchBtn.dataset.on = '0';
   $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
@@ -2072,15 +2164,17 @@ async function toggleTorch() {
     await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
     $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
     $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
-  } catch (e) { 
-    console.warn('Torch not available', e); 
+  } catch (e) {
+    console.warn('Torch not available', e);
   }
 }
 
 async function switchCamera() {
   useBackCamera = !useBackCamera;
   await stopCamera();
-  setTimeout(() => startCamera(), 300);
+  setTimeout(() => {
+    startCamera();
+  }, 300);
 }
 
 function showFullscreenMessage(msg, isError = true) {
@@ -2094,9 +2188,8 @@ function showFullscreenMessage(msg, isError = true) {
     el.classList.add('hidden');
   }, 2000);
 }
-  
+
 async function handleScanResult(rawText) {
-  // rawText はQRコードの中身
   console.log('[handleScanResult] raw QR:', rawText);
 
   if (!state.user?.id) {
@@ -2104,16 +2197,10 @@ async function handleScanResult(rawText) {
     return false;
   }
 
-  // ここでrawTextをパースして、boothIdとstampCodeに分ける
-  // いまはシンプルに同じ値を両方に入れる想定にしておく
   const boothId = rawText.toLowerCase();
   const stampCode = rawText.toLowerCase();
 
   try {
-    // Edge Function 'grant-stamp' は:
-    //  - user_stampsに (user_id, booth_id, stamp_code, points_added) をINSERT
-    //  - app_usersのポイント系を更新
-    //  - 最新の進捗情報( acquiredBooths, totalStamps, totalPoints )を返す
     const result = await callEdgeFunction('grant-stamp', {
       userId: state.user.id,
       boothId,
@@ -2123,10 +2210,8 @@ async function handleScanResult(rawText) {
     if (result.success) {
       showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
 
-      // 最新状態を取り直す
       await syncPointsFromServer();
 
-      // UIに反映終わったらスキャナ閉じる
       await wait(1500);
       closeFullscreenScanner();
       return true;
@@ -2155,16 +2240,15 @@ async function autoGrantStamp(stampId) {
   console.log('[autoGrantStamp] Processing stamp:', stampId);
 
   if (!state.user?.id) {
-    showToast('エラー: ユーザーIDが見つかりません', 'error');
+    showToast('エラー: ユーザーIDが見つかりません');
     return false;
   }
 
-  // boothIdとstampCodeを同じにしてサーバーへ
   const boothId = stampId.toLowerCase();
   const stampCode = stampId.toLowerCase();
 
   try {
-    showToast('スタンプを確認中...', 'info');
+    showToast('スタンプを確認中...');
 
     const result = await callEdgeFunction('grant-stamp', {
       userId: state.user.id,
@@ -2173,7 +2257,7 @@ async function autoGrantStamp(stampId) {
     });
 
     if (result.success) {
-      showToast(`✅ ${result.pointsAdded}pt獲得！`, 'success');
+      showToast(`✅ ${result.pointsAdded}pt獲得！`);
       await syncPointsFromServer();
       return true;
     }
@@ -2181,99 +2265,18 @@ async function autoGrantStamp(stampId) {
     console.error('[autoGrantStamp] Error:', error);
 
     if (error.message.includes('取得済み')) {
-      showToast('⚠️ 既に取得済みです', 'warning');
+      showToast('⚠️ 既に取得済みです');
     } else if (error.message.includes('未対応')) {
-      showToast('❌ 無効なQRコードです', 'error');
+      showToast('❌ 無効なQRコードです');
     } else {
-      showToast('❌ エラーが発生しました', 'error');
+      showToast('❌ エラーが発生しました');
     }
 
     return false;
   }
 }
 
-async function ensureAuth() {
-  // 匿名UUID方式：認証不要
-  let uuid = localStorage.getItem('user_uuid');
-  let isNewUser = false;
-
-  if (!uuid) {
-    uuid = crypto.randomUUID();
-    localStorage.setItem('user_uuid', uuid);
-    isNewUser = true;
-    console.log('[Anonymous User] New UUID created:', uuid);
-  } else {
-    console.log('[Anonymous User] Existing UUID loaded:', uuid);
-  }
-
-  // フロント側のstateに一旦セット（暫定）
-  state.user = {
-    id: uuid,
-    name: '匿名参加者',
-    registration_type: 'anonymous'
-  };
-
-  // UIブロック解除
-  const root = document.getElementById('app');
-  root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
-
-  // サーバーに問い合わせてユーザーを取得 or 作成
-  // get-user-data は service_role でDBに対して:
-  //   - userIdが未登録ならINSERT
-  //   - 既存ならSELECT
-  //   - user情報とprogress(acquiredBoothsなど)を返す想定
-  try {
-    const serverData = await callEdgeFunction('get-user-data', { userId: uuid });
-
-    if (serverData && serverData.user) {
-      // state.user をサーバーの真実側で更新
-      state.user = {
-        id: serverData.user.id,
-        user_number: serverData.user.user_number || 0,
-        registration_type: serverData.user.registration_type,
-        survey_completed: serverData.user.survey_completed || false,
-        created_at: serverData.user.created_at,
-        points: serverData.user.points ?? 0,
-        total_points: serverData.user.total_points ?? 0,
-        redeemable_points: serverData.user.redeemable_points ?? 0
-      };
-
-      // こっちもstateに反映
-      state.points = serverData.user.redeemable_points ?? 0;
-      state.totalPoints = serverData.user.total_points ?? 0;
-      state.surveyCompleted = serverData.user.survey_completed || false;
-
-      // 取得済みブース一覧
-      if (serverData.progress && Array.isArray(serverData.progress.acquiredBooths)) {
-        state.acquiredStamps = new Set(serverData.progress.acquiredBooths);
-      } else {
-        state.acquiredStamps = new Set();
-      }
-
-      // ユーザー番号をヘッダーに表示
-      const userNumberElement = document.getElementById('user-number');
-      if (userNumberElement) {
-        const formattedNumber = String(serverData.user.user_number || 0).padStart(5, '0');
-        userNumberElement.textContent = formattedNumber;
-      }
-
-      // ローカルに保存（今後拡張するときに使える）
-      saveLocalUser(state.user);
-    }
-  } catch (err) {
-    console.error('[ensureAuth] Failed to sync user from server:', err);
-    // 失敗してもアプリ自体は使える（ただしポイント表示などは空）
-  }
-}
-
-
-  await syncPointsFromServer();
-
-  return true;
-}
-
-// handleSignin and handleLogin functions removed - now using anonymous UUID-based system
-
+// ========== トースト ==========
 function showToast(msg) {
   const el = $app.toast;
   const box = el.firstElementChild;
@@ -2287,13 +2290,13 @@ function showToast(msg) {
   }, 1800);
 }
 
+// ========== マップ(ブースレイアウト) ==========
 function layoutBoothIcons() {
   const g = $app.map.iconsGroup;
   if (!g) return;
-  
-  console.log('[layoutBoothIcons] called');
+
   g.innerHTML = '';
-  
+
   const vb = $app.map.svg.viewBox.baseVal;
   const base = Math.min(vb.width, vb.height);
   const size = Math.max(100, Math.min(280, Math.round(base * 0.14)));
@@ -2307,13 +2310,13 @@ function layoutBoothIcons() {
 
     const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
     const isAcquired = state.acquiredStamps.has(id);
-    
+
     const group = document.createElementNS('http://www.w3.org/2000/svg','g');
     group.setAttribute('cursor', 'pointer');
     group.setAttribute('role', 'button');
     group.setAttribute('aria-label', booth.name);
     group.dataset.id = id;
-    
+
     const shadowDeep = document.createElementNS('http://www.w3.org/2000/svg','rect');
     shadowDeep.setAttribute('x', x + 8);
     shadowDeep.setAttribute('y', y + 8);
@@ -2323,7 +2326,7 @@ function layoutBoothIcons() {
     shadowDeep.setAttribute('fill', 'rgba(0,0,0,0.3)');
     shadowDeep.setAttribute('filter', 'blur(12px)');
     group.appendChild(shadowDeep);
-    
+
     const shadowMid = document.createElementNS('http://www.w3.org/2000/svg','rect');
     shadowMid.setAttribute('x', x + 2);
     shadowMid.setAttribute('y', y + 2);
@@ -2333,19 +2336,18 @@ function layoutBoothIcons() {
     shadowMid.setAttribute('fill', 'rgba(0,0,0,0.15)');
     shadowMid.setAttribute('filter', 'blur(4px)');
     group.appendChild(shadowMid);
-    
+
     const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     baseRect.setAttribute('x', x + 1);
     baseRect.setAttribute('y', y + 1);
     baseRect.setAttribute('width', size);
     baseRect.setAttribute('height', size);
     baseRect.setAttribute('rx', size * 0.18);
-    /* ★バグ修正: CSSグラデーションをSVGで使えるソリッドカラーに変更 */
-    baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1'); 
+    baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1');
     baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
     baseRect.setAttribute('stroke-width', '2');
     group.appendChild(baseRect);
-    
+
     const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
     border.setAttribute('x', x);
     border.setAttribute('y', y);
@@ -2355,10 +2357,9 @@ function layoutBoothIcons() {
     border.setAttribute('fill', 'white');
     border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
     border.setAttribute('stroke-width', '4');
-    /* ★フィルターを変更: isAcquiredでグローを適用 */
-    border.setAttribute('filter', isAcquired ? 'url(#acquired-glow)' : 'url(#std-shadow)'); 
+    border.setAttribute('filter', isAcquired ? 'url(#acquired-glow)' : 'url(#std-shadow)');
     group.appendChild(border);
-    
+
     const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
     innerShadow.setAttribute('x', x + 4);
     innerShadow.setAttribute('y', y + 4);
@@ -2369,7 +2370,7 @@ function layoutBoothIcons() {
     innerShadow.setAttribute('stroke', 'rgba(0,0,0,0.1)');
     innerShadow.setAttribute('stroke-width', '1');
     group.appendChild(innerShadow);
-    
+
     const clipId = `clip-${id}`;
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
     const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
@@ -2383,7 +2384,7 @@ function layoutBoothIcons() {
     clipPath.appendChild(clipRect);
     defs.appendChild(clipPath);
     group.appendChild(defs);
-    
+
     const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     fillRect.setAttribute('x', x + 5);
     fillRect.setAttribute('y', y + 5);
@@ -2404,8 +2405,6 @@ function layoutBoothIcons() {
     img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     img.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(img);
-    
-    // Reflection effects removed per user request
 
     if (isAcquired) {
       const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -2416,7 +2415,7 @@ function layoutBoothIcons() {
       checkBg.setAttribute('stroke', 'white');
       checkBg.setAttribute('stroke-width', '3');
       group.appendChild(checkBg);
-      
+
       const checkMark = document.createElementNS('http://www.w3.org/2000/svg','text');
       checkMark.setAttribute('x', x + size - 20);
       checkMark.setAttribute('y', y + 20);
@@ -2428,84 +2427,71 @@ function layoutBoothIcons() {
       checkMark.textContent = '✓';
       group.appendChild(checkMark);
     }
-    
+
     g.appendChild(group);
   });
-  
+
   if (!document.getElementById('highlight-gradient')) {
     const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
-    
+
     const gradient = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     gradient.setAttribute('id', 'highlight-gradient');
     gradient.setAttribute('x1', '0');
     gradient.setAttribute('y1', '0');
     gradient.setAttribute('x2', '0');
     gradient.setAttribute('y2', '1');
-    
     const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
     stop1.setAttribute('offset', '0%');
     stop1.setAttribute('stop-color', 'white');
     stop1.setAttribute('stop-opacity', '0.9');
-    
     const stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
     stop2.setAttribute('offset', '100%');
     stop2.setAttribute('stop-color', 'white');
     stop2.setAttribute('stop-opacity', '0');
-    
     gradient.appendChild(stop1);
     gradient.appendChild(stop2);
     defs.appendChild(gradient);
-    
+
     const borderGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     borderGrad.setAttribute('id', 'border-gradient');
     borderGrad.setAttribute('x1', '0');
     borderGrad.setAttribute('y1', '0');
     borderGrad.setAttribute('x2', '0');
     borderGrad.setAttribute('y2', '1');
-    
-    const bstop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    bstop1.setAttribute('offset', '0%');
-    bstop1.setAttribute('stop-color', '#f1f5f9');
-    
-    const bstop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    bstop2.setAttribute('offset', '50%');
-    bstop2.setAttribute('stop-color', '#e2e8f0');
-    
-    const bstop3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    bstop3.setAttribute('offset', '100%');
-    bstop3.setAttribute('stop-color', '#cbd5e1');
-    
-    borderGrad.appendChild(bstop1);
-    borderGrad.appendChild(bstop2);
-    borderGrad.appendChild(bstop3);
+    const b1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b1.setAttribute('offset', '0%');
+    b1.setAttribute('stop-color', '#f1f5f9');
+    const b2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b2.setAttribute('offset', '50%');
+    b2.setAttribute('stop-color', '#e2e8f0');
+    const b3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b3.setAttribute('offset', '100%');
+    b3.setAttribute('stop-color', '#cbd5e1');
+    borderGrad.appendChild(b1);
+    borderGrad.appendChild(b2);
+    borderGrad.appendChild(b3);
     defs.appendChild(borderGrad);
-    
+
     const acquiredGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
     acquiredGrad.setAttribute('id', 'acquired-gradient');
     acquiredGrad.setAttribute('x1', '0');
     acquiredGrad.setAttribute('y1', '0');
     acquiredGrad.setAttribute('x2', '0');
     acquiredGrad.setAttribute('y2', '1');
-    
-    const astop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    astop1.setAttribute('offset', '0%');
-    astop1.setAttribute('stop-color', '#6ee7b7');
-    
-    const astop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    astop2.setAttribute('offset', '50%');
-    astop2.setAttribute('stop-color', '#34d399');
-    
-    const astop3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    astop3.setAttribute('offset', '100%');
-    astop3.setAttribute('stop-color', '#10b981');
-    
-    acquiredGrad.appendChild(astop1);
-    acquiredGrad.appendChild(astop2);
-    acquiredGrad.appendChild(astop3);
+    const a1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a1.setAttribute('offset', '0%');
+    a1.setAttribute('stop-color', '#6ee7b7');
+    const a2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a2.setAttribute('offset', '50%');
+    a2.setAttribute('stop-color', '#34d399');
+    const a3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a3.setAttribute('offset', '100%');
+    a3.setAttribute('stop-color', '#10b981');
+    acquiredGrad.appendChild(a1);
+    acquiredGrad.appendChild(a2);
+    acquiredGrad.appendChild(a3);
     defs.appendChild(acquiredGrad);
 
-    /* ▼▼▼ ここから追加 ▼▼▼ */
-    // 標準の影フィルター
     const stdShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
     stdShadowFilter.setAttribute('id', 'std-shadow');
     const feStdShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
@@ -2517,19 +2503,17 @@ function layoutBoothIcons() {
     stdShadowFilter.appendChild(feStdShadow);
     defs.appendChild(stdShadowFilter);
 
-    // 取得済みのグロー（輝き）フィルター
     const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
     glowFilter.setAttribute('id', 'acquired-glow');
     const feGlowShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
     feGlowShadow.setAttribute('dx', '0');
     feGlowShadow.setAttribute('dy', '4');
     feGlowShadow.setAttribute('stdDeviation', '10');
-    feGlowShadow.setAttribute('flood-color', '#10b981'); /* 緑色の輝き */
+    feGlowShadow.setAttribute('flood-color', '#10b981');
     feGlowShadow.setAttribute('flood-opacity', '0.75');
     glowFilter.appendChild(feGlowShadow);
     defs.appendChild(glowFilter);
-    /* ▲▲▲ ここまで追加 ▲▲▲ */
-    
+
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
 
@@ -2539,8 +2523,8 @@ function layoutBoothIcons() {
   }));
 }
 
+// ========== アンケ注目UI(選択状態の見た目) ==========
 function setupSurveyInteractivity() {
-  // ラジオボタンのチェック表示
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       const group = e.target.name;
@@ -2551,7 +2535,6 @@ function setupSurveyInteractivity() {
     });
   });
 
-  // チェックボックスのチェック表示
   document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
     checkbox.addEventListener('change', (e) => {
       e.target.closest('.survey-option').classList.toggle('checked', e.target.checked);
@@ -2559,20 +2542,24 @@ function setupSurveyInteractivity() {
   });
 }
 
+// ========== init() ==========
 async function init() {
   if ($app.rewards.content) {
     originalRewardsContentHTML = $app.rewards.content.innerHTML;
   }
   rebindRewardElements();
+
   console.log('[init] starting');
 
-  // URLパラメータのチェック（ネイティブカメラ連携）
+  // URLパラメータ (ネイティブカメラ or 深いリンク)
   const urlParams = new URLSearchParams(window.location.search);
   const stampId = urlParams.get('stamp');
 
-  // 匿名ユーザー初期化 & サーバーと同期
+  // 匿名ユーザー準備 & サーバー側と同期 (ユーザー作成もここでやる)
   await ensureAuth();
-  await syncPointsFromServer(); // ←ここで最初の同期を必ず実行
+
+  // 最初の最新状態を取得（ポイント/スタンプ一覧/percentileなど）
+  await syncPointsFromServer();
 
   // stampパラメータがあれば即付与
   if (stampId) {
@@ -2581,27 +2568,24 @@ async function init() {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // ナビゲーションボタン
+  // ナビゲーション
   $app.navButtons.forEach(btn => {
     if (!btn) return;
     btn.addEventListener('click', () => {
-      console.log('[nav] clicked:', btn.dataset.page);
       state.activePage = btn.dataset.page;
       updateActivePage();
     });
   });
-
   if ($app.nav) {
     $app.nav.addEventListener('click', (e) => {
       const btn = e.target.closest('.nav-btn');
       if (!btn) return;
-      console.log('[nav-delegate] clicked:', btn.dataset.page);
       state.activePage = btn.dataset.page;
       updateActivePage();
     });
   }
 
-  // カテゴリカード
+  // カテゴリカード (stage / talksession / presentation / booths)
   document.querySelectorAll('.stamp-category-card').forEach(card => {
     card.addEventListener('click', () => {
       const category = card.dataset.category;
@@ -2609,7 +2593,7 @@ async function init() {
     });
   });
 
-  // ブースカード
+  // 各企業ブースカード
   document.querySelectorAll('.stamp-booth-card').forEach(card => {
     card.addEventListener('click', () => {
       const boothId = card.dataset.boothId;
@@ -2620,13 +2604,12 @@ async function init() {
     });
   });
 
-  // カテゴリシート
+  // カテゴリシートとブースシートの閉じる動き
   if ($app.categorySheet.backdrop) {
     $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
   }
   $app.categorySheet.closeBtn.addEventListener('click', closeCategorySheet);
 
-  // ブースシート
   if ($app.boothSheet.backdrop) {
     $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
   }
@@ -2648,14 +2631,14 @@ async function init() {
     setTimeout(() => ripple.remove(), 600);
   });
 
-  // リサイズ時のマップレイアウト更新
+  // ウィンドウサイズ変化でマップ再描画
   window.addEventListener('resize', () => {
     if (state.activePage === 'map') {
       layoutBoothIcons();
     }
   });
 
-  // スキャナ関連
+  // スキャナ系イベント
   if ($app.scan.openCard) {
     $app.scan.openCard.addEventListener('click', openFullscreenScanner);
   }
@@ -2682,7 +2665,7 @@ async function init() {
     $app.survey.form.addEventListener('submit', submitSurvey);
   }
 
-  // 特典モーダル
+  // 特典モーダル開閉
   if ($app.rewards.openBtn) {
     $app.rewards.openBtn.addEventListener('click', openRewardsModal);
   }
@@ -2695,25 +2678,24 @@ async function init() {
   // スタッフ確認モーダル（交換フロー）
   if ($app.staffConfirm.cancelBtn) {
     $app.staffConfirm.cancelBtn.addEventListener('click', () => {
-      // 交換確認画面から戻る
       closeStaffConfirmModal(true);
     });
   }
   if ($app.staffConfirm.executeBtn) {
     $app.staffConfirm.executeBtn.addEventListener('click', async () => {
-      // 実際に交換確定
       await claimReward();
     });
   }
 
-  // アンケートUIのビジュアル選択状態
+  // アンケートのUIハイライト
   setupSurveyInteractivity();
 
-  // 初回描画
+  // 最初の描画
   await updatePercentile();
   renderAll();
 }
 
+// DOM構築後に初期化を1回だけ呼ぶ
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
