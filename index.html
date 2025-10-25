@@ -1087,15 +1087,10 @@ const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
 async function callEdgeFunction(functionName, body = {}) {
-  const token = localStorage.getItem('auth_token');
   const headers = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
+    'apikey': SUPABASE_ANON_KEY
   };
-  // トークンがあれば追加（なくても動作するように）
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
   try {
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/${functionName}`,
@@ -1105,8 +1100,6 @@ async function callEdgeFunction(functionName, body = {}) {
         body: JSON.stringify(body)
       }
     );
-    
-    // 401エラーをより詳しく表示
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       console.error(`API Response:`, response.status, error);
@@ -1202,14 +1195,14 @@ const EVENT_DATA = [
 ];
 
 const state = { 
-  points: 0,              // 交換可能ポイント
-  totalPoints: 0,         // 累計ポイント（進捗バー用）
+  points: 0,                // 交換可能ポイント（redeemable_points）
+  totalPoints: 0,           // 累計ポイント（total_points）
   activePage: 'home', 
   prevCount: 0, 
   user: null,
   percentile: null,
-  acquiredStamps: new Set(),
-  claimedRewards: new Set(),
+  acquiredStamps: new Set(), // ユーザーが回ったブースID
+  claimedRewards: new Set(), // 交換済み景品 (未実装でも置いとく)
   surveyCompleted: false
 };
 
@@ -1674,18 +1667,16 @@ function handleCloseRewardMessage() {
 }
   
 const LS_KEY_USER = 'app_user';
-const LS_KEY_TOKEN = 'auth_token';
 
 function saveLocalUser(u) { 
   localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); 
 }
-
 function loadLocalUser() { 
   try { 
     return JSON.parse(localStorage.getItem(LS_KEY_USER) || 'null'); 
   } catch { 
     return null; 
-  } 
+  }
 }
 
 function clearLocalUser() { 
@@ -1698,40 +1689,46 @@ async function syncPointsFromServer() {
     console.log('[syncPointsFromServer] No user ID');
     return;
   }
-  
+
   console.log('[syncPointsFromServer] Starting sync for user:', state.user.id);
-  
+
   try {
     const data = await callEdgeFunction('get-user-data', {
       userId: state.user.id
     });
-    
-    console.log('[syncPointsFromServer] Data received:', data);
-    
-    // 交換可能ポイント
-    state.points = data.points || 0;
-    // 累計ポイント（リロード後も保持される）
-    state.totalPoints = data.total_points || 0;
-    state.acquiredStamps = new Set(data.acquired_stamps || []);
-    state.claimedRewards = new Set(data.claimed_rewards || []);
-    state.surveyCompleted = data.survey_completed || false;
-    
-    if (state.user) {
-      state.user.survey_completed = state.surveyCompleted;
+
+    // ユーザー情報
+    if (data && data.user) {
+      state.points = data.user.redeemable_points ?? 0;
+      state.totalPoints = data.user.total_points ?? 0;
+      state.surveyCompleted = data.user.survey_completed || false;
+
+      // user_number等アップデート
+      state.user.user_number = data.user.user_number || state.user.user_number;
+      state.user.survey_completed = data.user.survey_completed || false;
+      state.user.points = data.user.points ?? 0;
+      state.user.total_points = data.user.total_points ?? 0;
+      state.user.redeemable_points = data.user.redeemable_points ?? 0;
+
       saveLocalUser(state.user);
+
+      // ヘッダー上の番号も更新
+      const userNumberElement = document.getElementById('user-number');
+      if (userNumberElement) {
+        const formattedNumber = String(state.user.user_number || 0).padStart(5, '0');
+        userNumberElement.textContent = formattedNumber;
+      }
     }
-    
-    console.log('[syncPointsFromServer] State updated:', {
-      points: state.points,
-      totalPoints: state.totalPoints,
-      acquiredStamps: Array.from(state.acquiredStamps),
-      claimedRewards: Array.from(state.claimedRewards),
-      surveyCompleted: state.surveyCompleted
-    });
-    
+
+    // 進捗（どのブース回ったか）
+    if (data && data.progress && Array.isArray(data.progress.acquiredBooths)) {
+      state.acquiredStamps = new Set(data.progress.acquiredBooths);
+    }
+
+    // ランキング用パーセンタイルとか表示更新（実装は元のrenderAll等を呼べばOK）
     await updatePercentile();
     renderAll();
-    
+
     console.log('[syncPointsFromServer] Sync complete');
   } catch (err) {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
@@ -1740,16 +1737,14 @@ async function syncPointsFromServer() {
   
   
 async function updatePercentile() {
-  if (!state.user?.id || state.totalPoints === 0) {  // ← 累計で判定
+  if (!state.user?.id || state.totalPoints === 0) {
     state.percentile = null;
     return;
   }
-  
   try {
     const result = await callEdgeFunction('get-percentile', {
       userId: state.user.id
     });
-    
     state.percentile = result.percentile;
   } catch (err) {
     console.error('Failed to calculate percentile:', err);
@@ -2100,46 +2095,61 @@ function showFullscreenMessage(msg, isError = true) {
   }, 2000);
 }
   
-async function handleScanResult(text) {
-  if (!text) return false;
-  
+async function handleScanResult(rawText) {
+  // rawText はQRコードの中身
+  console.log('[handleScanResult] raw QR:', rawText);
+
   if (!state.user?.id) {
-    showFullscreenMessage('ログインしてください', true);
+    showFullscreenMessage('ユーザー情報がありません', true);
     return false;
   }
-  
+
+  // ここでrawTextをパースして、boothIdとstampCodeに分ける
+  // いまはシンプルに同じ値を両方に入れる想定にしておく
+  const boothId = rawText.toLowerCase();
+  const stampCode = rawText.toLowerCase();
+
   try {
+    // Edge Function 'grant-stamp' は:
+    //  - user_stampsに (user_id, booth_id, stamp_code, points_added) をINSERT
+    //  - app_usersのポイント系を更新
+    //  - 最新の進捗情報( acquiredBooths, totalStamps, totalPoints )を返す
     const result = await callEdgeFunction('grant-stamp', {
       userId: state.user.id,
-      qrCode: text.toLowerCase()
+      boothId,
+      stampCode
     });
-    
+
     if (result.success) {
-      await stopCamera();
       showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
+
+      // 最新状態を取り直す
+      await syncPointsFromServer();
+
+      // UIに反映終わったらスキャナ閉じる
       await wait(1500);
       closeFullscreenScanner();
-      
-      await syncPointsFromServer();
       return true;
     }
   } catch (error) {
     console.error('Stamp grant error:', error);
-    
-    if (error.message.includes('既に取得済み')) {
+
+    if (error.message.includes('取得済み')) {
       showFullscreenMessage('⚠️ 既に取得済みです', true);
     } else if (error.message.includes('未対応')) {
       showFullscreenMessage('❌ 未対応のQRコードです', true);
     } else {
       showFullscreenMessage('❌ エラーが発生しました', true);
     }
-    
+
     await wait(1500);
     return false;
   }
 }
 
-function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+function wait(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
 
 async function autoGrantStamp(stampId) {
   console.log('[autoGrantStamp] Processing stamp:', stampId);
@@ -2149,12 +2159,17 @@ async function autoGrantStamp(stampId) {
     return false;
   }
 
+  // boothIdとstampCodeを同じにしてサーバーへ
+  const boothId = stampId.toLowerCase();
+  const stampCode = stampId.toLowerCase();
+
   try {
     showToast('スタンプを確認中...', 'info');
 
     const result = await callEdgeFunction('grant-stamp', {
       userId: state.user.id,
-      qrCode: stampId.toLowerCase()
+      boothId,
+      stampCode
     });
 
     if (result.success) {
@@ -2165,7 +2180,7 @@ async function autoGrantStamp(stampId) {
   } catch (error) {
     console.error('[autoGrantStamp] Error:', error);
 
-    if (error.message.includes('既に取得済み')) {
+    if (error.message.includes('取得済み')) {
       showToast('⚠️ 既に取得済みです', 'warning');
     } else if (error.message.includes('未対応')) {
       showToast('❌ 無効なQRコードです', 'error');
@@ -2178,12 +2193,11 @@ async function autoGrantStamp(stampId) {
 }
 
 async function ensureAuth() {
-  // 匿名UUID方式：認証不要、即利用可能
+  // 匿名UUID方式：認証不要
   let uuid = localStorage.getItem('user_uuid');
   let isNewUser = false;
 
   if (!uuid) {
-    // 新規ユーザー：UUIDを自動生成
     uuid = crypto.randomUUID();
     localStorage.setItem('user_uuid', uuid);
     isNewUser = true;
@@ -2192,73 +2206,66 @@ async function ensureAuth() {
     console.log('[Anonymous User] Existing UUID loaded:', uuid);
   }
 
-  // 匿名ユーザーとして設定
+  // フロント側のstateに一旦セット（暫定）
   state.user = {
     id: uuid,
     name: '匿名参加者',
     registration_type: 'anonymous'
   };
 
-  // アプリUIを有効化（認証ゲート不要）
+  // UIブロック解除
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
 
-  // 新規ユーザーの場合、まずユーザーをサーバーに登録
-  if (isNewUser) {
-    try {
-      console.log('[Anonymous User] Creating new user in database...');
-      const result = await callEdgeFunction('onsite-intake', {
-        name: '匿名参加者',
-        email: `${uuid}@anonymous.local`,
-        user_id: uuid
-      });
-      console.log('[Anonymous User] User created successfully:', result);
-    } catch (error) {
-      console.error('[ensureAuth] Failed to create user:', error);
-      // 作成失敗してもアプリは使えるように続行
-    }
-  }
-
-  // サーバーからデータ同期してユーザー番号を取得
+  // サーバーに問い合わせてユーザーを取得 or 作成
+  // get-user-data は service_role でDBに対して:
+  //   - userIdが未登録ならINSERT
+  //   - 既存ならSELECT
+  //   - user情報とprogress(acquiredBoothsなど)を返す想定
   try {
-    const userData = await callEdgeFunction('get-user-data', { userId: uuid });
-    if (userData && userData.user) {
-      // ユーザー番号を5桁でゼロパディング表示
-      const userNumber = userData.user.user_number || 0;
-      const formattedNumber = String(userNumber).padStart(5, '0');
+    const serverData = await callEdgeFunction('get-user-data', { userId: uuid });
+
+    if (serverData && serverData.user) {
+      // state.user をサーバーの真実側で更新
+      state.user = {
+        id: serverData.user.id,
+        user_number: serverData.user.user_number || 0,
+        registration_type: serverData.user.registration_type,
+        survey_completed: serverData.user.survey_completed || false,
+        created_at: serverData.user.created_at,
+        points: serverData.user.points ?? 0,
+        total_points: serverData.user.total_points ?? 0,
+        redeemable_points: serverData.user.redeemable_points ?? 0
+      };
+
+      // こっちもstateに反映
+      state.points = serverData.user.redeemable_points ?? 0;
+      state.totalPoints = serverData.user.total_points ?? 0;
+      state.surveyCompleted = serverData.user.survey_completed || false;
+
+      // 取得済みブース一覧
+      if (serverData.progress && Array.isArray(serverData.progress.acquiredBooths)) {
+        state.acquiredStamps = new Set(serverData.progress.acquiredBooths);
+      } else {
+        state.acquiredStamps = new Set();
+      }
+
+      // ユーザー番号をヘッダーに表示
       const userNumberElement = document.getElementById('user-number');
       if (userNumberElement) {
+        const formattedNumber = String(serverData.user.user_number || 0).padStart(5, '0');
         userNumberElement.textContent = formattedNumber;
       }
-      console.log('[Anonymous User] User number:', formattedNumber);
+
+      // ローカルに保存（今後拡張するときに使える）
+      saveLocalUser(state.user);
     }
-  } catch (error) {
-    console.error('[ensureAuth] Failed to get user data:', error);
-    // ユーザーデータ取得失敗時、既存ユーザーでも作成を試みる
-    if (!isNewUser) {
-      try {
-        console.log('[Anonymous User] User not found, attempting to create...');
-        await callEdgeFunction('onsite-intake', {
-          name: '匿名参加者',
-          email: `${uuid}@anonymous.local`,
-          user_id: uuid
-        });
-        // 作成後に再度取得
-        const userData = await callEdgeFunction('get-user-data', { userId: uuid });
-        if (userData && userData.user) {
-          const userNumber = userData.user.user_number || 0;
-          const formattedNumber = String(userNumber).padStart(5, '0');
-          const userNumberElement = document.getElementById('user-number');
-          if (userNumberElement) {
-            userNumberElement.textContent = formattedNumber;
-          }
-          console.log('[Anonymous User] User number:', formattedNumber);
-        }
-      } catch (createError) {
-        console.error('[ensureAuth] Failed to create user after error:', createError);
-      }
-    }
+  } catch (err) {
+    console.error('[ensureAuth] Failed to sync user from server:', err);
+    // 失敗してもアプリ自体は使える（ただしポイント表示などは空）
   }
+}
+
 
   await syncPointsFromServer();
 
@@ -2553,24 +2560,23 @@ function setupSurveyInteractivity() {
 }
 
 async function init() {
-  if ($app.rewards.content) {
+   if ($app.rewards.content) {
     originalRewardsContentHTML = $app.rewards.content.innerHTML;
   }
   rebindRewardElements();
   console.log('[init] starting');
 
-  // ネイティブカメラからのQRコード対応
+  // URLパラメータのチェック（ネイティブカメラ連携）
   const urlParams = new URLSearchParams(window.location.search);
   const stampId = urlParams.get('stamp');
 
-  // 匿名ユーザー初期化（認証不要）
+  // 匿名ユーザー初期化 & サーバーと同期
   await ensureAuth();
 
-  // URLパラメータにstampがあれば自動的にスタンプ付与
+  // stampパラメータがあれば即付与
   if (stampId) {
     console.log('[Native Camera] Detected stamp parameter:', stampId);
     await autoGrantStamp(stampId);
-    // URLパラメータをクリーンアップ（履歴に残さない）
     window.history.replaceState({}, '', window.location.pathname);
   }
   
@@ -2710,7 +2716,7 @@ async function init() {
   console.log('[init] complete');
 }
 
-init();
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
