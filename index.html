@@ -2197,8 +2197,20 @@ async function handleScanResult(rawText) {
     return false;
   }
 
-  const boothId = rawText.toLowerCase();
-  const stampCode = rawText.toLowerCase();
+  // URLからスタンプIDを抽出
+  let stampId = rawText;
+  try {
+    const url = new URL(rawText);
+    const urlStampId = url.searchParams.get('stamp');
+    if (urlStampId) {
+      stampId = urlStampId;
+    }
+  } catch (e) {
+    // URLではない場合はそのまま使う
+  }
+
+  const boothId = stampId;
+  const stampCode = stampId;
 
   try {
     const result = await callEdgeFunction('grant-stamp', {
