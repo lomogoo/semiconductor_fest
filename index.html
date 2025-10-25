@@ -802,7 +802,41 @@ li .acquired-check {
       </div>
   </div>
 </div>
-  
+
+<!-- UUID QRコードモーダル -->
+<div id="uuid-qr-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)] my-auto">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between bg-white/80 backdrop-blur-sm">
+      <h3 class="text-lg font-semibold text-slate-800">あなたの受付QR</h3>
+      <button id="close-uuid-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="text-center space-y-2">
+        <p class="text-sm text-slate-600">事前登録ありがとうございます！</p>
+        <p class="text-xs text-slate-500">このQRコードを受付でご提示ください</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200">
+        <div id="uuid-qr-container" class="flex items-center justify-center min-h-[200px]">
+          <!-- QRコードがここに生成されます -->
+        </div>
+      </div>
+
+      <div class="text-center space-y-1">
+        <div class="text-xs text-slate-500">受付番号</div>
+        <div class="text-2xl font-bold text-sky-600 font-mono" id="uuid-qr-number">00000</div>
+      </div>
+
+      <div class="bg-sky-50 rounded-xl p-3 border border-sky-200">
+        <div class="text-xs text-sky-800 space-y-1">
+          <p>💡 <strong>この画面の開き方</strong></p>
+          <p class="pl-4">右上の受付番号（5桁の数字）をタップすると、いつでもこのQRコードを表示できます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Stamp Category Detail Sheet -->
   <div id="category-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
@@ -1393,6 +1427,55 @@ function closeSurveyModal() {
   }
 }
 
+// UUID QRモーダル関数
+function openUuidQrModal() {
+  if (!state.user?.id) {
+    showToast('ユーザー情報がありません');
+    return;
+  }
+
+  // 事前登録ユーザーのみ表示
+  if (state.user.registration_type !== 'pre_registration') {
+    return; // 何も起こらない
+  }
+
+  const modal = document.getElementById('uuid-qr-modal');
+  const container = document.getElementById('uuid-qr-container');
+  const numberDisplay = document.getElementById('uuid-qr-number');
+
+  // QRコード生成
+  container.innerHTML = ''; // クリア
+  new QRCode(container, {
+    text: state.user.id,
+    width: 200,
+    height: 200,
+    colorDark: '#0284c7',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // 受付番号表示
+  if (state.user.user_number) {
+    numberDisplay.textContent = String(state.user.user_number).padStart(5, '0');
+  }
+
+  // モーダル表示
+  $app.backdrop.classList.add('show');
+  modal.classList.add('show');
+}
+
+function closeUuidQrModal() {
+  const modal = document.getElementById('uuid-qr-modal');
+  modal.classList.remove('show');
+  if (
+    !$app.qr.modal.classList.contains('show') &&
+    !$app.rewards.modal.classList.contains('show') &&
+    !$app.survey.modal.classList.contains('show')
+  ) {
+    $app.backdrop.classList.remove('show');
+  }
+}
+
 function openRewardsModal() {
   if (!state.user?.id) {
     showToast('ログインしてください');
@@ -1720,21 +1803,28 @@ function handleCloseRewardMessage() {
 
 // Supabase側でユーザーを作成/取得
 async function ensureAuth() {
-  let uuid = localStorage.getItem('user_uuid');
+  // URLパラメータをチェック
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPreReg = urlParams.get('mode') === 'prereg';
+  const registrationType = isPreReg ? 'pre_registration' : 'on_site';
+
+  // registration_typeに応じてlocalStorageキーを分ける
+  const storageKey = `user_uuid_${registrationType}`;
+  let uuid = localStorage.getItem(storageKey);
 
   if (!uuid) {
     uuid = crypto.randomUUID();
-    localStorage.setItem('user_uuid', uuid);
-    console.log('[Anonymous User] New UUID created:', uuid);
+    localStorage.setItem(storageKey, uuid);
+    console.log(`[${registrationType}] New UUID created:`, uuid);
   } else {
-    console.log('[Anonymous User] Existing UUID loaded:', uuid);
+    console.log(`[${registrationType}] Existing UUID loaded:`, uuid);
   }
 
   // 仮のstate.user
   state.user = {
     id: uuid,
     name: '匿名参加者',
-    registration_type: 'anonymous'
+    registration_type: registrationType
   };
 
   // UIアンロック（もしローディングブロックしてるなら）
@@ -1742,7 +1832,10 @@ async function ensureAuth() {
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
 
   try {
-    const serverData = await callEdgeFunction('get-user-data', { userId: uuid });
+    const serverData = await callEdgeFunction('get-user-data', {
+      userId: uuid,
+      registrationType: registrationType
+    });
 
     if (serverData && serverData.user) {
       state.user = {
@@ -2580,6 +2673,32 @@ async function init() {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+  // 事前登録ユーザーの場合、初回訪問時にUUID QRを自動表示
+  if (state.user?.registration_type === 'pre_registration') {
+    const visitKey = 'prereg_visited';
+    const isFirstVisit = !localStorage.getItem(visitKey);
+    if (isFirstVisit) {
+      localStorage.setItem(visitKey, 'true');
+      // 少し遅延させて表示（UIが整ってから）
+      setTimeout(() => {
+        openUuidQrModal();
+      }, 500);
+    }
+  }
+
+  // 連番クリックでUUID QR表示（事前登録ユーザーのみ）
+  const userNumberElement = document.getElementById('user-number');
+  if (userNumberElement) {
+    userNumberElement.addEventListener('click', () => {
+      openUuidQrModal();
+    });
+    // 事前登録ユーザーの場合、クリック可能なことを示すスタイル追加
+    if (state.user?.registration_type === 'pre_registration') {
+      userNumberElement.style.cursor = 'pointer';
+      userNumberElement.title = 'クリックして受付QRを表示';
+    }
+  }
+
   // ナビゲーション
   $app.navButtons.forEach(btn => {
     if (!btn) return;
@@ -2667,6 +2786,12 @@ async function init() {
   // QRモーダル
   if ($app.qr.closeBtn) {
     $app.qr.closeBtn.addEventListener('click', closeQrModal);
+  }
+
+  // UUID QRモーダル
+  const uuidQrCloseBtn = document.getElementById('close-uuid-qr');
+  if (uuidQrCloseBtn) {
+    uuidQrCloseBtn.addEventListener('click', closeUuidQrModal);
   }
 
   // アンケートモーダル
