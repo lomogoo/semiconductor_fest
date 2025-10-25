@@ -2560,7 +2560,7 @@ function setupSurveyInteractivity() {
 }
 
 async function init() {
-   if ($app.rewards.content) {
+  if ($app.rewards.content) {
     originalRewardsContentHTML = $app.rewards.content.innerHTML;
   }
   rebindRewardElements();
@@ -2572,6 +2572,7 @@ async function init() {
 
   // 匿名ユーザー初期化 & サーバーと同期
   await ensureAuth();
+  await syncPointsFromServer(); // ←ここで最初の同期を必ず実行
 
   // stampパラメータがあれば即付与
   if (stampId) {
@@ -2579,7 +2580,8 @@ async function init() {
     await autoGrantStamp(stampId);
     window.history.replaceState({}, '', window.location.pathname);
   }
-  
+
+  // ナビゲーションボタン
   $app.navButtons.forEach(btn => {
     if (!btn) return;
     btn.addEventListener('click', () => {
@@ -2599,6 +2601,7 @@ async function init() {
     });
   }
 
+  // カテゴリカード
   document.querySelectorAll('.stamp-category-card').forEach(card => {
     card.addEventListener('click', () => {
       const category = card.dataset.category;
@@ -2606,6 +2609,7 @@ async function init() {
     });
   });
 
+  // ブースカード
   document.querySelectorAll('.stamp-booth-card').forEach(card => {
     card.addEventListener('click', () => {
       const boothId = card.dataset.boothId;
@@ -2616,16 +2620,19 @@ async function init() {
     });
   });
 
+  // カテゴリシート
   if ($app.categorySheet.backdrop) {
     $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
   }
   $app.categorySheet.closeBtn.addEventListener('click', closeCategorySheet);
 
+  // ブースシート
   if ($app.boothSheet.backdrop) {
     $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
   }
   $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
 
+  // rippleエフェクト
   document.addEventListener('click', e => {
     const rippleTarget = e.target.closest('.ripple');
     if (!rippleTarget) return;
@@ -2641,12 +2648,14 @@ async function init() {
     setTimeout(() => ripple.remove(), 600);
   });
 
+  // リサイズ時のマップレイアウト更新
   window.addEventListener('resize', () => {
     if (state.activePage === 'map') {
       layoutBoothIcons();
     }
   });
 
+  // スキャナ関連
   if ($app.scan.openCard) {
     $app.scan.openCard.addEventListener('click', openFullscreenScanner);
   }
@@ -2660,13 +2669,12 @@ async function init() {
     $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
   }
 
-  if ($app.rewards.openBtn) {
-    $app.rewards.openBtn.addEventListener('click', openRewardsModal);
-  }
-  if ($app.rewards.closeBtn) {
-    $app.rewards.closeBtn.addEventListener('click', closeRewardsModal);
+  // QRモーダル
+  if ($app.qr.closeBtn) {
+    $app.qr.closeBtn.addEventListener('click', closeQrModal);
   }
 
+  // アンケートモーダル
   if ($app.survey.closeBtn) {
     $app.survey.closeBtn.addEventListener('click', closeSurveyModal);
   }
@@ -2674,46 +2682,36 @@ async function init() {
     $app.survey.form.addEventListener('submit', submitSurvey);
   }
 
+  // 特典モーダル
+  if ($app.rewards.openBtn) {
+    $app.rewards.openBtn.addEventListener('click', openRewardsModal);
+  }
+  if ($app.rewards.closeBtn) {
+    $app.rewards.closeBtn.addEventListener('click', () => {
+      closeRewardsModal();
+    });
+  }
+
+  // スタッフ確認モーダル（交換フロー）
+  if ($app.staffConfirm.cancelBtn) {
+    $app.staffConfirm.cancelBtn.addEventListener('click', () => {
+      // 交換確認画面から戻る
+      closeStaffConfirmModal(true);
+    });
+  }
+  if ($app.staffConfirm.executeBtn) {
+    $app.staffConfirm.executeBtn.addEventListener('click', async () => {
+      // 実際に交換確定
+      await claimReward();
+    });
+  }
+
+  // アンケートUIのビジュアル選択状態
   setupSurveyInteractivity();
 
-  // 匿名ユーザーとして自動初期化
-  await ensureAuth();
-
-  $app.userPill.addEventListener('click', openQrModal);
-  $app.qr.closeBtn.addEventListener('click', closeQrModal);
-  
-  if ($app.staffConfirm.executeBtn) {
-    // 「交換」ボタンで claimReward を実行
-    $app.staffConfirm.executeBtn.addEventListener('click', claimReward); 
-  }
-  if ($app.staffConfirm.cancelBtn) {
-    // 「戻る」ボタンで特典モーダルに戻る
-    $app.staffConfirm.cancelBtn.addEventListener('click', () => closeStaffConfirmModal(true));
-  }
-
-  $app.backdrop.addEventListener('click', (e) => {
-    if (e.target === $app.backdrop) {
-      if ($app.qr.modal.classList.contains('show')) {
-        closeQrModal();
-      } else if ($app.rewards.modal.classList.contains('show')) {
-        closeRewardsModal();
-      } else if ($app.survey.modal.classList.contains('show')) {
-        closeSurveyModal();
-      } else if ($app.staffConfirm.modal.classList.contains('show')) {
-        closeStaffConfirmModal(true); // 特典モーダルに戻る
-      }
-    }
-  });
-
+  // 初回描画
+  await updatePercentile();
   renderAll();
-  
-  setInterval(() => {
-    if (state.user?.id) {
-      syncPointsFromServer();
-    }
-  }, 30000);
-  
-  console.log('[init] complete');
 }
 
 document.addEventListener('DOMContentLoaded', init);
