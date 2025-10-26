@@ -2237,6 +2237,13 @@ async function handleScanResult(rawText) {
     });
 
     if (result.success) {
+      console.log('[DEBUG] QR Success - Before update:', {
+        oldTotalPoints: state.totalPoints,
+        oldAcquiredStamps: Array.from(state.acquiredStamps),
+        newTotalPoints: result.newTotalPoints,
+        newAcquiredStamps: result.acquiredStamps
+      });
+
       // レスポンスから直接ポイント更新（追加API不要）
       if (result.newTotalPoints !== undefined) {
         state.totalPoints = result.newTotalPoints;
@@ -2251,6 +2258,12 @@ async function handleScanResult(rawText) {
         state.acquiredStamps = new Set(result.acquiredStamps);
       }
 
+      console.log('[DEBUG] QR Success - After update:', {
+        newTotalPoints: state.totalPoints,
+        newAcquiredStamps: Array.from(state.acquiredStamps),
+        activePage: state.activePage
+      });
+
       // localStorageに保存
       saveLocalUser(state.user);
 
@@ -2258,7 +2271,9 @@ async function handleScanResult(rawText) {
 
       // UIを完全に更新（パーセンタイル＋全UI）
       await updatePercentile();
+      console.log('[DEBUG] Before renderAll()');
       renderAll();
+      console.log('[DEBUG] After renderAll()');
 
       // 待機時間を短縮 & カメラを早く閉じる
       await wait(800);
