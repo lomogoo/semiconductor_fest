@@ -8,7 +8,8 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, stampId } = await req.json()
+    const { userId, boothId, stampCode } = await req.json()
+    let stampId = stampCode || boothId
 
     if (!userId || !stampId) {
       return new Response(
@@ -17,13 +18,16 @@ serve(async (req) => {
       )
     }
 
+    // Convert to uppercase to match BOOTH_DATA
+    let finalStampId = stampId.toUpperCase()
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Check if user exists
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -35,60 +39,57 @@ serve(async (req) => {
       )
     }
 
-    // Check if stamp already acquired
-    const { data: existingStamp } = await supabase
-      .from('user_stamps')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('stamp_id', stampId)
-      .single()
-
-    if (existingStamp) {
+    // Check if already acquired
+    const acquiredStamps = user.acquired_stamps || []
+    if (acquiredStamps.includes(finalStampId)) {
       return new Response(
-        JSON.stringify({ error: 'Stamp already acquired', alreadyGranted: true }),
+        JSON.stringify({ error: '既に取得済みです', alreadyGranted: true }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Insert stamp record
-    const { error: stampError } = await supabase
-      .from('user_stamps')
-      .insert({
-        user_id: userId,
-        stamp_id: stampId,
-      })
-
-    if (stampError) {
-      console.error('[grant-stamp] Error inserting stamp:', stampError)
-      throw new Error('Failed to grant stamp')
+    // Validate stamp ID (A-F for booths, or event stamps)
+    const validStamps = ['A', 'B', 'C', 'D', 'E', 'F', 'STAGE', 'TALKSESSION', 'PRESENTATION']
+    if (!validStamps.includes(finalStampId)) {
+      return new Response(
+        JSON.stringify({ error: '未対応のスタンプIDです' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
+    // Add to acquired stamps array
+    const newAcquiredStamps = [...acquiredStamps, finalStampId]
+
     // Update user points (+1 point per stamp)
-    const newTotalPoints = user.total_points + 1
-    const newRedeemablePoints = user.redeemable_points + 1
+    const pointsToAdd = 1
+    const newTotalPoints = (user.total_points || 0) + pointsToAdd
+    const newRedeemablePoints = (user.redeemable_points || 0) + pointsToAdd
 
     const { error: updateError } = await supabase
-      .from('users')
+      .from('app_users')
       .update({
+        acquired_stamps: newAcquiredStamps,
         total_points: newTotalPoints,
         redeemable_points: newRedeemablePoints,
-        points: newRedeemablePoints, // Keep points in sync with redeemable_points
+        points: newRedeemablePoints,
       })
       .eq('id', userId)
 
     if (updateError) {
-      console.error('[grant-stamp] Error updating points:', updateError)
-      throw new Error('Failed to update points')
+      console.error('[grant-stamp] Error updating:', updateError)
+      throw new Error('Failed to grant stamp')
     }
 
-    console.log(`[grant-stamp] Granted stamp ${stampId} to user ${userId}`)
+    console.log(`[grant-stamp] Granted stamp ${finalStampId} to user ${userId}`)
 
     return new Response(
       JSON.stringify({
         success: true,
-        stampId,
+        stampId: finalStampId,
+        pointsAdded: pointsToAdd,
         newTotalPoints,
         newRedeemablePoints,
+        acquiredStamps: newAcquiredStamps,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
