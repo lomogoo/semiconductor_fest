@@ -9,7 +9,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userId } = await req.json()
+    const { userId, registrationType } = await req.json()
 
     if (!userId) {
       return new Response(
@@ -25,7 +25,7 @@ serve(async (req) => {
 
     // Check if user exists
     let { data: user, error: userError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -34,9 +34,12 @@ serve(async (req) => {
     if (userError || !user) {
       console.log('[get-user-data] User not found, creating new user:', userId)
 
+      // Determine registration type
+      const finalRegistrationType = registrationType || 'on_site'
+
       // Get the next user_number
       const { data: maxUserData, error: maxError } = await supabase
-        .from('users')
+        .from('app_users')
         .select('user_number')
         .order('user_number', { ascending: false })
         .limit(1)
@@ -46,15 +49,17 @@ serve(async (req) => {
 
       // Create new user
       const { data: newUser, error: createError } = await supabase
-        .from('users')
+        .from('app_users')
         .insert({
           id: userId,
           user_number: nextUserNumber,
-          registration_type: 'anonymous',
+          registration_type: finalRegistrationType,
           points: 0,
           total_points: 0,
           redeemable_points: 0,
           survey_completed: false,
+          acquired_stamps: [],
+          claimed_rewards: [],
         })
         .select()
         .single()
@@ -68,18 +73,8 @@ serve(async (req) => {
       console.log('[get-user-data] User created successfully:', user)
     }
 
-    // Get user stamps (acquired booths)
-    const { data: stamps, error: stampsError } = await supabase
-      .from('user_stamps')
-      .select('stamp_id, acquired_at')
-      .eq('user_id', userId)
-      .order('acquired_at', { ascending: true })
-
-    if (stampsError) {
-      console.error('[get-user-data] Error fetching stamps:', stampsError)
-    }
-
-    const acquiredBooths = stamps ? stamps.map(s => s.stamp_id) : []
+    // Get acquired stamps from the array column
+    const acquiredBooths = user.acquired_stamps || []
 
     // Return user data with progress
     const response = {
@@ -92,10 +87,11 @@ serve(async (req) => {
         points: user.points,
         total_points: user.total_points,
         redeemable_points: user.redeemable_points,
+        acquired_stamps: acquiredBooths,
+        claimed_rewards: user.claimed_rewards || [],
       },
       progress: {
         acquiredBooths,
-        stamps: stamps || [],
       }
     }
 

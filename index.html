@@ -1416,7 +1416,6 @@ function closeUuidQrModal() {
   const modal = document.getElementById('uuid-qr-modal');
   modal.classList.remove('show');
   if (
-    !$app.qr.modal.classList.contains('show') &&
     !$app.rewards.modal.classList.contains('show') &&
     !$app.survey.modal.classList.contains('show')
   ) {
@@ -1436,7 +1435,6 @@ function openRewardsModal() {
 function closeRewardsModal() {
   $app.rewards.modal.classList.remove('show');
   if (
-    !$app.qr.modal.classList.contains('show') &&
     !$app.survey.modal.classList.contains('show')
   ) {
     $app.backdrop.classList.remove('show');
@@ -1463,7 +1461,6 @@ function closeStaffConfirmModal(backToRewards = false) {
     $app.rewards.modal.classList.add('show');
   } else {
     if (
-      !$app.qr.modal.classList.contains('show') &&
       !$app.rewards.modal.classList.contains('show') &&
       !$app.survey.modal.classList.contains('show')
     ) {
@@ -2240,11 +2237,25 @@ async function handleScanResult(rawText) {
     });
 
     if (result.success) {
+      // レスポンスから直接ポイント更新（追加API不要）
+      if (result.newTotalPoints !== undefined) {
+        state.totalPoints = result.newTotalPoints;
+      }
+      if (result.newRedeemablePoints !== undefined) {
+        state.points = result.newRedeemablePoints;
+        state.user.redeemable_points = result.newRedeemablePoints;
+      }
+      if (result.acquiredStamps) {
+        state.acquiredStamps = new Set(result.acquiredStamps);
+      }
+
       showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
 
-      await syncPointsFromServer();
+      // UIを即座に更新
+      renderProgress();
 
-      await wait(1500);
+      // 待機時間を短縮 & カメラを早く閉じる
+      await wait(800);
       closeFullscreenScanner();
       return true;
     }
