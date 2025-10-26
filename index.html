@@ -2673,17 +2673,13 @@ async function init() {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  // 事前登録ユーザーの場合、初回訪問時にUUID QRを自動表示
-  if (state.user?.registration_type === 'pre_registration') {
-    const visitKey = 'prereg_visited';
-    const isFirstVisit = !localStorage.getItem(visitKey);
-    if (isFirstVisit) {
-      localStorage.setItem(visitKey, 'true');
-      // 少し遅延させて表示（UIが整ってから）
-      setTimeout(() => {
-        openUuidQrModal();
-      }, 500);
-    }
+  // 事前登録ユーザーの場合、パラメータ付きURLからアクセス時にUUID QRを自動表示
+  const isPreRegUrl = urlParams.get('mode') === 'prereg';
+  if (state.user?.registration_type === 'pre_registration' && isPreRegUrl) {
+    // ?mode=prereg パラメータがある場合は毎回表示
+    setTimeout(() => {
+      openUuidQrModal();
+    }, 500);
   }
 
   // 連番クリックでUUID QR表示（事前登録ユーザーのみ）
