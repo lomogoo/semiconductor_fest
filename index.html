@@ -1805,19 +1805,45 @@ function handleCloseRewardMessage() {
 async function ensureAuth() {
   // URLパラメータをチェック
   const urlParams = new URLSearchParams(window.location.search);
-  const isPreReg = urlParams.get('mode') === 'prereg';
-  const registrationType = isPreReg ? 'pre_registration' : 'on_site';
+  const hasPreRegParam = urlParams.get('mode') === 'prereg';
 
-  // registration_typeに応じてlocalStorageキーを分ける
-  const storageKey = `user_uuid_${registrationType}`;
-  let uuid = localStorage.getItem(storageKey);
+  // 優先順位1: 既に事前登録UUIDが存在するか確認
+  const preRegUuid = localStorage.getItem('user_uuid_pre_registration');
 
-  if (!uuid) {
-    uuid = crypto.randomUUID();
-    localStorage.setItem(storageKey, uuid);
-    console.log(`[${registrationType}] New UUID created:`, uuid);
+  let registrationType;
+  let uuid;
+  let storageKey;
+
+  if (preRegUuid) {
+    // 既に事前登録済み → パラメータに関わらず事前登録として扱う
+    registrationType = 'pre_registration';
+    uuid = preRegUuid;
+    storageKey = 'user_uuid_pre_registration';
+    console.log('[pre_registration] Existing pre-reg user (priority):', uuid);
+  } else if (hasPreRegParam) {
+    // 新規事前登録
+    registrationType = 'pre_registration';
+    storageKey = 'user_uuid_pre_registration';
+    uuid = localStorage.getItem(storageKey);
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+      localStorage.setItem(storageKey, uuid);
+      console.log('[pre_registration] New UUID created:', uuid);
+    } else {
+      console.log('[pre_registration] Existing UUID loaded:', uuid);
+    }
   } else {
-    console.log(`[${registrationType}] Existing UUID loaded:`, uuid);
+    // 当日登録
+    registrationType = 'on_site';
+    storageKey = 'user_uuid_on_site';
+    uuid = localStorage.getItem(storageKey);
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+      localStorage.setItem(storageKey, uuid);
+      console.log('[on_site] New UUID created:', uuid);
+    } else {
+      console.log('[on_site] Existing UUID loaded:', uuid);
+    }
   }
 
   // 仮のstate.user
