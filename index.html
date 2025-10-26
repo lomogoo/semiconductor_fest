@@ -581,23 +581,6 @@ li .acquired-check {
   <!-- General Modal Backdrop -->
   <div id="modal-backdrop" class="auth-backdrop"></div>
 
-  <!-- User QR Modal -->
-  <div id="qr-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)] my-auto">
-      <div class="p-4 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">あなたのQRコード</h3>
-        <button id="close-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
-      </div>
-      <div class="p-5 flex flex-col items-center gap-3">
-        <div id="qr-box" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm"></div>
-        <div id="qr-uuid" class="text-[10px] text-slate-500 break-all font-mono"></div>
-        <div class="flex gap-2">
-          <a id="download-qr" class="px-3 py-1.5 text-xs rounded-xl bg-sky-600 text-white border border-sky-600 cursor-pointer">画像を保存</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Survey Modal -->
   <div id="survey-modal" class="auth-modal">
     <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,640px)] max-h-[85dvh] overflow-y-auto my-auto">
@@ -1298,7 +1281,6 @@ let originalRewardsContentHTML = null;
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
-  userPill: document.getElementById('user-pill'),
   pages: document.querySelectorAll('.page'),
   nav: document.querySelector('.floating-nav'),
   navIndicator: document.getElementById('nav-indicator'),
@@ -1351,13 +1333,6 @@ const $app = {
     executeBtn: document.getElementById('staff-confirm-execute'),
     cancelBtn: document.getElementById('staff-confirm-cancel')
   },
-  qr: {
-    modal: document.getElementById('qr-modal'),
-    box: document.getElementById('qr-box'),
-    uuid: document.getElementById('qr-uuid'),
-    dl: document.getElementById('download-qr'),
-    closeBtn: document.getElementById('close-qr')
-  },
   rewards: {
     modal: document.getElementById('rewards-modal'),
     content: document.getElementById('rewards-content'),
@@ -1388,41 +1363,14 @@ const LS_KEY_USER = 'app_user';
 function saveLocalUser(u) {
   localStorage.setItem(LS_KEY_USER, JSON.stringify(u));
 }
-function loadLocalUser() {
-  try {
-    return JSON.parse(localStorage.getItem(LS_KEY_USER) || 'null');
-  } catch {
-    return null;
-  }
-}
-
 // ========== モーダル / UI オープン・クローズ ==========
-function openQrModal() {
-  if (!state.user?.id) { showToast('ログインしてください'); return; }
-  $app.backdrop.classList.add('show');
-  $app.qr.modal.classList.add('show');
-  renderUserQr(state.user.id);
-}
-function closeQrModal() {
-  $app.qr.modal.classList.remove('show');
-  if (
-    !$app.rewards.modal.classList.contains('show') &&
-    !$app.survey.modal.classList.contains('show')
-  ) {
-    $app.backdrop.classList.remove('show');
-  }
-}
-
 function openSurveyModal() {
   $app.backdrop.classList.add('show');
   $app.survey.modal.classList.add('show');
 }
 function closeSurveyModal() {
   $app.survey.modal.classList.remove('show');
-  if (
-    !$app.qr.modal.classList.contains('show') &&
-    !$app.rewards.modal.classList.contains('show')
-  ) {
+  if (!$app.rewards.modal.classList.contains('show')) {
     $app.backdrop.classList.remove('show');
   }
 }
@@ -1521,39 +1469,6 @@ function closeStaffConfirmModal(backToRewards = false) {
     ) {
       $app.backdrop.classList.remove('show');
     }
-  }
-}
-
-// ========== QRコード表示 ==========
-function renderUserQr(uuid) {
-  $app.qr.box.innerHTML = '';
-  $app.qr.uuid.textContent = uuid;
-
-  try {
-    new QRCode($app.qr.box, {
-      text: uuid,
-      width: 260,
-      height: 260,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
-    });
-
-    setTimeout(() => {
-      const canvas = $app.qr.box.querySelector('canvas');
-      if (canvas) {
-        try {
-          const dataUrl = canvas.toDataURL('image/png');
-          $app.qr.dl.setAttribute('href', dataUrl);
-          $app.qr.dl.setAttribute('download', `user-qr-${uuid}.png`);
-        } catch (e) {
-          console.warn('toDataURL failed', e);
-        }
-      }
-    }, 100);
-  } catch (err) {
-    console.error(err);
-    showToast('QR生成に失敗しました');
   }
 }
 
@@ -1819,7 +1734,6 @@ async function ensureAuth() {
     registrationType = 'pre_registration';
     uuid = preRegUuid;
     storageKey = 'user_uuid_pre_registration';
-    console.log('[pre_registration] Existing pre-reg user (priority):', uuid);
   } else if (hasPreRegParam) {
     // 新規事前登録
     registrationType = 'pre_registration';
@@ -1828,9 +1742,6 @@ async function ensureAuth() {
     if (!uuid) {
       uuid = crypto.randomUUID();
       localStorage.setItem(storageKey, uuid);
-      console.log('[pre_registration] New UUID created:', uuid);
-    } else {
-      console.log('[pre_registration] Existing UUID loaded:', uuid);
     }
   } else {
     // 当日登録
@@ -1840,9 +1751,6 @@ async function ensureAuth() {
     if (!uuid) {
       uuid = crypto.randomUUID();
       localStorage.setItem(storageKey, uuid);
-      console.log('[on_site] New UUID created:', uuid);
-    } else {
-      console.log('[on_site] Existing UUID loaded:', uuid);
     }
   }
 
@@ -1902,11 +1810,8 @@ async function ensureAuth() {
 // 最新状態をDBから再取得
 async function syncPointsFromServer() {
   if (!state.user?.id) {
-    console.log('[syncPointsFromServer] No user ID');
     return;
   }
-
-  console.log('[syncPointsFromServer] Starting sync for user:', state.user.id);
 
   try {
     const data = await callEdgeFunction('get-user-data', {
@@ -1939,8 +1844,6 @@ async function syncPointsFromServer() {
 
     await updatePercentile();
     renderAll();
-
-    console.log('[syncPointsFromServer] Sync complete');
   } catch (err) {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
   }
@@ -2309,8 +2212,6 @@ function showFullscreenMessage(msg, isError = true) {
 }
 
 async function handleScanResult(rawText) {
-  console.log('[handleScanResult] raw QR:', rawText);
-
   if (!state.user?.id) {
     showFullscreenMessage('ユーザー情報がありません', true);
     return false;
@@ -2368,8 +2269,6 @@ function wait(ms) {
 }
 
 async function autoGrantStamp(stampId) {
-  console.log('[autoGrantStamp] Processing stamp:', stampId);
-
   if (!state.user?.id) {
     showToast('エラー: ユーザーIDが見つかりません');
     return false;
@@ -2680,8 +2579,6 @@ async function init() {
   }
   rebindRewardElements();
 
-  console.log('[init] starting');
-
   // URLパラメータ (ネイティブカメラ or 深いリンク)
   const urlParams = new URLSearchParams(window.location.search);
   const stampId = urlParams.get('stamp');
@@ -2694,7 +2591,6 @@ async function init() {
 
   // stampパラメータがあれば即付与
   if (stampId) {
-    console.log('[Native Camera] Detected stamp parameter:', stampId);
     await autoGrantStamp(stampId);
     window.history.replaceState({}, '', window.location.pathname);
   }
@@ -2737,14 +2633,6 @@ async function init() {
       updateActivePage();
     });
   }
-
-  // カテゴリカード (stage / talksession / presentation / booths)
-  document.querySelectorAll('.stamp-category-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const category = card.dataset.category;
-      openCategorySheet(category);
-    });
-  });
 
   // 各企業ブースカード
   document.querySelectorAll('.stamp-booth-card').forEach(card => {
@@ -2803,11 +2691,6 @@ async function init() {
   }
   if ($app.fullscreenScanner.switchBtn) {
     $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
-  }
-
-  // QRモーダル
-  if ($app.qr.closeBtn) {
-    $app.qr.closeBtn.addEventListener('click', closeQrModal);
   }
 
   // UUID QRモーダル
