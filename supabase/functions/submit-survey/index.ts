@@ -23,7 +23,7 @@ serve(async (req) => {
 
     // Get user
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -50,7 +50,7 @@ serve(async (req) => {
 
     // Update user: mark survey as completed and add bonus points
     const { error: updateError } = await supabase
-      .from('users')
+      .from('app_users')
       .update({
         survey_completed: true,
         total_points: newTotalPoints,

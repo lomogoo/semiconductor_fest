@@ -23,7 +23,7 @@ serve(async (req) => {
 
     // Get user's total points
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('total_points')
       .eq('id', userId)
       .single()
@@ -39,7 +39,7 @@ serve(async (req) => {
 
     // Count total users
     const { count: totalUsers, error: countError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('*', { count: 'exact', head: true })
 
     if (countError) {
@@ -47,21 +47,21 @@ serve(async (req) => {
       throw new Error('Failed to count users')
     }
 
-    // Count users with fewer points
-    const { count: lowerUsers, error: lowerError } = await supabase
-      .from('users')
+    // Count users with MORE points (for top percentile calculation)
+    const { count: higherUsers, error: higherError } = await supabase
+      .from('app_users')
       .select('*', { count: 'exact', head: true })
-      .lt('total_points', userPoints)
+      .gt('total_points', userPoints)
 
-    if (lowerError) {
-      console.error('[get-percentile] Error counting lower users:', lowerError)
-      throw new Error('Failed to count lower users')
+    if (higherError) {
+      console.error('[get-percentile] Error counting higher users:', higherError)
+      throw new Error('Failed to count higher users')
     }
 
-    // Calculate percentile
+    // Calculate top percentile (上位%)
     let percentile = 0
     if (totalUsers && totalUsers > 0) {
-      percentile = Math.round(((lowerUsers || 0) / totalUsers) * 100)
+      percentile = Math.round(((higherUsers || 0) + 1) / totalUsers * 100)
     }
 
     return new Response(

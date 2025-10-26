@@ -23,7 +23,7 @@ serve(async (req) => {
 
     // Get user
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('app_users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -46,32 +46,30 @@ serve(async (req) => {
     // Deduct points
     const newRedeemablePoints = user.redeemable_points - pointsCost
 
-    // Record the reward claim
-    const { error: rewardError } = await supabase
-      .from('user_rewards')
-      .insert({
-        user_id: userId,
+    // Add to claimed rewards array
+    const claimedRewards = user.claimed_rewards || []
+    const newClaimedRewards = [
+      ...claimedRewards,
+      {
         reward_type: rewardType,
         points_spent: pointsCost,
-      })
+        claimed_at: new Date().toISOString(),
+      }
+    ]
 
-    if (rewardError) {
-      console.error('[claim-reward] Error recording reward:', rewardError)
-      throw new Error('Failed to record reward')
-    }
-
-    // Update user points
+    // Update user points and claimed rewards
     const { error: updateError } = await supabase
-      .from('users')
+      .from('app_users')
       .update({
         redeemable_points: newRedeemablePoints,
         points: newRedeemablePoints,
+        claimed_rewards: newClaimedRewards,
       })
       .eq('id', userId)
 
     if (updateError) {
-      console.error('[claim-reward] Error updating points:', updateError)
-      throw new Error('Failed to update points')
+      console.error('[claim-reward] Error updating user:', updateError)
+      throw new Error('Failed to claim reward')
     }
 
     console.log(`[claim-reward] User ${userId} claimed reward ${rewardType}, spent ${pointsCost} points`)
@@ -82,6 +80,7 @@ serve(async (req) => {
         rewardType,
         pointsSpent: pointsCost,
         newRedeemablePoints,
+        claimedRewards: newClaimedRewards,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
