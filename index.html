@@ -589,110 +589,180 @@ li .acquired-check {
         <button id="close-survey" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">✕</button>
       </div>
       <form id="survey-form" class="p-4 space-y-4">
-        <!-- Q1: 学年 -->
+        <!-- Q1: 現在の所属 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q1. あなたの学年は？
+            Q1. 現在の所属は？
             <span class="survey-required">*</span>
           </label>
           <div class="survey-radio-group">
             <label class="survey-option">
-              <input type="radio" name="grade" value="高1" required />
-              <span>高1</span>
+              <input type="radio" name="affiliation" value="高校" required />
+              <span>高校</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="grade" value="高2" />
-              <span>高2</span>
+              <input type="radio" name="affiliation" value="専門学校" />
+              <span>専門学校</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="grade" value="高3" />
-              <span>高3</span>
+              <input type="radio" name="affiliation" value="高等専門学校" />
+              <span>高等専門学校</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="grade" value="大学生" />
-              <span>大学生</span>
+              <input type="radio" name="affiliation" value="大学" />
+              <span>大学</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="grade" value="その他" />
+              <input type="radio" name="affiliation" value="その他" />
               <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q2: 興味分野 -->
+        <!-- Q2: 興味のある研究分野 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q2. 興味のある分野は？（複数選択可）
+            Q2. 興味のある研究分野は？（複数選択可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="checkbox" name="interest" value="電子工学" />
+              <input type="checkbox" name="research_interest" value="半導体デバイス" />
+              <span>半導体デバイス</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="半導体材料" />
+              <span>半導体材料</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="半導体製造プロセス" />
+              <span>半導体製造プロセス</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="電子工学" />
               <span>電子工学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="interest" value="材料工学" />
+              <input type="checkbox" name="research_interest" value="材料工学" />
               <span>材料工学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="interest" value="製造技術" />
-              <span>製造技術</span>
+              <input type="checkbox" name="research_interest" value="機械工学" />
+              <span>機械工学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="interest" value="営業・企画" />
-              <span>営業・企画</span>
+              <input type="checkbox" name="research_interest" value="化学工学" />
+              <span>化学工学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="interest" value="その他" />
+              <input type="checkbox" name="research_interest" value="物理学" />
+              <span>物理学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="その他" />
               <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q3: 開催地 -->
+        <!-- Q3: 興味のあるキャリア分野 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q3. どこからご来場ですか？
+            Q3. 興味のあるキャリア分野は？（複数選択可）
             <span class="survey-required">*</span>
           </label>
-          <div class="survey-radio-group">
+          <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="radio" name="location" value="宮城県内" required />
-              <span>宮城県内</span>
+              <input type="checkbox" name="career_interest" value="研究開発" />
+              <span>研究開発</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="location" value="東北地方（宮城以外）" />
-              <span>東北地方（宮城以外）</span>
+              <input type="checkbox" name="career_interest" value="製造技術" />
+              <span>製造技術</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="location" value="その他の地域" />
-              <span>その他の地域</span>
+              <input type="checkbox" name="career_interest" value="品質管理" />
+              <span>品質管理</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="設計・開発" />
+              <span>設計・開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="営業・マーケティング" />
+              <span>営業・マーケティング</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="企画・事業開発" />
+              <span>企画・事業開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="その他" />
+              <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q4: 今後の連絡 -->
+        <!-- Q4: イベントを知ったきっかけ -->
         <div class="survey-field">
           <label class="survey-label">
-            Q4. 将来のキャリアについて企業から連絡を受けたいですか？
+            Q4. 本イベントはどこで知りましたか？
             <span class="survey-required">*</span>
           </label>
           <div class="survey-radio-group">
             <label class="survey-option">
-              <input type="radio" name="future_contact" value="はい" required />
-              <span>はい</span>
+              <input type="radio" name="event_source" value="学校からの案内" required />
+              <span>学校からの案内</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="future_contact" value="いいえ" />
-              <span>いいえ</span>
+              <input type="radio" name="event_source" value="SNS" />
+              <span>SNS</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="ウェブサイト" />
+              <span>ウェブサイト</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="友人・知人の紹介" />
+              <span>友人・知人の紹介</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="その他" />
+              <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q5: 自由記述 -->
+        <!-- Q5: 良かったコンテンツ -->
         <div class="survey-field">
           <label class="survey-label">
-            Q5. 本日のイベントについてご感想やご要望があればお聞かせください
+            Q5. どのコンテンツが良かったですか？（複数選択可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="特別セミナー（ものづくり太郎）" />
+              <span>特別セミナー（ものづくり太郎）</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="トークセッション" />
+              <span>トークセッション</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="企業研究発表会" />
+              <span>企業研究発表会</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="企業ブース" />
+              <span>企業ブース</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q6: 感想・要望 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q6. 本日のイベントの感想、要望があればお聞かせください
           </label>
           <textarea name="feedback" class="survey-textarea" placeholder="ご感想をお聞かせください..."></textarea>
         </div>
@@ -705,84 +775,41 @@ li .acquired-check {
     </div>
   </div>
 
-  <!-- Rewards Modal -->
-<div id="rewards-modal" class="auth-modal">
-  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)] max-h-[85dvh] overflow-y-auto my-auto">
-    <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+  <!-- Gold Pin Badge Exchange Modal -->
+<div id="badge-exchange-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,480px)] my-auto">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between bg-white/80 backdrop-blur-sm z-10">
       <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
-      <button id="close-rewards" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      <button id="close-badge-exchange" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
     </div>
-    <div id="rewards-content" class="p-4 space-y-4">
-     <div id="pre-survey-section" class="space-y-4">
-        
-        <div class="liquid-glass rounded-2xl p-4 border border-white/50 space-y-4">
-          
-          <div class="text-center">
-            <div class="text-xs text-slate-600 mb-1">交換可能ポイント</div>
-            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display-pre">0</div>
-          </div>
-
-          <div class="progress-info-grid" id="rewards-booth-grid-pre">
-            </div>
-
-          <div class="reward-card p-0 border-none shadow-none">
-            <div class="reward-image-wrapper">
-              <img src="quo.png" alt="QUOカード" />
-            </div>
-            <div class="reward-details">
-              <div class="reward-name">QUOカード（500円分）</div>
-              <div class="reward-description" id="reward-exchange-info-pre">0枚交換可能</div>
-            </div>
-          </div>
+    <div class="p-6 space-y-6">
+      <div class="text-center space-y-4">
+        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
+          <span class="text-6xl">🏅</span>
         </div>
-        <div class="staff-instruction">
-          <div class="staff-instruction-title">
-            📋 ご注意ください
-          </div>
-          <div class="staff-instruction-text">
-            特典の受け取りの前に、アンケートへの回答が必要です。下のボタンからアンケートにご協力ください。アンケート回答後に、L404にて特典を交換ください。
-          </div>
-        </div>
-
-        <button id="open-survey-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
-          アンケートに回答する
-        </button>
-      </div>
-
-      <div id="post-survey-section" class="space-y-4 hidden">
-        <div class="liquid-glass rounded-2xl p-4 border border-white/50 space-y-4">
-          <div class="text-center">
-            <div class="text-xs text-slate-600 mb-1">交換可能ポイント</div>
-            <div class="text-3xl font-bold text-purple-600" id="rewards-points-display">0</div>
-          </div>
-          <div class="progress-info-grid" id="rewards-booth-grid">
-            </div>
-          <div class="reward-card p-0 border-none shadow-none">
-            <div class="reward-image-wrapper">
-              <img src="quo.png" alt="QUOカード" />
-            </div>
-            <div class="reward-details">
-              <div class="reward-name">QUOカード（500円分）</div>
-              <div class="reward-description" id="reward-exchange-info">0枚交換可能</div>
-            </div>
-          </div>
-        </div>
-        <button id="claim-reward-btn" class="w-full px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
-          🎁 交換する
-        </button>
-        <div class="staff-instruction">
-          <div class="staff-instruction-title">
-            👨‍💼 スタッフ確認
-          </div>
-          <div class="staff-instruction-text">
-            スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
-          </div>
-        </div>
-        <div class="text-xs text-slate-500 text-center">
-          ※交換したQUOカードは受付（L404）でお受け取りください
+        <div>
+          <div class="text-2xl font-bold text-slate-800 mb-2">ゴールドピンバッジ</div>
+          <div class="text-sm text-slate-600">アンケート回答特典</div>
         </div>
       </div>
+
+      <div class="staff-instruction">
+        <div class="staff-instruction-title">
+          👨‍💼 スタッフ確認
+        </div>
+        <div class="staff-instruction-text">
+          スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
+        </div>
       </div>
+
+      <button id="claim-badge-btn" class="w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold ripple text-lg shadow-lg">
+        🎁 交換する
+      </button>
+
+      <div class="text-xs text-slate-500 text-center">
+        ※交換は1回のみとなります
+      </div>
+    </div>
   </div>
 </div>
 
@@ -939,10 +966,10 @@ li .acquired-check {
                 <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
               </button>
 
-              <!-- QUOカード交換ボタン -->
-              <button id="open-rewards-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2">
-                <span class="text-lg">🎁</span>
-                <span>QUOカードを交換する</span>
+              <!-- アンケート回答 / 特典交換ボタン -->
+              <button id="survey-action-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2">
+                <span class="text-lg">📝</span>
+                <span id="survey-action-text">アンケート回答</span>
               </button>
             </div>
           </div>
@@ -1275,8 +1302,6 @@ const state = {
   surveyCompleted: false
 };
 
-let originalRewardsContentHTML = null;
-
 // DOM参照
 const $app = {
   header: document.getElementById('header'),
@@ -1333,28 +1358,19 @@ const $app = {
     executeBtn: document.getElementById('staff-confirm-execute'),
     cancelBtn: document.getElementById('staff-confirm-cancel')
   },
-  rewards: {
-    modal: document.getElementById('rewards-modal'),
-    content: document.getElementById('rewards-content'),
-    closeBtn: document.getElementById('close-rewards'),
-    openBtn: document.getElementById('open-rewards-btn'),
-    claimBtn: null,
-    openSurveyBtn: null,
-    pointsDisplay: null,
-    exchangeInfo: null,
-    boothGrid: null,
-    pointsDisplayPre: null,
-    boothGridPre: null,
-    preSurveySection: null,
-    postSurveySection: null,
-    exchangeInfoPre: null
+  badgeExchange: {
+    modal: document.getElementById('badge-exchange-modal'),
+    closeBtn: document.getElementById('close-badge-exchange'),
+    claimBtn: document.getElementById('claim-badge-btn')
   },
   survey: {
     modal: document.getElementById('survey-modal'),
     form: document.getElementById('survey-form'),
     closeBtn: document.getElementById('close-survey'),
     error: document.getElementById('survey-error')
-  }
+  },
+  surveyActionBtn: document.getElementById('survey-action-btn'),
+  surveyActionText: document.getElementById('survey-action-text')
 };
 
 // ========== localStorage管理 ==========
@@ -1370,7 +1386,7 @@ function openSurveyModal() {
 }
 function closeSurveyModal() {
   $app.survey.modal.classList.remove('show');
-  if (!$app.rewards.modal.classList.contains('show')) {
+  if (!$app.badgeExchange.modal.classList.contains('show')) {
     $app.backdrop.classList.remove('show');
   }
 }
@@ -1416,58 +1432,36 @@ function closeUuidQrModal() {
   const modal = document.getElementById('uuid-qr-modal');
   modal.classList.remove('show');
   if (
-    !$app.rewards.modal.classList.contains('show') &&
+    !$app.badgeExchange.modal.classList.contains('show') &&
     !$app.survey.modal.classList.contains('show')
   ) {
     $app.backdrop.classList.remove('show');
   }
 }
 
-function openRewardsModal() {
+function openBadgeExchangeModal() {
   if (!state.user?.id) {
     showToast('ログインしてください');
     return;
   }
+
+  // Check if badge already claimed
+  if (state.user.badge_claimed) {
+    showToast('特典は既に交換済みです');
+    return;
+  }
+
   $app.backdrop.classList.add('show');
-  $app.rewards.modal.classList.add('show');
-  renderRewardsModal();
+  $app.badgeExchange.modal.classList.add('show');
 }
-function closeRewardsModal() {
-  $app.rewards.modal.classList.remove('show');
-  if (
-    !$app.survey.modal.classList.contains('show')
-  ) {
+
+function closeBadgeExchangeModal() {
+  $app.badgeExchange.modal.classList.remove('show');
+  if (!$app.survey.modal.classList.contains('show')) {
     $app.backdrop.classList.remove('show');
   }
 }
 
-// スタッフ確認(交換直前)モーダル
-function openStaffConfirmModal() {
-  if (state.points <= 0) {
-    showToast('交換できるポイントがありません');
-    return;
-  }
-
-  $app.staffConfirm.count.textContent = `${state.points}枚`;
-
-  $app.rewards.modal.classList.remove('show');
-  $app.backdrop.classList.add('show');
-  $app.staffConfirm.modal.classList.add('show');
-}
-function closeStaffConfirmModal(backToRewards = false) {
-  $app.staffConfirm.modal.classList.remove('show');
-
-  if (backToRewards) {
-    $app.rewards.modal.classList.add('show');
-  } else {
-    if (
-      !$app.rewards.modal.classList.contains('show') &&
-      !$app.survey.modal.classList.contains('show')
-    ) {
-      $app.backdrop.classList.remove('show');
-    }
-  }
-}
 
 // ========== アンケート提出 ==========
 async function submitSurvey(e) {
@@ -1479,18 +1473,21 @@ async function submitSurvey(e) {
 
   const formData = new FormData($app.survey.form);
   const surveyData = {
-    grade: formData.get('grade'),
-    location: formData.get('location'),
-    future_contact: formData.get('future_contact'),
+    affiliation: formData.get('affiliation'),
+    event_source: formData.get('event_source'),
     feedback: formData.get('feedback'),
-    interests: []
+    research_interests: [],
+    career_interests: [],
+    good_contents: []
   };
-  formData.getAll('interest').forEach(v => surveyData.interests.push(v));
+  formData.getAll('research_interest').forEach(v => surveyData.research_interests.push(v));
+  formData.getAll('career_interest').forEach(v => surveyData.career_interests.push(v));
+  formData.getAll('good_content').forEach(v => surveyData.good_contents.push(v));
 
   try {
     $app.survey.error.textContent = '';
     const result = await callEdgeFunction('submit-survey', {
-      surveyData // ← サーバー側がuserId/JWTから紐付ける想定
+      surveyData
     });
 
     if (result.success) {
@@ -1499,9 +1496,11 @@ async function submitSurvey(e) {
       saveLocalUser(state.user);
 
       $app.survey.modal.classList.remove('show');
+      $app.backdrop.classList.remove('show');
       showToast('✅ アンケートありがとうございました！');
 
-      openRewardsModal();
+      // Update button to "特典交換"
+      updateSurveyActionButton();
     }
   } catch (err) {
     console.error('Survey submission failed:', err);
@@ -1509,207 +1508,64 @@ async function submitSurvey(e) {
   }
 }
 
-// ========== 特典交換UI / 交換処理 ==========
-function rebindRewardElements() {
-  $app.rewards.pointsDisplay = document.getElementById('rewards-points-display');
-  $app.rewards.exchangeInfo = document.getElementById('reward-exchange-info');
-  $app.rewards.boothGrid = document.getElementById('rewards-booth-grid');
-
-  $app.rewards.pointsDisplayPre = document.getElementById('rewards-points-display-pre');
-  $app.rewards.boothGridPre = document.getElementById('rewards-booth-grid-pre');
-
-  $app.rewards.preSurveySection = document.getElementById('pre-survey-section');
-  $app.rewards.postSurveySection = document.getElementById('post-survey-section');
-
-  $app.rewards.claimBtn = document.getElementById('claim-reward-btn');
-  $app.rewards.openSurveyBtn = document.getElementById('open-survey-btn');
-  $app.rewards.exchangeInfoPre = document.getElementById('reward-exchange-info-pre');
-
-  if ($app.rewards.claimBtn) {
-    $app.rewards.claimBtn.addEventListener('click', openStaffConfirmModal);
-  }
-  if ($app.rewards.openSurveyBtn) {
-    $app.rewards.openSurveyBtn.addEventListener('click', () => {
-      closeRewardsModal();
-      setTimeout(() => openSurveyModal(), 300);
-    });
-  }
-}
-
-function renderRewardsModal() {
-  const points = state.points;
+// ========== Survey Action Button Update ==========
+function updateSurveyActionButton() {
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
+  const isBadgeClaimed = state.user?.badge_claimed || false;
 
-  // ポイント表示
-  if ($app.rewards.pointsDisplay) $app.rewards.pointsDisplay.textContent = `${points}pt`;
-  if ($app.rewards.pointsDisplayPre) $app.rewards.pointsDisplayPre.textContent = `${points}pt`;
+  if (!$app.surveyActionBtn) return;
 
-  // ブース達成状況グリッド
-  if ($app.rewards.boothGrid) $app.rewards.boothGrid.innerHTML = '';
-  if ($app.rewards.boothGridPre) $app.rewards.boothGridPre.innerHTML = '';
-
-  BOOTH_DATA.forEach(booth => {
-    const isAcquired = state.acquiredStamps.has(booth.id);
-    const inner = `
-      <div class="booth-icon">
-        <img src="${booth.img}" alt="${booth.name}" />
-      </div>
-      <div class="booth-label">${booth.id}</div>
-    `;
-
-    if ($app.rewards.boothGridPre) {
-      const elPre = document.createElement('div');
-      elPre.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
-      elPre.innerHTML = inner;
-      $app.rewards.boothGridPre.appendChild(elPre);
-    }
-
-    if ($app.rewards.boothGrid) {
-      const elPost = document.createElement('div');
-      elPost.className = `progress-booth-item ${isAcquired ? 'acquired' : ''}`;
-      elPost.innerHTML = inner;
-      $app.rewards.boothGrid.appendChild(elPost);
-    }
-  });
-
-  if (!isSurveyCompleted) {
-    $app.rewards.preSurveySection.classList.remove('hidden');
-    $app.rewards.postSurveySection.classList.add('hidden');
-
-    if ($app.rewards.exchangeInfoPre) {
-      $app.rewards.exchangeInfoPre.textContent = `${points}枚交換可能`;
-    }
+  if (isBadgeClaimed) {
+    // Badge already claimed - disable button
+    $app.surveyActionBtn.disabled = true;
+    $app.surveyActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    $app.surveyActionText.textContent = '交換済み';
+  } else if (isSurveyCompleted) {
+    // Survey completed but badge not claimed - show "特典交換"
+    $app.surveyActionBtn.disabled = false;
+    $app.surveyActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    $app.surveyActionText.textContent = '特典交換';
   } else {
-    $app.rewards.preSurveySection.classList.add('hidden');
-    $app.rewards.postSurveySection.classList.remove('hidden');
-
-    const canExchange = points > 0;
-    const exchangeText = canExchange
-      ? `${points}枚交換可能`
-      : '全ブースを回ってください';
-
-    if ($app.rewards.exchangeInfo) {
-      $app.rewards.exchangeInfo.textContent = exchangeText;
-    }
-    if ($app.rewards.exchangeInfoPre) {
-      $app.rewards.exchangeInfoPre.textContent = exchangeText;
-    }
-
-    const btn = $app.rewards.claimBtn;
-    if (btn) {
-      if (canExchange) {
-        btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        btn.textContent = `🎁 ${points}枚交換する`;
-      } else {
-        btn.disabled = true;
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
-        btn.textContent = 'ブースを回ってください';
-      }
-    }
+    // Survey not completed - show "アンケート回答"
+    $app.surveyActionBtn.disabled = false;
+    $app.surveyActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    $app.surveyActionText.textContent = 'アンケート回答';
   }
 }
 
-async function claimReward() {
+// ========== Badge Claim Function ==========
+async function claimBadge() {
   if (!state.user?.id) {
     showToast('ログインしてください');
     return;
   }
 
-  if (!state.surveyCompleted && !state.user.survey_completed) {
-    showToast('アンケートへの回答が必要です');
-    closeStaffConfirmModal(true);
-    return;
-  }
-
-  if (state.points === 0) {
-    showToast('ポイントがありません');
-    closeStaffConfirmModal(true);
+  if (state.user.badge_claimed) {
+    showToast('特典は既に交換済みです');
     return;
   }
 
   try {
-    const quoCards = state.points;
-    const timestampPrefix = String(Date.now()).slice(0, -1);
-    const rewardId = `quo-card-${timestampPrefix}${quoCards}`;
-
-    closeStaffConfirmModal(false);
-
-    const result = await callEdgeFunction('claim-reward', {
-      userId: state.user.id,
-      rewardId: rewardId,
-      points: quoCards
+    const result = await callEdgeFunction('claim-badge', {
+      userId: state.user.id
     });
 
     if (result.success) {
-      state.claimedRewards.add(rewardId);
+      state.user.badge_claimed = true;
+      saveLocalUser(state.user);
 
-      state.points = result.redeemablePoints || 0;
-      state.totalPoints = result.totalPoints || state.totalPoints;
+      closeBadgeExchangeModal();
+      showToast('🎉 ゴールドピンバッジを交換しました！受付（L404）でお受け取りください');
 
-      showRewardClaimedMessage(quoCards);
-
-      $app.backdrop.classList.add('show');
-      $app.rewards.modal.classList.add('show');
-
-      renderAll();
+      // Update button to disabled state
+      updateSurveyActionButton();
     }
   } catch (err) {
-    console.error('Failed to claim reward:', err);
-    showToast('特典の交換に失敗しました');
+    console.error('Badge claim failed:', err);
+    showToast('交換に失敗しました。もう一度お試しください。');
   }
 }
 
-function showRewardClaimedMessage(quoCards) {
-  $app.rewards.preSurveySection.classList.add('hidden');
-  $app.rewards.postSurveySection.classList.add('hidden');
-
-  const messageHTML = `
-    <div class="space-y-4">
-      <div class="text-center py-8">
-        <div class="text-6xl mb-4">🎉</div>
-        <div class="text-2xl font-bold text-green-600 mb-2">交換完了！</div>
-        <div class="text-lg text-slate-700 mb-4">
-          QUOカード<span class="text-3xl font-bold text-purple-600">${quoCards}枚</span>
-        </div>
-        <div class="text-sm text-slate-600">
-          (${quoCards * 500}円分)
-        </div>
-      </div>
-
-      <div class="staff-instruction">
-        <div class="staff-instruction-title">
-          📍 受け取り場所
-        </div>
-        <div class="staff-instruction-text">
-          受付（L404）でQUOカードをお受け取りください。
-        </div>
-      </div>
-
-      <button id="close-reward-message-btn" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
-        閉じる
-      </button>
-    </div>
-  `;
-
-  $app.rewards.content.innerHTML = messageHTML;
-
-  const closeBtn = document.getElementById('close-reward-message-btn');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', handleCloseRewardMessage);
-  }
-}
-
-function handleCloseRewardMessage() {
-  closeRewardsModal();
-
-  setTimeout(() => {
-    if (originalRewardsContentHTML) {
-      $app.rewards.content.innerHTML = originalRewardsContentHTML;
-      rebindRewardElements();
-    }
-  }, 500);
-}
 
 // ========== サーバー同期系 ==========
 
@@ -1904,7 +1760,7 @@ function renderProgress() {
   }
 
   if (n >= MAX_POINTS) {
-    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> QUOカードと交換できます！';
+    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> お疲れ様でした！';
   } else {
     $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
   }
@@ -1991,7 +1847,7 @@ function openCategorySheet(categoryKey) {
     $app.categorySheet.title.textContent = '企業ブース';
     $app.categorySheet.content.innerHTML = `
       <div class="space-y-3">
-        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。各ブース1pt (500円分QUOカード) ずつ獲得できます。</p>
+        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。アンケート回答で特典と交換できます。</p>
         ${BOOTH_DATA.map(booth => {
           const isAcquired = state.acquiredStamps.has(booth.id);
           return `
@@ -2606,10 +2462,6 @@ function setupSurveyInteractivity() {
 
 // ========== init() ==========
 async function init() {
-  if ($app.rewards.content) {
-    originalRewardsContentHTML = $app.rewards.content.innerHTML;
-  }
-  rebindRewardElements();
 
   // URLパラメータ (ネイティブカメラ or 深いリンク)
   const urlParams = new URLSearchParams(window.location.search);
@@ -2739,26 +2591,24 @@ async function init() {
     $app.survey.form.addEventListener('submit', submitSurvey);
   }
 
-  // 特典モーダル開閉
-  if ($app.rewards.openBtn) {
-    $app.rewards.openBtn.addEventListener('click', openRewardsModal);
-  }
-  if ($app.rewards.closeBtn) {
-    $app.rewards.closeBtn.addEventListener('click', () => {
-      closeRewardsModal();
+  // Survey Action Button (アンケート回答 / 特典交換)
+  if ($app.surveyActionBtn) {
+    $app.surveyActionBtn.addEventListener('click', () => {
+      const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
+      if (!isSurveyCompleted) {
+        openSurveyModal();
+      } else if (!state.user?.badge_claimed) {
+        openBadgeExchangeModal();
+      }
     });
   }
 
-  // スタッフ確認モーダル（交換フロー）
-  if ($app.staffConfirm.cancelBtn) {
-    $app.staffConfirm.cancelBtn.addEventListener('click', () => {
-      closeStaffConfirmModal(true);
-    });
+  // Badge Exchange Modal
+  if ($app.badgeExchange.closeBtn) {
+    $app.badgeExchange.closeBtn.addEventListener('click', closeBadgeExchangeModal);
   }
-  if ($app.staffConfirm.executeBtn) {
-    $app.staffConfirm.executeBtn.addEventListener('click', async () => {
-      await claimReward();
-    });
+  if ($app.badgeExchange.claimBtn) {
+    $app.badgeExchange.claimBtn.addEventListener('click', claimBadge);
   }
 
   // アンケートのUIハイライト
@@ -2767,6 +2617,9 @@ async function init() {
   // 最初の描画
   await updatePercentile();
   renderAll();
+
+  // Update survey action button based on survey and badge claim status
+  updateSurveyActionButton();
 }
 
 // DOM構築後に初期化を1回だけ呼ぶ
