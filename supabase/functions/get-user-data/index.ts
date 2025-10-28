@@ -62,6 +62,7 @@ serve(async (req) => {
           total_points: 0,
           redeemable_points: 0,
           survey_completed: false,
+          badge_claimed: false,
           acquired_stamps: [],
           claimed_rewards: [],
         })
@@ -87,6 +88,7 @@ serve(async (req) => {
         user_number: user.user_number,
         registration_type: user.registration_type,
         survey_completed: user.survey_completed,
+        badge_claimed: user.badge_claimed || false,
         created_at: user.created_at,
         points: user.points,
         total_points: user.total_points,
