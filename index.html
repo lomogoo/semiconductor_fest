@@ -573,7 +573,94 @@ li .acquired-check {
       border: none;
       box-shadow: none;
     }
-  
+
+  /* ========== Slide to Claim Styles ========== */
+  .slide-to-claim-container {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+    user-select: none;
+  }
+
+  .slide-to-claim-track {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-to-claim-text {
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    opacity: 1;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .slide-to-claim-success-text {
+    position: absolute;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-text {
+    opacity: 0;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-success-text {
+    opacity: 1;
+  }
+
+  .slide-to-claim-container.completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .slide-to-claim-button {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 52px;
+    height: 52px;
+    background: white;
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.2s;
+    touch-action: none;
+  }
+
+  .slide-to-claim-button:active {
+    cursor: grabbing;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .slide-to-claim-button.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .slide-icon {
+    font-size: 24px;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-button {
+    cursor: default;
+  }
+
   </style>
   
 </head>
@@ -798,13 +885,20 @@ li .acquired-check {
           👨‍💼 スタッフ確認
         </div>
         <div class="staff-instruction-text">
-          スタッフの目の前でこちらのボタンを押してください。交換した特典は受付（L404）でお受け取りください。
+          スタッフの目の前で下のスライダーを右端までスライドしてください。交換した特典は受付（L404）でお受け取りください。
         </div>
       </div>
 
-      <button id="claim-badge-btn" class="w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold ripple text-lg shadow-lg">
-        🎁 交換する
-      </button>
+      <!-- Slide to Claim -->
+      <div class="slide-to-claim-container">
+        <div class="slide-to-claim-track">
+          <div class="slide-to-claim-text">スライドして交換</div>
+          <div class="slide-to-claim-success-text">✓ 交換完了</div>
+        </div>
+        <div id="slide-to-claim-button" class="slide-to-claim-button">
+          <span class="slide-icon">🎁</span>
+        </div>
+      </div>
 
       <div class="text-xs text-slate-500 text-center">
         ※交換は1回のみとなります
@@ -1360,8 +1454,7 @@ const $app = {
   },
   badgeExchange: {
     modal: document.getElementById('badge-exchange-modal'),
-    closeBtn: document.getElementById('close-badge-exchange'),
-    claimBtn: document.getElementById('claim-badge-btn')
+    closeBtn: document.getElementById('close-badge-exchange')
   },
   survey: {
     modal: document.getElementById('survey-modal'),
@@ -1453,6 +1546,9 @@ function openBadgeExchangeModal() {
 
   $app.backdrop.classList.add('show');
   $app.badgeExchange.modal.classList.add('show');
+
+  // Reset slider
+  resetSlider();
 }
 
 function closeBadgeExchangeModal() {
@@ -1460,6 +1556,101 @@ function closeBadgeExchangeModal() {
   if (!$app.survey.modal.classList.contains('show')) {
     $app.backdrop.classList.remove('show');
   }
+
+  // Reset slider when closing
+  resetSlider();
+}
+
+// ========== Slide to Claim Logic ==========
+let slideState = {
+  isDragging: false,
+  startX: 0,
+  currentX: 0,
+  maxSlide: 0
+};
+
+function initSlider() {
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+
+  if (!slider || !container) return;
+
+  // Calculate max slide distance
+  slideState.maxSlide = container.offsetWidth - slider.offsetWidth - 8; // 8px for padding (4px on each side)
+
+  // Mouse events
+  slider.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+
+  // Touch events
+  slider.addEventListener('touchstart', startDrag);
+  document.addEventListener('touchmove', drag);
+  document.addEventListener('touchend', endDrag);
+}
+
+function startDrag(e) {
+  const container = document.querySelector('.slide-to-claim-container');
+  if (container.classList.contains('completed')) return;
+
+  slideState.isDragging = true;
+  slideState.startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  slideState.currentX = parseInt(document.getElementById('slide-to-claim-button').style.left) || 4;
+
+  e.preventDefault();
+}
+
+function drag(e) {
+  if (!slideState.isDragging) return;
+
+  const slider = document.getElementById('slide-to-claim-button');
+  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  const diff = currentPos - slideState.startX;
+  let newX = slideState.currentX + diff;
+
+  // Constrain movement
+  newX = Math.max(4, Math.min(newX, slideState.maxSlide + 4));
+
+  slider.style.left = `${newX}px`;
+
+  e.preventDefault();
+}
+
+function endDrag(e) {
+  if (!slideState.isDragging) return;
+
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+  const currentLeft = parseInt(slider.style.left) || 4;
+
+  // Check if slid far enough (90% of max distance)
+  if (currentLeft >= slideState.maxSlide * 0.9) {
+    // Complete the slide
+    slider.style.left = `${slideState.maxSlide + 4}px`;
+    container.classList.add('completed');
+
+    // Execute badge claim
+    setTimeout(() => {
+      claimBadge();
+    }, 300);
+  } else {
+    // Reset to start
+    slider.style.left = '4px';
+  }
+
+  slideState.isDragging = false;
+  e.preventDefault();
+}
+
+function resetSlider() {
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+
+  if (!slider || !container) return;
+
+  slider.style.left = '4px';
+  container.classList.remove('completed');
+  slideState.isDragging = false;
 }
 
 
@@ -2608,9 +2799,9 @@ async function init() {
   if ($app.badgeExchange.closeBtn) {
     $app.badgeExchange.closeBtn.addEventListener('click', closeBadgeExchangeModal);
   }
-  if ($app.badgeExchange.claimBtn) {
-    $app.badgeExchange.claimBtn.addEventListener('click', claimBadge);
-  }
+
+  // Initialize slide-to-claim slider
+  initSlider();
 
   // アンケートのUIハイライト
   setupSurveyInteractivity();
