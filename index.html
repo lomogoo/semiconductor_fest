@@ -907,7 +907,25 @@ li .acquired-check {
       <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
       <button id="close-badge-exchange" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
     </div>
-    <div class="p-6 space-y-6">
+
+    <!-- Already Claimed Display -->
+    <div id="badge-already-claimed" class="p-6 space-y-6 hidden">
+      <div class="text-center space-y-4">
+        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 rounded-full flex items-center justify-center shadow-xl">
+          <span class="text-6xl">✓</span>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-slate-800 mb-3">交換済み</div>
+          <div class="text-base text-slate-600 leading-relaxed">
+            この特典は既に交換済みです。<br>
+            受付（L404）でお受け取りください。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exchange Interface -->
+    <div id="badge-exchange-interface" class="p-6 space-y-6">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
           <span class="text-6xl">🏅</span>
@@ -1104,7 +1122,7 @@ li .acquired-check {
                   <span class="text-lg">📝</span>
                   <span id="survey-action-text">アンケート回答</span>
                 </div>
-                <span class="text-xs opacity-90 font-normal">アンケート回答でゴールドピンバッジプレゼント！</span>
+                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でゴールドピンバッジプレゼント！</span>
               </button>
             </div>
           </div>
@@ -1504,7 +1522,8 @@ const $app = {
     error: document.getElementById('survey-error')
   },
   surveyActionBtn: document.getElementById('survey-action-btn'),
-  surveyActionText: document.getElementById('survey-action-text')
+  surveyActionText: document.getElementById('survey-action-text'),
+  surveyActionSubtext: document.getElementById('survey-action-subtext')
 };
 
 // ========== localStorage管理 ==========
@@ -1579,17 +1598,24 @@ function openBadgeExchangeModal() {
     return;
   }
 
+  const alreadyClaimedDiv = document.getElementById('badge-already-claimed');
+  const exchangeInterfaceDiv = document.getElementById('badge-exchange-interface');
+
   // Check if badge already claimed
   if (state.user.badge_claimed) {
-    showToast('特典は既に交換済みです');
-    return;
+    // Show "Already Claimed" message
+    alreadyClaimedDiv.classList.remove('hidden');
+    exchangeInterfaceDiv.classList.add('hidden');
+  } else {
+    // Show exchange interface
+    alreadyClaimedDiv.classList.add('hidden');
+    exchangeInterfaceDiv.classList.remove('hidden');
+    // Reset slider
+    resetSlider();
   }
 
   $app.backdrop.classList.add('show');
   $app.badgeExchange.modal.classList.add('show');
-
-  // Reset slider
-  resetSlider();
 }
 
 function closeBadgeExchangeModal() {
@@ -1791,15 +1817,27 @@ function updateSurveyActionButton() {
     $app.surveyActionBtn.disabled = true;
     $app.surveyActionBtn.classList.add('opacity-50', 'cursor-not-allowed', 'claimed');
     $app.surveyActionText.textContent = '交換済み';
+    // Hide subtext for claimed state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.add('hidden');
+    }
   } else if (isSurveyCompleted) {
     // Survey completed but badge not claimed - show "特典交換" with green glow
     $app.surveyActionBtn.disabled = false;
     $app.surveyActionBtn.classList.add('ready-to-claim');
     $app.surveyActionText.textContent = '特典交換';
+    // Hide subtext for claim state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.add('hidden');
+    }
   } else {
     // Survey not completed - show "アンケート回答"
     $app.surveyActionBtn.disabled = false;
     $app.surveyActionText.textContent = 'アンケート回答';
+    // Show subtext for survey state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.remove('hidden');
+    }
   }
 }
 
@@ -1832,7 +1870,26 @@ async function claimBadge() {
     }
   } catch (err) {
     console.error('Badge claim failed:', err);
-    showToast('交換に失敗しました。もう一度お試しください。');
+
+    // Check if error is "already claimed"
+    if (err.message && err.message.includes('already claimed')) {
+      // Update state to reflect server status
+      state.user.badge_claimed = true;
+      saveLocalUser(state.user);
+
+      // Switch modal display to "Already Claimed"
+      const alreadyClaimedDiv = document.getElementById('badge-already-claimed');
+      const exchangeInterfaceDiv = document.getElementById('badge-exchange-interface');
+      alreadyClaimedDiv.classList.remove('hidden');
+      exchangeInterfaceDiv.classList.add('hidden');
+
+      // Update button state
+      updateSurveyActionButton();
+
+      showToast('特典は既に交換済みです');
+    } else {
+      showToast('交換に失敗しました。もう一度お試しください。');
+    }
   }
 }
 
