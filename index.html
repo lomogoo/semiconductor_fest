@@ -1743,7 +1743,7 @@ async function submitSurvey(e) {
 // ========== Survey Action Button Update ==========
 function updateSurveyActionButton() {
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
-  const isBadgeClaimed = state.user?.badge_claimed || false;
+  const isBadgeClaimed = state.user?.badge_claimed ?? false;
 
   console.log('[updateSurveyActionButton] State:', {
     survey_completed: isSurveyCompleted,
@@ -1874,8 +1874,8 @@ async function ensureAuth() {
         id: serverData.user.id,
         user_number: serverData.user.user_number || 0,
         registration_type: serverData.user.registration_type,
-        survey_completed: serverData.user.survey_completed || false,
-        badge_claimed: serverData.user.badge_claimed || false,
+        survey_completed: serverData.user.survey_completed ?? false,
+        badge_claimed: serverData.user.badge_claimed ?? false,
         created_at: serverData.user.created_at,
         points: serverData.user.points ?? 0,
         total_points: serverData.user.total_points ?? 0,
@@ -1886,7 +1886,7 @@ async function ensureAuth() {
 
       state.points = serverData.user.redeemable_points ?? 0;
       state.totalPoints = serverData.user.total_points ?? 0;
-      state.surveyCompleted = serverData.user.survey_completed || false;
+      state.surveyCompleted = serverData.user.survey_completed ?? false;
 
       if (serverData.progress && Array.isArray(serverData.progress.acquiredBooths)) {
         state.acquiredStamps = new Set(serverData.progress.acquiredBooths);
@@ -1922,11 +1922,11 @@ async function syncPointsFromServer() {
     if (data && data.user) {
       state.points = data.user.redeemable_points ?? 0;
       state.totalPoints = data.user.total_points ?? 0;
-      state.surveyCompleted = data.user.survey_completed || false;
+      state.surveyCompleted = data.user.survey_completed ?? false;
 
       state.user.user_number = data.user.user_number || state.user.user_number;
-      state.user.survey_completed = data.user.survey_completed || false;
-      state.user.badge_claimed = data.user.badge_claimed || false;
+      state.user.survey_completed = data.user.survey_completed ?? false;
+      state.user.badge_claimed = data.user.badge_claimed ?? false;
       state.user.points = data.user.points ?? 0;
       state.user.total_points = data.user.total_points ?? 0;
       state.user.redeemable_points = data.user.redeemable_points ?? 0;
@@ -1946,6 +1946,9 @@ async function syncPointsFromServer() {
 
     await updatePercentile();
     renderAll();
+
+    // Update survey action button to reflect badge_claimed status
+    updateSurveyActionButton();
   } catch (err) {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
   }
