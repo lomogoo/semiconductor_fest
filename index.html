@@ -1936,6 +1936,7 @@ async function ensureAuth() {
     console.error('[ensureAuth] Failed to sync user from server:', err);
     // fail soft: アプリは動かす
   }
+  updateSurveyActionButton();
 }
 
 // 最新状態をDBから再取得
@@ -2760,7 +2761,6 @@ function setupSurveyInteractivity() {
 
 // ========== init() ==========
 async function init() {
-
   // URLパラメータ (ネイティブカメラ or 深いリンク)
   const urlParams = new URLSearchParams(window.location.search);
   const stampId = urlParams.get('stamp');
@@ -2919,7 +2919,6 @@ async function init() {
   // Update survey action button based on survey and badge claim status
   updateSurveyActionButton();
 }
-
 // DOM構築後に初期化を1回だけ呼ぶ
 document.addEventListener('DOMContentLoaded', init);
 </script>
