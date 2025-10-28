@@ -3,71 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>半導体スタンプラリーMAP（Auth対応）</title>
+  <title>みやぎ半導体キャリアフェス</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-  <!-- Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
   <style>
     :root {
       --bg-light: #f0f4f8;
-      --accent-sky: #0ea5e9; /* sky-500 */
+      --accent-sky: #0ea5e9;
       --text-main: #1e293b;
       --text-sub: #64748b;
-      --bar-width-pct: 78%; /* ★ 進捗バーを短めに */
-      --dot-size: 28px;     /* ★ マーカー＆現在地ドット 大きめ */
-      --dot-border: 4px;    /* ★ ドット外枠 太め */
-      --chip-size: 64px;    /* ★ グリッドのロゴ画像サイズ */
+      --bar-width-pct: 78%;
+      --dot-size: 28px;
+      --dot-border: 4px;
+      --chip-size: 64px;
     }
     html { font-family: 'Inter', sans-serif; }
     body {
-      background-color: var(--bg-light);
-      background-image:
-        radial-gradient(at 10% 20%, hsla(210, 80%, 95%, 0.7) 0px, transparent 50%),
-        radial-gradient(at 80% 15%, hsla(200, 70%, 90%, 0.6) 0px, transparent 50%),
-        radial-gradient(at 20% 90%, hsla(220, 75%, 92%, 0.5) 0px, transparent 50%),
-        radial-gradient(at 90% 85%, hsla(190, 60%, 90%, 0.6) 0px, transparent 50%);
+      background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f8 25%, #f5f8fa 50%, #e8f0f8 75%, #f2f6f9 100%);
       background-attachment: fixed;
       color: var(--text-main);
       overscroll-behavior: none;
       height: 100dvh;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
-    #app { flex: 1; display: flex; flex-direction: column; }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(at 15% 25%, hsla(210, 85%, 97%, 0.5) 0px, transparent 60%),
+        radial-gradient(at 85% 20%, hsla(200, 75%, 95%, 0.4) 0px, transparent 55%),
+        radial-gradient(at 25% 85%, hsla(220, 80%, 96%, 0.35) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, hsla(190, 70%, 94%, 0.45) 0px, transparent 58%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
     main { flex: 1; overflow-y: auto; position: relative; }
 
     .page { display: none; width: 100%; position: relative; }
     .page.active { display: block; }
 
-    /* --- LiquidGlass Card --- */
     .liquid-glass {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(32px) saturate(180%);
-      -webkit-backdrop-filter: blur(32px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.5) 100%
+      );
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow:
-        inset 0 2px 2px rgba(255, 255, 255, 0.8),
-        0 16px 40px rgba(37, 37, 85, 0.12);
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.4),
+        0 20px 60px -10px rgba(14, 165, 233, 0.08),
+        0 8px 20px -5px rgba(14, 165, 233, 0.06);
     }
 
-    /* --- Floating Navigation (LiquidGlass Base) --- */
     .floating-nav {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(32px) saturate(180%);
-      -webkit-backdrop-filter: blur(32px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.35) 0%,
+        rgba(255, 255, 255, 0.25) 100%
+      );
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       box-shadow:
-        inset 0 2px 2px rgba(255, 255, 255, 0.7),
-        0 16px 40px rgba(37, 37, 85, 0.18);
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.3),
+        0 20px 50px -8px rgba(14, 165, 233, 0.15),
+        0 10px 25px -5px rgba(14, 165, 233, 0.08);
       position: relative;
       border-radius: 1.5rem;
     }
 
-    /* --- Nav Indicator --- */
     #nav-indicator {
       position: absolute;
       top: 50%;
@@ -88,76 +106,101 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: -1;
     }
-    #nav-indicator::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      opacity: .7;
-    }
 
     .nav-btn { z-index: 1; }
     .nav-btn.active { color: #0c4a6e; }
 
-    /* --- Chip (Stamp) 画像版 --- */
-    .chip {
-      width: var(--chip-size);
-      height: var(--chip-size);
-      border-radius: 20px;
-      border: 1.5px solid rgba(255,255,255,0.7);
-      background: #fff;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(0, 150, 200, 0.15);
-      overflow: hidden; /* ★ 1:1トリミング */
-      transition: box-shadow .3s ease;
-    }
-    .chip.on { box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 0 24px rgba(52, 211, 153, .55); }
-    .chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-    .chip-name { max-width: 88px; height: 2.4em; margin-top: 6px; font-size: 11px; line-height: 1.2; color: #0f172a; text-align: center; font-weight: 600; white-space: normal; display: flex; align-items: center; justify-content: center; }
-
-    /* --- Bottom Sheet --- */
     .bottom-sheet-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
     .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform .4s cubic-bezier(0.4, 0, 0.2, 1); }
     .bottom-sheet.is-open { transform: translateY(0); }
     .bottom-sheet.is-open + .bottom-sheet-backdrop { opacity: 1; pointer-events: auto; }
 
-    /* --- Ripple --- */
     .ripple { position: relative; overflow: hidden; }
     .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: ripple-anim .6s linear; }
     @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-    /* --- List Anim --- */\n    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
+    .list-item-anim { opacity: 0; transform: translateY(20px); animation: fade-in-up .5s ease-out forwards; }
     @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 
-    /* --- Progress Bar with Bubbles --- */
-    .progress-area { position: relative; padding-top: 7rem; margin-top: 1rem; overflow: visible; }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) skewX(-12deg); }
+      100% { transform: translateX(200%) skewX(-12deg); }
+    }
+
+    .progress-area { position: relative; padding-top: 3rem; margin-top: 1rem; overflow: visible; }
     #progress-wrapper { position: relative; margin: 0 auto; width: clamp(260px, var(--bar-width-pct), 560px); min-height: 44px; display: block; }
 
-    .reward-bubble { position: absolute; bottom: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 90px; pointer-events: none; }
-    #reward-bubble-4 { left: 50%; }
-    #reward-bubble-8 { left: 100%; transform: translateX(-50%); }
+    .progress-track {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 9999px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+      overflow: visible;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    #progress-bar {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9, #0284c7);
+      transition: width .6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    #progress-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2.5s infinite;
+    }
+    #progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+      border-radius: 9999px 9999px 0 0;
+    }
 
-    .reward-bubble-content { width: 100%; min-height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; margin-top: 6px; }
-    .reward-bubble-stem { display:none; }
+    .progress-marker {
+      position: absolute;
+      top: 50%;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 3px solid #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 12;
+      display: grid;
+      place-items: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .progress-marker.is-active {
+      border-color: #0ea5e9;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5), 0 0 30px rgba(14, 165, 233, 0.3);
+      transform: translate(-50%, -55%);
+    }
+    .progress-marker .label {
+      font-size: 14px;
+      font-weight: 800;
+      color: #334155;
+      user-select: none;
+    }
+    .progress-marker.is-active .label {
+      color: white;
+    }
+    
+    .map-wrap { aspect-ratio:2/3; margin-top: 0; }
 
-    .progress-track { position: relative; width: 100%; height: 12px; background-color: #e0e7ff; border-radius: 9999px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); overflow: visible; }
-    #progress-bar { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #34d399, #10b981, var(--accent-sky), #3b82f6); transition: width .5s ease-in-out; }
-
-    /* --- Fixed markers (4 & 8) --- */
-    .marker-dot { position: absolute; top: 50%; width: var(--dot-size); height: var(--dot-size); background: #fff; border: var(--dot-border) solid #cbd5e1; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 4px rgba(0,0,0,.08); z-index: 12; display: grid; place-items: center; }
-    .marker-dot .label { font-size: 14px; font-weight: 800; color: #334155; user-select: none; line-height: 1; }
-    .marker-dot.is-active { border-color: #3b82f6; background: #3b82f6; box-shadow: 0 0 14px rgba(59,130,246,.6), 0 2px 8px rgba(0,0,0,.15); }
-    .marker-dot.is-active .label { color: #fff; }
-
-    /* --- Current position dot --- */
-    #progress-dot { position: absolute; top: 50%; left: 0%; width: var(--dot-size); height: var(--dot-size); background-color: white; border: var(--dot-border) solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 2px 8px rgba(0,0,0,.12); transition: left 0.5s ease-in-out; z-index: 20; outline: 3px solid #fff; }
-
-    .map-wrap{aspect-ratio:2/3; margin-top: .25rem;} /* ヘッダーに少し寄せる */
-
-    /* --- QR スキャナUI --- */
     .scanner-video { width: 100%; height: auto; border-radius: 1rem; background: #000; }
     .scan-guide { position: absolute; inset: 0; pointer-events: none; }
     .scan-corner { position: absolute; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.9); }
@@ -166,213 +209,1062 @@
     .scan-corner.bl { bottom: 12%; left: 10%; border-right: none; border-top: none; }
     .scan-corner.br { bottom: 12%; right: 10%; border-left: none; border-top: none; }
 
-    .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 60; }
+    .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 100; }
 
-    /* ===== Auth Gate (ポップアップ) ===== */
     .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(6px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
-    .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; }
+    .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
     .auth-modal.show { display:flex; }
+
+    .fullscreen-scanner {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #000;
+      display: none;
+      flex-direction: column;
+    }
+    .fullscreen-scanner.active {
+      display: flex;
+    }
+    .fullscreen-scanner video {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fullscreen-scanner-controls {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 101;
+    }
+
+    .stamp-category-card, .stamp-booth-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .stamp-category-card:hover, .stamp-booth-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .booth-progress {
+      font-size: 11px;
+      color: #059669;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .company-mini-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .company-mini-card:hover {
+      background: rgba(255,255,255,0.8);
+    }
+
+  .company-mini-card .acquired-check, 
+li .acquired-check {
+  position: absolute;
+  top: -6px;   /* ロゴの上端から少しはみ出す */
+  right: -6px; /* ロゴの右端から少しはみ出す */
+　z-index: 10; /* ロゴ画像の上に表示する */
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(52, 211, 153, 0.4);
+}
+
+    .progress-info-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .progress-booth-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      border-radius: 0.75rem;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid #cbd5e1;
+      transition: all 0.3s ease;
+    }
+
+    .progress-booth-item.acquired {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.2));
+      border-color: #10b981;
+    }
+
+    .progress-booth-item .booth-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background: white;
+    }
+
+    .progress-booth-item .booth-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .progress-booth-item .booth-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #475569;
+      text-align: center;
+    }
+
+    .progress-booth-item.acquired .booth-label {
+      color: #059669;
+    }
+
+    /* Survey Styles */
+    .survey-field {
+      margin-bottom: 1.5rem;
+    }
+
+    .survey-label {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .survey-required {
+      color: #ef4444;
+      margin-left: 0.25rem;
+    }
+
+    .survey-radio-group, .survey-checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .survey-option {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .survey-option:hover {
+      background: rgba(226, 232, 240, 0.5);
+    }
+
+    .survey-option input {
+      margin-right: 0.75rem;
+      cursor: pointer;
+    }
+
+    .survey-option.checked {
+      border-color: #0ea5e9;
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    .survey-textarea, .survey-text-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.75rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .survey-textarea:focus, .survey-text-input:focus {
+      outline: none;
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .survey-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Reward Styles */
+    .reward-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+    }
+
+    .reward-image-wrapper {
+      width: 140px;
+      height: 140px;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: white;
+      border: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .reward-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.5rem;
+    }
+
+    .reward-details {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .reward-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .reward-description {
+      font-size: 0.875rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .staff-instruction {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(252, 211, 77, 0.1), rgba(251, 146, 60, 0.1));
+      border: 2px solid #fbbf24;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .staff-instruction-title {
+      font-weight: 700;
+      color: #d97706;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .staff-instruction-text {
+      font-size: 0.875rem;
+      color: #d97706;
+      line-height: 1.6;
+    }
+
+    .survey-completed-message {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+      border: 2px solid #10b981;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .survey-completed-message-title {
+      font-weight: 700;
+      color: #059669;
+      margin-bottom: 0.25rem;
+    }
+
+    .survey-completed-message-text {
+      font-size: 0.875rem;
+      color: #059669;
+    }
+    /* 企業ロゴグリッドのスタイル */
+    #company-logo-grid {
+      padding: 0.5rem;
+    }
+
+    .company-logo-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .company-logo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+      transition: filter 0.3s ease;
+    }
+
+    .company-logo-item.not-acquired img {
+      filter: grayscale(100%) brightness(1.1);
+      opacity: 0.4;
+    }
+
+    .company-logo-item.acquired {
+      border-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .company-logo-item.acquired img {
+      filter: grayscale(0%);
+      opacity: 1;
+    }
+
+    .company-logo-item.acquired::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+    }
+
+    /* キラキラを動かすアニメーション */
+    @keyframes shine {
+      0% {
+        background-position: -300px 0; /* 左側（見えない位置）からスタート */
+      }
+      100% {
+        background-position: 600px 0; /* 右側へ移動 */
+      }
+    }
+
+  /* 統合カード内のreward-cardのスタイルをリセット */
+    #post-survey-section .reward-card.p-0 {
+      padding: 0;
+      border: none;
+      box-shadow: none;
+    }
+
+  /* ========== Slide to Claim Styles ========== */
+  .slide-to-claim-container {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+    user-select: none;
+  }
+
+  .slide-to-claim-track {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-to-claim-text {
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    opacity: 1;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .slide-to-claim-success-text {
+    position: absolute;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-text {
+    opacity: 0;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-success-text {
+    opacity: 1;
+  }
+
+  .slide-to-claim-container.completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .slide-to-claim-button {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 52px;
+    height: 52px;
+    background: white;
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    touch-action: none;
+    transition: none;
+    /* No transition - follows finger immediately */
+  }
+
+  .slide-to-claim-button:active {
+    cursor: grabbing;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .slide-to-claim-button.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .slide-icon {
+    font-size: 24px;
+  }
+
+  .slide-to-claim-container.completed .slide-to-claim-button {
+    cursor: default;
+  }
+
+  /* ========== Survey Action Button States ========== */
+  #survey-action-btn.ready-to-claim {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), 0 6px 25px rgba(16, 185, 129, 0.6);
+    }
+  }
+
+  #survey-action-btn.claimed {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+
   </style>
+  
 </head>
 <body>
-  <!-- ===== Auth: Backdrop and Launch Panel ===== -->
-  <div id="auth-backdrop" class="auth-backdrop"></div>
-  <div id="auth-launch" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 p-6 w-[min(92vw,480px)]">
-      <h2 class="text-xl font-semibold text-slate-800">ご利用前にサインイン/ログイン</h2>
-      <p class="text-sm text-slate-600 mt-1">初めての方は「サインイン」で氏名・学校名・学部/学科を登録してください。既に登録済みの方は「ログイン」へ。</p>
-      <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button id="open-signin" class="px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">サインイン</button>
-        <button id="open-login" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">ログイン</button>
-      </div>
-    </div>
-  </div>
+  <!-- General Modal Backdrop -->
+  <div id="modal-backdrop" class="auth-backdrop"></div>
 
-  <!-- ===== Signin Modal ===== -->
-  <div id="signin-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
-      <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">サインイン（初回登録）</h3>
-        <button data-close="signin" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+  <!-- Survey Modal -->
+  <div id="survey-modal" class="auth-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,640px)] max-h-[85dvh] overflow-y-auto my-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+        <h3 class="text-lg font-semibold text-slate-800">アンケート</h3>
+        <button id="close-survey" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">✕</button>
       </div>
-      <form id="signin-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="si-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北 太郎" />
+      <form id="survey-form" class="p-4 space-y-4">
+        <!-- Q1: 現在の所属 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q1. 現在の所属は？
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="高校" required />
+              <span>高校</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="専門学校" />
+              <span>専門学校</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="高等専門学校" />
+              <span>高等専門学校</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="大学" />
+              <span>大学</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="その他" />
+              <span>その他</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="text-sm text-slate-700">学校名</label>
-          <input id="si-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：東北大学" />
+
+        <!-- Q2: 興味のある研究分野 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q2. 興味のある学問分野は？（複数選択可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="工学" />
+              <span>工学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="理学" />
+              <span>理学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="情報科学" />
+              <span>情報科学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="経済学・経営学" />
+              <span>経済学・経営学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="文学・人文科学" />
+              <span>文学・人文科学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="社会科学" />
+              <span>社会科学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="医学・薬学" />
+              <span>医学・薬学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="農学" />
+              <span>農学</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="research_interest" value="その他" />
+              <span>その他</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label class="text-sm text-slate-700">学部・学科</label>
-          <input id="si-dept" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="例：工学部 電気情報物理工学科" />
+
+        <!-- Q3: 興味のあるキャリア分野 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q3. 興味のあるキャリア分野は？（複数選択可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="研究開発" />
+              <span>研究開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="製造・生産技術" />
+              <span>製造・生産技術</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="品質管理・品質保証" />
+              <span>品質管理・品質保証</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="設計・開発" />
+              <span>設計・開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="営業・マーケティング" />
+              <span>営業・マーケティング</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="企画・事業開発" />
+              <span>企画・事業開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="人材開発・人事" />
+              <span>人材開発・人事</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="経営・管理" />
+              <span>経営・管理</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="情報システム・IT" />
+              <span>情報システム・IT</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="その他" />
+              <span>その他</span>
+            </label>
+          </div>
         </div>
-        <button id="signin-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">登録して入場</button>
-        <p id="signin-note" class="text-xs text-slate-500">※この登録情報はSupabaseのDBに保存され、ユーザーには一意のUUIDが付与されます。</p>
-        <p id="signin-error" class="text-sm text-red-600"></p>
+
+        <!-- Q4: イベントを知ったきっかけ -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q4. 本イベントはどこで知りましたか？
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="学校からの案内" required />
+              <span>学校からの案内</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="SNS" />
+              <span>SNS</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="ウェブサイト" />
+              <span>ウェブサイト</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="友人・知人の紹介" />
+              <span>友人・知人の紹介</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="event_source" value="その他" id="event-source-other" />
+              <span>その他</span>
+            </label>
+          </div>
+          <div id="event-source-other-input" class="mt-2 hidden">
+            <input type="text" name="event_source_other_text" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-sky-500 focus:outline-none text-sm" placeholder="詳しく教えてください" />
+          </div>
+        </div>
+
+        <!-- Q5: 良かったコンテンツ -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q5. 特にどのコンテンツが良かったですか？（複数選択可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="特別セミナー（ものづくり太郎）" />
+              <span>特別セミナー（ものづくり太郎）</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="トークセッション" />
+              <span>トークセッション</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="企業研究発表会" />
+              <span>企業研究発表会</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_content" value="企業ブース" />
+              <span>企業ブース</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q6: 感想・要望 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q6. 本日のイベントの感想、要望があればお聞かせください
+          </label>
+          <textarea name="feedback" class="survey-textarea" placeholder="ご感想をお聞かせください..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
+          回答を送信
+        </button>
+        <p id="survey-error" class="text-sm text-red-600"></p>
       </form>
     </div>
   </div>
 
-  <!-- ===== Login Modal ===== -->
-  <div id="login-modal" class="auth-modal">
-    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,560px)]">
-      <div class="p-5 border-b border-white/50 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-800">ログイン（登録済み）</h3>
-        <button data-close="login" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+  <!-- Gold Pin Badge Exchange Modal -->
+<div id="badge-exchange-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,480px)] my-auto">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between bg-white/80 backdrop-blur-sm z-10">
+      <h3 class="text-lg font-semibold text-slate-800">特典交換</h3>
+      <button id="close-badge-exchange" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+    </div>
+
+    <!-- Already Claimed Display -->
+    <div id="badge-already-claimed" class="p-6 space-y-6 hidden">
+      <div class="text-center space-y-4">
+        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 rounded-full flex items-center justify-center shadow-xl">
+          <span class="text-6xl">✓</span>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-slate-800 mb-3">交換済み</div>
+          <div class="text-base text-slate-600 leading-relaxed">
+            この特典は既に交換済みです。<br>
+            受付（L404）でお受け取りください。
+          </div>
+        </div>
       </div>
-      <form id="login-form" class="p-5 space-y-4">
-        <div>
-          <label class="text-sm text-slate-700">氏名</label>
-          <input id="li-name" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した氏名" />
+    </div>
+
+    <!-- Exchange Interface -->
+    <div id="badge-exchange-interface" class="p-6 space-y-6">
+      <div class="text-center space-y-4">
+        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
+          <span class="text-6xl">🏅</span>
         </div>
         <div>
-          <label class="text-sm text-slate-700">学校名</label>
-          <input id="li-school" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="登録した学校名" />
+          <div class="text-2xl font-bold text-slate-800 mb-2">ゴールドピンバッジ</div>
+          <div class="text-sm text-slate-600">アンケート回答特典</div>
         </div>
-        <button id="login-submit" type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">入場</button>
-        <p id="login-error" class="text-sm text-red-600"></p>
-      </form>
+      </div>
+
+      <div class="staff-instruction">
+        <div class="staff-instruction-title">
+          👨‍💼 スタッフ確認
+        </div>
+        <div class="staff-instruction-text">
+          スタッフの目の前で下のスライダーを右端までスライドしてください。交換した特典は受付（L404）でお受け取りください。
+        </div>
+      </div>
+
+      <!-- Slide to Claim -->
+      <div class="slide-to-claim-container">
+        <div class="slide-to-claim-track">
+          <div class="slide-to-claim-text">スライドして交換</div>
+          <div class="slide-to-claim-success-text">✓ 交換完了</div>
+        </div>
+        <div id="slide-to-claim-button" class="slide-to-claim-button">
+          <span class="slide-icon">👉</span>
+        </div>
+      </div>
+
+      <div class="text-xs text-slate-500 text-center">
+        ※交換は1回のみとなります
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UUID QRコードモーダル -->
+<div id="uuid-qr-modal" class="auth-modal">
+  <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,420px)] my-auto">
+    <div class="p-4 border-b border-white/50 flex items-center justify-between bg-white/80 backdrop-blur-sm">
+      <h3 class="text-lg font-semibold text-slate-800">あなたの受付QR</h3>
+      <button id="close-uuid-qr" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="text-center space-y-2">
+        <p class="text-sm text-slate-600">事前登録ありがとうございます！</p>
+        <p class="text-xs text-slate-500">このQRコードを受付でご提示ください</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200">
+        <div id="uuid-qr-container" class="flex items-center justify-center min-h-[200px]">
+          <!-- QRコードがここに生成されます -->
+        </div>
+      </div>
+
+      <div class="text-center space-y-1">
+        <div class="text-xs text-slate-500">受付番号</div>
+        <div class="text-2xl font-bold text-sky-600 font-mono" id="uuid-qr-number">00000</div>
+      </div>
+
+      <div class="bg-sky-50 rounded-xl p-3 border border-sky-200">
+        <div class="text-xs text-sky-800 space-y-1">
+          <p>💡 <strong>この画面の開き方</strong></p>
+          <p class="pl-4">右上の受付番号（5桁の数字）をタップすると、いつでもこのQRコードを表示できます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Stamp Category Detail Sheet -->
+  <div id="category-sheet" class="bottom-sheet">
+    <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-center justify-between">
+        <h4 id="category-sheet-title" class="font-semibold text-lg text-slate-800"></h4>
+        <button id="close-category-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <div id="category-sheet-content" class="p-4"></div>
+    </div>
+  </div>
+  <div class="bottom-sheet-backdrop" data-target="category"></div>
+
+  <!-- Fullscreen Scanner -->
+  <div id="fullscreen-scanner" class="fullscreen-scanner">
+    <div class="fullscreen-scanner-controls">
+      <button id="fullscreen-close" class="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold">✕ 閉じる</button>
+      <div class="flex gap-2">
+        <button id="fullscreen-torch" class="px-3 py-2 rounded-xl bg-white/20 text-white border border-white/40">💡</button>
+        <button id="fullscreen-switch" class="px-3 py-2 rounded-xl bg-white/20 text-white border border-white/40">🔄</button>
+      </div>
+    </div>
+    <video id="fullscreen-video" autoplay playsinline muted></video>
+    <div class="scan-guide">
+      <div class="scan-corner tl"></div>
+      <div class="scan-corner tr"></div>
+      <div class="scan-corner bl"></div>
+      <div class="scan-corner br"></div>
+    </div>
+    <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: white; text-align: center; background: rgba(0,0,0,0.6); padding: 0.5rem 1rem; border-radius: 1rem;">
+      <span id="fullscreen-status">QRコードを枠内に写してください</span>
+    </div>
+    <div id="fullscreen-message" class="hidden" style="position: absolute; bottom: 6rem; left: 50%; transform: translateX(-50%); z-index: 102; width: 80%; max-width: 320px;">
+      <div class="px-4 py-3 rounded-2xl bg-red-500 text-white shadow-lg text-center font-medium"></div>
     </div>
   </div>
 
-  <div id="app" class="opacity-0 pointer-events-none select-none">
-    <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl">
+  <!-- Booth Detail Sheet -->
+  <div id="booth-sheet" class="bottom-sheet">
+    <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
+      <div class="p-4 border-b border-white/50 flex items-center gap-3">
+        <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
+        <div class="min-w-0 flex-1 text-center">
+          <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
+        </div>
+        <button id="close-booth-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
+      </div>
+      <div class="p-4 space-y-4 text-sm">
+        <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-sheet-backdrop" data-target="booth"></div>
+
+  <div id="app">
+    <header id="header" class="sticky top-0 z-30 liquid-glass transition-transform duration-300 rounded-b-3xl backdrop-blur-xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(240,249,255,0.8) 100%); border-bottom: 1px solid rgba(14, 165, 233, 0.1);">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-        <svg class="w-10 h-10 shadow-lg" viewBox="0 0 64 64" aria-label="Semiconductor" role="img">
-          <defs>
-            <linearGradient id="waferGrad" x1="0" x2="1">
-              <stop offset="0" stop-color="#a5f3fc"/>
-              <stop offset="1" stop-color="#60a5fa"/>
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="28" fill="url(#waferGrad)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
-          <g stroke="rgba(255,255,255,0.6)" stroke-width="1">
-            <path d="M8 20 H56M8 32 H56M8 44 H56"/>
-            <path d="M20 8 V56M32 8 V56M44 8 V56"/>
-          </g>
-          <path d="M58 30 A28 28 0 0 1 58 34" stroke="#0ea5e9" stroke-width="3" fill="none"/>
-        </svg>
-        <div>
-          <h1 id="header-title" class="text-lg font-semibold text-sky-800">進捗ホーム</h1>
-          <p class="text-xs text-sky-700">半導体スタンプラリーMAP</p>
+        <!-- ロゴエリア -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <div class="relative w-16 h-10 rounded-xl overflow-hidden bg-white shadow-md" style="box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);">
+            <img src="logo.png" alt="Logo" class="w-full h-full object-contain p-1" />
+          </div>
         </div>
-        <div id="user-pill" class="ml-auto text-xs text-slate-700 hidden"></div>
+
+        <!-- タイトルエリア -->
+        <div class="flex-1 min-w-0">
+          <h1 id="header-title" class="text-base font-bold text-sky-900 tracking-tight">ホーム</h1>
+          <p class="text-xs text-sky-600 font-medium truncate">みやぎ半導体キャリアフェス</p>
+        </div>
+
+        <!-- ユーザー番号表示 -->
+        <div id="user-number-display" class="ml-auto text-xs text-slate-700 font-mono font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-sky-50 to-blue-50 backdrop-blur-sm border border-sky-300 flex items-center gap-1.5 shadow-sm">
+          <span class="text-sky-600">#</span>
+          <span id="user-number">00000</span>
+        </div>
       </div>
     </header>
 
     <main class="flex-1 pb-28">
       <div id="page-home" class="page active p-4 space-y-6">
-        <div class="liquid-glass rounded-3xl p-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
-            <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0/8</span>
-          </div>
-          <div class="progress-area">
-            <div id="progress-wrapper">
-              <!-- Bubbles -->
-              <div id="reward-bubble-4" class="reward-bubble">
-                <div class="reward-bubble-content liquid-glass border-slate-300">💎</div>
-              </div>
-              <div id="reward-bubble-8" class="reward-bubble">
-                <div class="reward-bubble-content liquid-glass border-amber-300">👑</div>
-              </div>
-              <!-- Track -->
-              <div id="progress-track" class="progress-track">
-                <div id="progress-bar" style="width:0%"></div>
-                <div id="marker-4" class="marker-dot" style="left:50%"><span class="label">4</span></div>
-                <div id="marker-8" class="marker-dot" style="left:100%"><span class="label">8</span></div>
-                <div id="progress-dot"></div>
+        <div class="liquid-glass rounded-3xl p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%); box-shadow: 0 8px 24px rgba(14, 165, 233, 0.15);">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
+              <div class="flex items-center gap-2">
+                <span id="rank-percentile" class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium"></span>
+                <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
               </div>
             </div>
+            <!-- 企業ロゴグリッド (2×3) -->
+            <div id="company-logo-grid" class="grid grid-cols-3 gap-3 mt-3">
+              <!-- ロゴはJavaScriptで動的に生成 -->
+            </div>
+            <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
+            <div id="progress-percent" class="mt-2 text-center">
+              <span id="stamp-count" class="text-2xl font-bold text-sky-600">0</span>
+              <span class="text-xs text-slate-500 ml-1">/ 6 スタンプ</span>
+            </div>
+
+            <!-- アクションボタンエリア -->
+            <div class="mt-5 space-y-3">
+              <!-- QRスキャンボタン -->
+              <button id="scan-card" class="w-full relative overflow-hidden rounded-2xl p-4 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);">
+                <div class="relative z-10 flex items-center justify-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm grid place-items-center text-3xl">
+                    📷
+                  </div>
+                  <div class="text-left flex-1">
+                    <div class="font-bold text-lg text-white">QRスキャン</div>
+                    <div class="text-xs text-sky-50">スタンプを集めよう</div>
+                  </div>
+                  <div class="text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
+              </button>
+
+              <!-- アンケート回答 / 特典交換ボタン -->
+              <button id="survey-action-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex flex-col items-center justify-center gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">📝</span>
+                  <span id="survey-action-text">アンケート回答</span>
+                </div>
+                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でゴールドピンバッジプレゼント！</span>
+              </button>
+            </div>
           </div>
-          <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600">スタンプをタップして詳細を確認しよう。</p>
         </div>
+
         <div class="liquid-glass rounded-3xl p-4">
-          <div class="grid grid-cols-4 gap-y-4" id="stamp-grid"></div>
+          <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
+          <div class="space-y-3" id="stamp-categories">
+            <!-- 6社の企業ブース -->
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/restar.jpeg" alt="株式会社レスター" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">株式会社レスター</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/kioxia.png" alt="キオクシア岩手株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/sont.png" alt="ソニーセミコンダクタマニュファクチャリング株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/tel.png" alt="東京エレクトロン宮城株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="E">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/toppan.jpg" alt="TOPPAN株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
+                    <img src="assets/lapis.png" alt="ラピスセミコンダクタ株式会社" class="max-w-full max-h-full object-contain">
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
-      <div id="page-map" class="page p-3 pt-2 space-y-3">
+      <div id="page-map" class="page p-3 pt-2">
         <div class="map-wrap w-full max-w-[1200px] mx-auto">
           <svg id="svg-map" viewBox="0 0 1200 1800" preserveAspectRatio="xMidYMid meet" class="w-full h-auto">
-            <image id="bg-image" href="background.png" x="0" y="0" width="1200" height="1800" />
+            <image id="bg-image" href="assets/layout.png" xlink:href="assets/layout.png" x="0" y="0" width="1200" height="1800" />
             <g id="booth-icons" font-size="140" text-anchor="middle" dominant-baseline="middle" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));"></g>
           </svg>
         </div>
-        <!-- 横長カード型 スキャン起動ボタン（マップと下部ナビの間） -->
-        <div class="max-w-[1200px] mx-auto">
-          <button id="scan-card" class="w-full liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border border-white/50 ripple">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-sky-500 text-white grid place-items-center text-2xl">📷</div>
-              <div class="text-left">
-                <div class="font-semibold text-slate-800">デジタルスタンプラリー</div>
-                <div class="text-xs text-slate-600">QRを読み取ってスタンプをGET</div>
-              </div>
-            </div>
-            <div class="text-sky-700 text-sm font-medium">スキャンを開始</div>
-          </button>
-        </div>
       </div>
 
-      <div id="page-list" class="page p-2">
+      <div id="page-list" class="page p-4">
         <ul id="booth-list" class="space-y-2"></ul>
       </div>
     </main>
 
-    <!-- ブース詳細シート -->
-    <div id="booth-sheet" class="bottom-sheet">
-      <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
-        <div class="p-4 border-b border-white/50 flex items-start gap-3">
-          <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
-          <div class="min-w-0 flex-1">
-            <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
-            <div id="booth-sheet-tags" class="mt-2 flex flex-wrap gap-2"></div>
-          </div>
-          <button id="get-stamp-btn" data-id="" class="px-4 py-2 text-sm rounded-2xl bg-sky-500 text-white ripple shadow-md">スタンプGET</button>
+    <div id="staff-confirm-modal" class="auth-modal">
+      <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,480px)] my-auto">
+        <div class="p-4 border-b border-white/50">
+          <h3 class="text-lg font-semibold text-slate-800 text-center">スタッフ確認</h3>
         </div>
-        <div class="p-4 space-y-4 text-sm">
-          <p id="booth-sheet-desc" class="text-slate-700 leading-6"></p>
-          <div class="text-slate-600 space-y-2">
-            <div><strong class="font-medium text-slate-800">スタンプ条件：</strong><span id="booth-sheet-condition">-</span></div>
-            <div><strong class="font-medium text-slate-800">ノベルティ：</strong><span id="booth-sheet-giveaway">-</span></div>
+        <div class="p-5 text-center space-y-4">
+          <p class="text-lg font-semibold text-sky-700 leading-relaxed">
+            スタッフにこの画面を
+            <br>
+            見せてください
+          </p>
+          
+          <div class="liquid-glass rounded-2xl p-4 border border-white/40">
+            <div class="text-sm text-slate-600">交換枚数</div>
+            <div id="staff-confirm-count" class="text-3xl font-bold text-purple-600">0枚</div>
+          </div>
+
+          <p class="text-xs text-slate-600">スタッフが「交換」ボタンを押します。</p>
+          
+          <div class="grid grid-cols-2 gap-3 mt-2">
+            <button id="staff-confirm-cancel" class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-800 font-semibold ripple">
+              戻る
+            </button>
+            <button id="staff-confirm-execute" class="px-4 py-3 rounded-2xl bg-purple-600 text-white font-semibold ripple text-lg">
+              🎁 交換
+            </button>
           </div>
         </div>
       </div>
     </div>
-    <div class="bottom-sheet-backdrop"></div>
-
-    <!-- QRスキャナ シート -->
-    <div id="scan-sheet" class="bottom-sheet">
-      <div class="liquid-glass rounded-t-3xl overflow-hidden">
-        <div class="p-4 border-b border-white/50 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">📷</span>
-            <h4 class="font-semibold text-lg text-slate-800">QRスキャン</h4>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="torch-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">ライト</button>
-            <button id="close-scan-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
-          </div>
-        </div>
-        <div class="relative p-4 pb-2">
-          <video id="scan-video" class="scanner-video" autoplay playsinline muted></video>
-          <div class="scan-guide">
-            <div class="scan-corner tl"></div>
-            <div class="scan-corner tr"></div>
-            <div class="scan-corner bl"></div>
-            <div class="scan-corner br"></div>
-          </div>
-        </div>
-        <div class="px-4 pb-4 flex items-center justify-between text-sm text-slate-600">
-          <span id="scan-status">カメラを初期化中…</span>
-          <button id="switch-camera-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">カメラ切替</button>
-        </div>
-      </div>
-    </div>
-
+    
     <div id="toast" class="toast hidden">
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
     </div>
@@ -382,278 +1274,851 @@
         <div id="nav-indicator"></div>
         <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
         <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
-        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">一覧</span></button>
+        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">イベント</span></button>
       </nav>
     </div>
   </div>
-
 <script>
-/******************* Supabase 接続設定 *******************/
-// ★ Supabaseのプロジェクト値を設定してください
-const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co"; // 置換
-const SUPABASE_ANON_KEY = "YOUR-ANON-KEY"; // 置換
+const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
-const SUPABASE_URL_PLACEHOLDER_TOKEN = "YOUR-PROJECT-REF";
-const SUPABASE_KEY_PLACEHOLDER_TOKEN = "YOUR-ANON-KEY";
-
-function isSupabaseCredentialUnset(value, token) {
-  if (!value) return true;
-  const trimmed = value.trim();
-  if (!trimmed) return true;
-  return trimmed === token || trimmed.includes(token);
-}
-
-const IS_SUPABASE_CONFIGURED = !isSupabaseCredentialUnset(SUPABASE_URL, SUPABASE_URL_PLACEHOLDER_TOKEN)
-  && !isSupabaseCredentialUnset(SUPABASE_ANON_KEY, SUPABASE_KEY_PLACEHOLDER_TOKEN);
-
-let supabase = null;
-if (IS_SUPABASE_CONFIGURED) {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false }
-  });
-} else {
-  console.warn('Supabase のURL/Anonキーが未設定のため、認証機能は無効化されています。');
-}
-
-function getSupabaseClientOrThrow() {
-  if (!IS_SUPABASE_CONFIGURED || !supabase) {
-    const err = new Error('Supabase credentials are not configured.');
-    err.code = 'SUPABASE_NOT_CONFIGURED';
-    throw err;
+async function callEdgeFunction(functionName, body = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY
+  };
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/${functionName}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      }
+    );
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error(`API Response:`, response.status, error);
+      throw new Error(error.error || `API Error: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`[callEdgeFunction] ${functionName} failed:`, error);
+    throw error;
   }
-  return supabase;
 }
 
-// 推奨テーブル構成（SQL例）
-// create table if not exists app_users (
-//   id uuid primary key default gen_random_uuid(),
-//   name text not null,
-//   school text not null,
-//   department text not null,
-//   created_at timestamptz default now()
-// );
-// create index on app_users (name, school);
-
-/******************* DATA & STATE *******************/
+// 定数・データ定義
 const IMG_DEFAULT = 'logo.jpg';
+const MAX_POINTS = 6;
+
 const BOOTH_ANCHORS = {
-  A: { x: 0.20, y: 0.30 }, B: { x: 0.80, y: 0.30 }, C: { x: 0.30, y: 0.38 },
-  D: { x: 0.70, y: 0.38 }, E: { x: 0.27, y: 0.51 }, F: { x: 0.73, y: 0.51 },
-  G: { x: 0.27, y: 0.65 }, H: { x: 0.73, y: 0.65 }
+  A: { x: 0.85, y: 0.22 },
+  B: { x: 0.83, y: 0.35 },
+  C: { x: 0.82, y: 0.60 },
+  D: { x: 0.175, y: 0.60 },
+  E: { x: 0.175, y: 0.83 },
+  F: { x: 0.82, y: 0.83 }
 };
 
 const BOOTH_DATA = [
-  { id: 'A', name: '東京エレクトロン宮城株式会社', img: IMG_DEFAULT, icon: '⚡', desc: '最先端のプラズマエッチング装置を展示。微細加工技術の最前線をご覧ください。', tags:['エッチング', '製造装置', 'プラズマ'], giveaway:'TELオリジナルウエハーストラップ', condition:'エッチング工程に関するクイズに正解' },
-  { id: 'B', name: 'TOPPAN株式会社', img: IMG_DEFAULT, icon: '🖼️', desc: '半導体回路の原版「フォトマスク」の世界へようこそ。EUVマスクの最新技術を紹介します。', tags:['フォトマスク', 'EUV', 'リソグラフィ'], giveaway:'フォトマスクデザイン定規', condition:'ミニチュアマスクの重ね合わせ体験' },
-  { id: 'C', name: 'ラピスセミコンダクタ宮城工場', img: IMG_DEFAULT, icon: '💡', desc: '超低消費電力MCUとカスタムLSIソリューション。身近なIoTデバイスを動かす技術を解説します。', tags:['LSI', 'MCU', 'IoT'], giveaway:'オリジナルICチップキーホルダー', condition:'IoTデバイスのデモを体験' },
-  { id: 'D', name: '株式会社NTKセラテック', img: IMG_DEFAULT, icon: '🔥', desc: '製造装置を支えるファインセラミックス部品。静電チャックやヒーターの実物を展示。', tags:['セラミックス', '装置部品', '静電チャック'], giveaway:'セラミック製コースター', condition:'セラミックスの熱伝導実験に参加' },
-  { id: 'E', name: '日本ファインセラミックス株式会社', img: IMG_DEFAULT, icon: '🏺', desc: '高純度・高精度なセラミックス製品。半導体の品質は、私たちの素材技術から生まれます。', tags:['材料', 'セラミックス', '高純度'], giveaway:'ミニチュアセラミックプレート', condition:'製品サンプルに触れてみる' },
-  { id: 'F', name: '東北大蔵電気株式会社', img: IMG_DEFAULT, icon: '🌡️', desc: '成膜プロセスを精密に制御する水晶振動子式膜厚計や各種コントローラーを展示。', tags:['計測', '成膜', 'コントローラー'], giveaway:'液晶温度計カード', condition:'膜厚計のデモンストレーションを見学' },
-  { id: 'G', name: 'アドバンテストコンポーネント株式会社', img: IMG_DEFAULT, icon: '🔬', desc: '半導体の品質を守る最終関門。プローブカードとテストソケットの精密技術をご覧ください。', tags:['テスト', '検査', 'プローブカード'], giveaway:'回路図デザインの付箋', condition:'プローブカードの拡大モデルを操作' },
-  { id: 'H', name: 'Mioテクノロジー株式会社', img: IMG_DEFAULT, icon: '⚙️', desc: 'μm単位の超精密加工技術。製造装置の心臓部を支えるコンポーネントを製造しています。', tags:['精密加工', '部品', 'コンポーネント'], giveaway:'精密加工メタル定規', condition:'加工サンプルの顕微鏡観察' }
+  {
+    id: 'A',
+    name: '株式会社レスター',
+    img: 'assets/restar.jpeg',
+    icon: '⚡',
+    desc: '国内屈指の売上を誇る半導体商社。半導体製品を専門とした買い付け・販売に加え、顧客の納品管理等のサポートも行う。',
+    tags:['エッチング', '製造装置', 'プラズマ'],
+    giveaway:'TELオリジナルウエハーストラップ',
+    condition:'エッチング工程に関するクイズに正解'
+  },
+  {
+    id: 'B',
+    name: 'キオクシア岩手株式会社',
+    img: 'assets/kioxia.png',
+    icon: '🖼️',
+    desc: '国内唯一のメモリ半導体メーカー「キオクシア」のグループ企業。東北地域の半導体人材育成等に取り組む「東北半導体・エレクトロニクスデザインコンソーシアム」の事務局も務めている。',
+    tags:['フォトマスク', 'EUV', 'リソグラフィ'],
+    giveaway:'フォトマスクデザイン定規',
+    condition:'ミニチュアマスクの重ね合わせ体験'
+  },
+  {
+    id: 'C',
+    name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
+    img: 'assets/sont.png',
+    icon: '💡',
+    desc: 'ソニーグループの半導体生産会社。スマートフォンのカメラ等に使用される「イメージセンサ」で世界トップのシェアを誇る。白石市にレーザー半導体の生産工場が立地している。',
+    tags:['LSI', 'MCU', 'IoT'],
+    giveaway:'オリジナルICチップキーホルダー',
+    condition:'IoTデバイスのデモを体験'
+  },
+  {
+    id: 'D',
+    name: '東京エレクトロン宮城株式会社',
+    img: 'assets/tel.png',
+    icon: '🔥',
+    desc: '国内トップ、世界でも第4位の半導体製造装置メーカーのグループ企業であり、大和町でプラズマエッチング装置の製造等を行っている。',
+    tags:['セラミックス', '装置部品', '静電チャック'],
+    giveaway:'セラミック製コースター',
+    condition:'セラミックスの熱伝導実験に参加'
+  },
+  {
+    id: 'E',
+    name: 'TOPPAN株式会社',
+    img: 'assets/toppan.jpg',
+    icon: '🏺',
+    desc: '印刷・微細加工技術を駆使した半導体パッケージ基板等の部素材メーカーとして世界屈指の技術力を誇る。',
+    tags:['材料', 'セラミックス', '高純度'],
+    giveaway:'ミニチュアセラミックプレート',
+    condition:'製品サンプルに触れてみる'
+  },
+  {
+    id: 'F',
+    name: 'ラピスセミコンダクタ株式会社',
+    img: 'assets/lapis.png',
+    icon: '🌡️',
+    desc: '国内第4位の半導体メーカー「ローム株式会社」のグループ企業。大衡村に半導体製造工場が立地している。',
+    tags:['計測', '成膜', 'コントローラー'],
+    giveaway:'液晶温度計カード',
+    condition:'膜厚計のデモンストレーションを見学'
+  },
 ];
 
-// 既存のタップ取得機能は維持
-const state = { stamps: new Set(), activePage: 'home', prevCount: 0, user: null };
-
-// --- QRダミーコードのホワイトリスト ---
-const QR_WHITELIST = {
-  'handoutai_a': 'A', 'handoutai_b': 'B', 'handoutai_c': 'C', 'handoutai_d': 'D',
-  'handoutai_e': 'E', 'handoutai_f': 'F', 'handoutai_g': 'G', 'handoutai_h': 'H'
+const CATEGORY_DATA = {
+  stage: {
+    title: '特別セミナー：ものづくり太郎氏',
+    icon: '🎤',
+    imgPath: 'monomaker.png',
+    time: '16:00〜',
+    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。',
+    condition: 'ステージイベントに参加'
+  },
+  talksession: {
+    title: 'トークセッション',
+    icon: '💬',
+    imgPath: 'talksession.png',
+    time: '時間未定',
+    desc: 'ここにトークセッションの説明文を入力します。',
+    condition: 'トークセッションに参加'
+  },
+  presentation: {
+    title: '企業研究発表会',
+    icon: '📊',
+    imgPath: 'student_presentation.png',
+    time: '17:30〜',
+    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
+    condition: '研究発表会に参加'
+  }
 };
 
-// --- DOM ELEMENTS ---
+const EVENT_DATA = [
+  {
+    id: 'stage',
+    type: 'category',
+    title: '特別セミナー！ものづくり太郎氏',
+    img: 'monomaker.png',
+    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。'
+  },
+  {
+    id: 'talksession',
+    type: 'category',
+    title: 'トークセッション',
+    img: 'talksession.png',
+    desc: 'ここにトークセッションの説明文を入力します。'
+  },
+  {
+    id: 'presentation',
+    type: 'category',
+    title: '企業研究発表会',
+    img: 'student_presentation.png',
+    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。'
+  },
+  {
+    id: 'booths',
+    type: 'category',
+    title: '企業ブース',
+    img: 'firmbooth.png',
+    desc: '各企業ブースを訪問してスタンプを獲得しましょう。6社のブースがあります。'
+  }
+];
+
+// アプリ状態
+const state = {
+  points: 0,                // 交換可能ポイント（redeemable_points）
+  totalPoints: 0,           // 累計ポイント（total_points）
+  activePage: 'home',
+  prevCount: 0,
+  user: null,
+  percentile: null,
+  acquiredStamps: new Set(), // 回ったブースID
+  claimedRewards: new Set(), // 交換済み景品
+  surveyCompleted: false
+};
+
+// DOM参照
 const $app = {
   header: document.getElementById('header'),
   headerTitle: document.getElementById('header-title'),
-  userPill: document.getElementById('user-pill'),
   pages: document.querySelectorAll('.page'),
   nav: document.querySelector('.floating-nav'),
   navIndicator: document.getElementById('nav-indicator'),
   navButtons: document.querySelectorAll('.nav-btn'),
-  stampGrid: document.getElementById('stamp-grid'),
   boothList: document.getElementById('booth-list'),
   progress: {
     badge: document.getElementById('progress-badge'),
-    bar: document.getElementById('progress-bar'),
-    wrapper: document.getElementById('progress-wrapper'),
     msg: document.getElementById('progress-msg'),
-    bubble4: document.getElementById('reward-bubble-4'),
-    bubble8: document.getElementById('reward-bubble-8'),
-    dot: document.getElementById('progress-dot'),
-    marker4: document.getElementById('marker-4'),
-    marker8: document.getElementById('marker-8'),
+    percent: document.getElementById('progress-percent'),
+    rankPercentile: document.getElementById('rank-percentile'),
+    logoGrid: document.getElementById('company-logo-grid'),
+    stampCount: document.getElementById('stamp-count'),
   },
   map: {
     svg: document.getElementById('svg-map'),
     bg: document.getElementById('bg-image'),
     iconsGroup: document.getElementById('booth-icons')
   },
-  sheet: {
+  categorySheet: {
+    el: document.getElementById('category-sheet'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="category"]'),
+    title: document.getElementById('category-sheet-title'),
+    content: document.getElementById('category-sheet-content'),
+    closeBtn: document.getElementById('close-category-sheet')
+  },
+  boothSheet: {
     el: document.getElementById('booth-sheet'),
-    backdrop: document.querySelector('.bottom-sheet-backdrop'),
+    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
     icon: document.getElementById('booth-sheet-icon'),
     title: document.getElementById('booth-sheet-title'),
-    tags: document.getElementById('booth-sheet-tags'),
     desc: document.getElementById('booth-sheet-desc'),
-    condition: document.getElementById('booth-sheet-condition'),
-    giveaway: document.getElementById('booth-sheet-giveaway'),
-    getStampBtn: document.getElementById('get-stamp-btn'),
+    closeBtn: document.getElementById('close-booth-sheet')
   },
   scan: {
-    sheet: document.getElementById('scan-sheet'),
-    video: document.getElementById('scan-video'),
-    status: document.getElementById('scan-status'),
-    torchBtn: document.getElementById('torch-btn'),
-    switchBtn: document.getElementById('switch-camera-btn'),
     openCard: document.getElementById('scan-card'),
-    closeBtn: document.getElementById('close-scan-btn'),
   },
-  auth: {
-    backdrop: document.getElementById('auth-backdrop'),
-    launch: document.getElementById('auth-launch'),
-    signin: document.getElementById('signin-modal'),
-    login: document.getElementById('login-modal'),
-    openSignin: document.getElementById('open-signin'),
-    openLogin: document.getElementById('open-login'),
-    signinForm: document.getElementById('signin-form'),
-    loginForm: document.getElementById('login-form'),
-    siName: document.getElementById('si-name'),
-    siSchool: document.getElementById('si-school'),
-    siDept: document.getElementById('si-dept'),
-    liName: document.getElementById('li-name'),
-    liSchool: document.getElementById('li-school'),
-    signinError: document.getElementById('signin-error'),
-    loginError: document.getElementById('login-error'),
+  fullscreenScanner: {
+    container: document.getElementById('fullscreen-scanner'),
+    video: document.getElementById('fullscreen-video'),
+    status: document.getElementById('fullscreen-status'),
+    closeBtn: document.getElementById('fullscreen-close'),
+    torchBtn: document.getElementById('fullscreen-torch'),
+    switchBtn: document.getElementById('fullscreen-switch'),
   },
-  toast: document.getElementById('toast')
+  backdrop: document.getElementById('modal-backdrop'),
+  toast: document.getElementById('toast'),
+  staffConfirm: {
+    modal: document.getElementById('staff-confirm-modal'),
+    count: document.getElementById('staff-confirm-count'),
+    executeBtn: document.getElementById('staff-confirm-execute'),
+    cancelBtn: document.getElementById('staff-confirm-cancel')
+  },
+  badgeExchange: {
+    modal: document.getElementById('badge-exchange-modal'),
+    closeBtn: document.getElementById('close-badge-exchange')
+  },
+  survey: {
+    modal: document.getElementById('survey-modal'),
+    form: document.getElementById('survey-form'),
+    closeBtn: document.getElementById('close-survey'),
+    error: document.getElementById('survey-error')
+  },
+  surveyActionBtn: document.getElementById('survey-action-btn'),
+  surveyActionText: document.getElementById('survey-action-text'),
+  surveyActionSubtext: document.getElementById('survey-action-subtext')
 };
 
-/******************* Auth UI Helpers *******************/
-function showAuthGate() {
-  $app.auth.backdrop.classList.add('show');
-  $app.auth.launch.classList.add('show');
-  // アプリの操作を無効化
-  const root = document.getElementById('app');
-  root.classList.add('opacity-0', 'pointer-events-none', 'select-none');
+// ========== localStorage管理 ==========
+const LS_KEY_USER = 'app_user';
+
+function saveLocalUser(u) {
+  localStorage.setItem(LS_KEY_USER, JSON.stringify(u));
 }
-function hideAuthGate() {
-  $app.auth.backdrop.classList.remove('show');
-  $app.auth.launch.classList.remove('show');
+// ========== モーダル / UI オープン・クローズ ==========
+function openSurveyModal() {
+  $app.backdrop.classList.add('show');
+  $app.survey.modal.classList.add('show');
 }
-function openAuthModal(kind) {
-  hideAuthGate();
-  $app.auth.backdrop.classList.add('show');
-  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
-  target.classList.add('show');
+function closeSurveyModal() {
+  $app.survey.modal.classList.remove('show');
+  if (!$app.badgeExchange.modal.classList.contains('show')) {
+    $app.backdrop.classList.remove('show');
+  }
 }
-function closeAuthModal(kind) {
-  const target = kind === 'signin' ? $app.auth.signin : $app.auth.login;
-  target.classList.remove('show');
-  $app.auth.backdrop.classList.remove('show');
+
+// UUID QRモーダル関数
+function openUuidQrModal() {
+  if (!state.user?.id) {
+    showToast('ユーザー情報がありません');
+    return;
+  }
+
+  // 事前登録ユーザーのみ表示
+  if (state.user.registration_type !== 'pre_registration') {
+    return; // 何も起こらない
+  }
+
+  const modal = document.getElementById('uuid-qr-modal');
+  const container = document.getElementById('uuid-qr-container');
+  const numberDisplay = document.getElementById('uuid-qr-number');
+
+  // QRコード生成
+  container.innerHTML = ''; // クリア
+  new QRCode(container, {
+    text: state.user.id,
+    width: 200,
+    height: 200,
+    colorDark: '#0284c7',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // 受付番号表示
+  if (state.user.user_number) {
+    numberDisplay.textContent = String(state.user.user_number).padStart(5, '0');
+  }
+
+  // モーダル表示
+  $app.backdrop.classList.add('show');
+  modal.classList.add('show');
 }
-function enableAppUI(user) {
+
+function closeUuidQrModal() {
+  const modal = document.getElementById('uuid-qr-modal');
+  modal.classList.remove('show');
+  if (
+    !$app.badgeExchange.modal.classList.contains('show') &&
+    !$app.survey.modal.classList.contains('show')
+  ) {
+    $app.backdrop.classList.remove('show');
+  }
+}
+
+function openBadgeExchangeModal() {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+
+  const alreadyClaimedDiv = document.getElementById('badge-already-claimed');
+  const exchangeInterfaceDiv = document.getElementById('badge-exchange-interface');
+
+  // Check if badge already claimed
+  if (state.user.badge_claimed) {
+    // Show "Already Claimed" message
+    alreadyClaimedDiv.classList.remove('hidden');
+    exchangeInterfaceDiv.classList.add('hidden');
+  } else {
+    // Show exchange interface
+    alreadyClaimedDiv.classList.add('hidden');
+    exchangeInterfaceDiv.classList.remove('hidden');
+    // Reset slider
+    resetSlider();
+  }
+
+  $app.backdrop.classList.add('show');
+  $app.badgeExchange.modal.classList.add('show');
+}
+
+function closeBadgeExchangeModal() {
+  $app.badgeExchange.modal.classList.remove('show');
+  if (!$app.survey.modal.classList.contains('show')) {
+    $app.backdrop.classList.remove('show');
+  }
+
+  // Reset slider when closing
+  resetSlider();
+}
+
+// ========== Slide to Claim Logic ==========
+let slideState = {
+  isDragging: false,
+  containerLeft: 0,
+  maxSlide: 0,
+  startX: 0
+};
+
+function initSlider() {
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+
+  if (!slider || !container) return;
+
+  // Calculate max slide distance
+  slideState.maxSlide = container.offsetWidth - slider.offsetWidth - 8; // 8px for padding (4px on each side)
+
+  // Mouse events
+  slider.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+
+  // Touch events with passive: false to allow preventDefault
+  slider.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener('touchmove', drag, { passive: false });
+  document.addEventListener('touchend', endDrag, { passive: false });
+}
+
+function startDrag(e) {
+  const container = document.querySelector('.slide-to-claim-container');
+  const slider = document.getElementById('slide-to-claim-button');
+
+  if (container.classList.contains('completed')) return;
+
+  slideState.isDragging = true;
+
+  // Get container's left position
+  const containerRect = container.getBoundingClientRect();
+  slideState.containerLeft = containerRect.left;
+
+  // Get starting position
+  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  const sliderRect = slider.getBoundingClientRect();
+  slideState.startX = currentPos - sliderRect.left;
+
+  // Ensure no transition during drag
+  slider.style.transition = 'none';
+
+  e.preventDefault();
+}
+
+function drag(e) {
+  if (!slideState.isDragging) return;
+
+  const slider = document.getElementById('slide-to-claim-button');
+
+  // Get current touch/mouse position
+  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+
+  // Calculate position relative to container
+  let newX = currentPos - slideState.containerLeft - slideState.startX;
+
+  // Constrain movement
+  newX = Math.max(4, Math.min(newX, slideState.maxSlide + 4));
+
+  slider.style.left = `${newX}px`;
+
+  e.preventDefault();
+}
+
+function endDrag(e) {
+  if (!slideState.isDragging) return;
+
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+  const currentLeft = parseInt(slider.style.left) || 4;
+
+  // Check if slid far enough (90% of max distance)
+  if (currentLeft >= slideState.maxSlide * 0.9) {
+    // Complete the slide with transition
+    slider.style.transition = 'left 0.3s ease-out';
+    slider.style.left = `${slideState.maxSlide + 4}px`;
+    container.classList.add('completed');
+
+    // Execute badge claim
+    setTimeout(() => {
+      claimBadge();
+      // Remove transition after animation
+      setTimeout(() => {
+        slider.style.transition = 'none';
+      }, 300);
+    }, 300);
+  } else {
+    // Reset to start with transition
+    slider.style.transition = 'left 0.3s ease-out';
+    slider.style.left = '4px';
+    setTimeout(() => {
+      slider.style.transition = 'none';
+    }, 300);
+  }
+
+  slideState.isDragging = false;
+  e.preventDefault();
+}
+
+function resetSlider() {
+  const slider = document.getElementById('slide-to-claim-button');
+  const container = document.querySelector('.slide-to-claim-container');
+
+  if (!slider || !container) return;
+
+  slider.style.transition = 'none';
+  slider.style.left = '4px';
+  container.classList.remove('completed');
+  slideState.isDragging = false;
+}
+
+
+// ========== アンケート提出 ==========
+async function submitSurvey(e) {
+  e.preventDefault();
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+
+  const formData = new FormData($app.survey.form);
+  const surveyData = {
+    affiliation: formData.get('affiliation'),
+    event_source: formData.get('event_source'),
+    feedback: formData.get('feedback'),
+    research_interests: [],
+    career_interests: [],
+    good_contents: []
+  };
+  formData.getAll('research_interest').forEach(v => surveyData.research_interests.push(v));
+  formData.getAll('career_interest').forEach(v => surveyData.career_interests.push(v));
+  formData.getAll('good_content').forEach(v => surveyData.good_contents.push(v));
+
+  try {
+    $app.survey.error.textContent = '';
+    const result = await callEdgeFunction('submit-survey', {
+      userId: state.user.id,
+      surveyData
+    });
+
+    if (result.success) {
+      state.surveyCompleted = true;
+      state.user.survey_completed = true;
+      saveLocalUser(state.user);
+
+      $app.survey.modal.classList.remove('show');
+      showToast('✅ アンケートありがとうございました！');
+
+      // Update button to "特典交換" with green glow
+      updateSurveyActionButton();
+
+      // Auto-open badge exchange modal after 500ms
+      setTimeout(() => {
+        openBadgeExchangeModal();
+      }, 500);
+    }
+  } catch (err) {
+    console.error('Survey submission failed:', err);
+    $app.survey.error.textContent = 'アンケート送信に失敗しました。もう一度お試しください。';
+  }
+}
+
+// ========== Survey Action Button Update ==========
+function updateSurveyActionButton() {
+  const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
+  const isBadgeClaimed = state.user?.badge_claimed ?? false;
+
+  console.log('[updateSurveyActionButton] State:', {
+    survey_completed: isSurveyCompleted,
+    badge_claimed: isBadgeClaimed,
+    'state.user': state.user
+  });
+
+  if (!$app.surveyActionBtn) return;
+
+  // Remove all state classes first
+  $app.surveyActionBtn.classList.remove('ready-to-claim', 'claimed', 'opacity-50', 'cursor-not-allowed');
+
+  if (isBadgeClaimed) {
+    // Badge already claimed - disable button with grey style
+    $app.surveyActionBtn.disabled = true;
+    $app.surveyActionBtn.classList.add('opacity-50', 'cursor-not-allowed', 'claimed');
+    $app.surveyActionText.textContent = '交換済み';
+    // Hide subtext for claimed state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.add('hidden');
+    }
+  } else if (isSurveyCompleted) {
+    // Survey completed but badge not claimed - show "特典交換" with green glow
+    $app.surveyActionBtn.disabled = false;
+    $app.surveyActionBtn.classList.add('ready-to-claim');
+    $app.surveyActionText.textContent = '特典交換';
+    // Hide subtext for claim state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.add('hidden');
+    }
+  } else {
+    // Survey not completed - show "アンケート回答"
+    $app.surveyActionBtn.disabled = false;
+    $app.surveyActionText.textContent = 'アンケート回答';
+    // Show subtext for survey state
+    if ($app.surveyActionSubtext) {
+      $app.surveyActionSubtext.classList.remove('hidden');
+    }
+  }
+}
+
+// ========== Badge Claim Function ==========
+async function claimBadge() {
+  if (!state.user?.id) {
+    showToast('ログインしてください');
+    return;
+  }
+
+  if (state.user.badge_claimed) {
+    showToast('特典は既に交換済みです');
+    return;
+  }
+
+  try {
+    const result = await callEdgeFunction('claim-badge', {
+      userId: state.user.id
+    });
+
+    if (result.success) {
+      state.user.badge_claimed = true;
+      saveLocalUser(state.user);
+
+      closeBadgeExchangeModal();
+      showToast('🎉 ゴールドピンバッジを交換しました！受付（L404）でお受け取りください');
+
+      // Update button to disabled state
+      updateSurveyActionButton();
+    }
+  } catch (err) {
+    console.error('Badge claim failed:', err);
+
+    // Check if error is "already claimed"
+    if (err.message && err.message.includes('already claimed')) {
+      // Update state to reflect server status
+      state.user.badge_claimed = true;
+      saveLocalUser(state.user);
+
+      // Switch modal display to "Already Claimed"
+      const alreadyClaimedDiv = document.getElementById('badge-already-claimed');
+      const exchangeInterfaceDiv = document.getElementById('badge-exchange-interface');
+      alreadyClaimedDiv.classList.remove('hidden');
+      exchangeInterfaceDiv.classList.add('hidden');
+
+      // Update button state
+      updateSurveyActionButton();
+
+      showToast('特典は既に交換済みです');
+    } else {
+      showToast('交換に失敗しました。もう一度お試しください。');
+    }
+  }
+}
+
+
+// ========== サーバー同期系 ==========
+
+// Supabase側でユーザーを作成/取得
+async function ensureAuth() {
+  // URLパラメータをチェック
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasPreRegParam = urlParams.get('mode') === 'prereg';
+
+  // 優先順位1: 既に事前登録UUIDが存在するか確認
+  const preRegUuid = localStorage.getItem('user_uuid_pre_registration');
+
+  let registrationType;
+  let uuid;
+  let storageKey;
+
+  if (preRegUuid) {
+    // 既に事前登録済み → パラメータに関わらず事前登録として扱う
+    registrationType = 'pre_registration';
+    uuid = preRegUuid;
+    storageKey = 'user_uuid_pre_registration';
+  } else if (hasPreRegParam) {
+    // 新規事前登録
+    registrationType = 'pre_registration';
+    storageKey = 'user_uuid_pre_registration';
+    uuid = localStorage.getItem(storageKey);
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+      localStorage.setItem(storageKey, uuid);
+    }
+  } else {
+    // 当日登録
+    registrationType = 'on_site';
+    storageKey = 'user_uuid_on_site';
+    uuid = localStorage.getItem(storageKey);
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+      localStorage.setItem(storageKey, uuid);
+    }
+  }
+
+  // 仮のstate.user
+  state.user = {
+    id: uuid,
+    name: '匿名参加者',
+    registration_type: registrationType
+  };
+
+  // UIアンロック（もしローディングブロックしてるなら）
   const root = document.getElementById('app');
   root.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
-  $app.userPill.classList.remove('hidden');
-  $app.userPill.innerHTML = `<span class="px-2 py-1 rounded-xl bg-sky-100 border border-sky-200">👤 ${user.name}（${user.school} / ${user.department}）</span>`;
+
+  try {
+    const serverData = await callEdgeFunction('get-user-data', {
+      userId: uuid,
+      registrationType: registrationType
+    });
+
+    if (serverData && serverData.user) {
+      console.log('[ensureAuth] Received from Supabase:', {
+        survey_completed: serverData.user.survey_completed,
+        badge_claimed: serverData.user.badge_claimed
+      });
+
+      state.user = {
+        id: serverData.user.id,
+        user_number: serverData.user.user_number || 0,
+        registration_type: serverData.user.registration_type,
+        survey_completed: serverData.user.survey_completed ?? false,
+        badge_claimed: serverData.user.badge_claimed ?? false,
+        created_at: serverData.user.created_at,
+        points: serverData.user.points ?? 0,
+        total_points: serverData.user.total_points ?? 0,
+        redeemable_points: serverData.user.redeemable_points ?? 0
+      };
+
+      console.log('[ensureAuth] Set state.user.badge_claimed:', state.user.badge_claimed);
+
+      state.points = serverData.user.redeemable_points ?? 0;
+      state.totalPoints = serverData.user.total_points ?? 0;
+      state.surveyCompleted = serverData.user.survey_completed ?? false;
+
+      if (serverData.progress && Array.isArray(serverData.progress.acquiredBooths)) {
+        state.acquiredStamps = new Set(serverData.progress.acquiredBooths);
+      } else {
+        state.acquiredStamps = new Set();
+      }
+
+      const userNumberElement = document.getElementById('user-number');
+      if (userNumberElement) {
+        const formattedNumber = String(serverData.user.user_number || 0).padStart(5, '0');
+        userNumberElement.textContent = formattedNumber;
+      }
+
+      saveLocalUser(state.user);
+    }
+  } catch (err) {
+    console.error('[ensureAuth] Failed to sync user from server:', err);
+    // fail soft: アプリは動かす
+  }
+  updateSurveyActionButton();
 }
 
-/******************* Auth Storage (client-side) *******************/
-const LS_KEY_USER = 'app_user';
-function saveLocalUser(u){ localStorage.setItem(LS_KEY_USER, JSON.stringify(u)); }
-function loadLocalUser(){ try { return JSON.parse(localStorage.getItem(LS_KEY_USER)||'null'); } catch { return null; } }
-function clearLocalUser(){ localStorage.removeItem(LS_KEY_USER); }
+// 最新状態をDBから再取得
+async function syncPointsFromServer() {
+  if (!state.user?.id) {
+    return;
+  }
 
-/******************* Supabase Accessors *******************/
-async function sbInsertUser({name, school, department}) {
-  const client = getSupabaseClientOrThrow();
-  // RPC経由（RLSでテーブル直アクセス不可のため）
-  const { data, error } = await client
-    .rpc('register_user', { p_name: name, p_school: school, p_department: department });
-  if (error) throw error;
-  return data; // app_users の1行（id, name, school, department, created_at）
+  try {
+    const data = await callEdgeFunction('get-user-data', {
+      userId: state.user.id
+    });
+
+    if (data && data.user) {
+      state.points = data.user.redeemable_points ?? 0;
+      state.totalPoints = data.user.total_points ?? 0;
+      state.surveyCompleted = data.user.survey_completed ?? false;
+
+      state.user.user_number = data.user.user_number || state.user.user_number;
+      state.user.survey_completed = data.user.survey_completed ?? false;
+      state.user.badge_claimed = data.user.badge_claimed ?? false;
+      state.user.points = data.user.points ?? 0;
+      state.user.total_points = data.user.total_points ?? 0;
+      state.user.redeemable_points = data.user.redeemable_points ?? 0;
+
+      saveLocalUser(state.user);
+
+      const userNumberElement = document.getElementById('user-number');
+      if (userNumberElement) {
+        const formattedNumber = String(state.user.user_number || 0).padStart(5, '0');
+        userNumberElement.textContent = formattedNumber;
+      }
+    }
+
+    if (data && data.progress && Array.isArray(data.progress.acquiredBooths)) {
+      state.acquiredStamps = new Set(data.progress.acquiredBooths);
+    }
+
+    await updatePercentile();
+    renderAll();
+
+    // Update survey action button to reflect badge_claimed status
+    updateSurveyActionButton();
+  } catch (err) {
+    console.error('[syncPointsFromServer] Failed to sync points:', err);
+  }
 }
 
-async function sbFindUserByNameAndSchool({name, school}) {
-  const client = getSupabaseClientOrThrow();
-  // RPC経由で1件取得。存在しなければ null
-  const { data, error } = await client
-    .rpc('login_user', { p_name: name, p_school: school });
-  if (error) throw error;
-  return data; // 見つからなければ null
+// ========== ランキング系 ==========
+async function updatePercentile() {
+  if (!state.user?.id || state.totalPoints === 0) {
+    state.percentile = null;
+    return;
+  }
+  try {
+    const result = await callEdgeFunction('get-percentile', {
+      userId: state.user.id
+    });
+    state.percentile = result.percentile;
+  } catch (err) {
+    console.error('Failed to calculate percentile:', err);
+    state.percentile = null;
+  }
 }
 
-/******************* RENDER FUNCTIONS *******************/
+// ========== 進捗・ページ描画系 ==========
 function renderAll() {
-  renderStampGrid();
   renderProgress();
   updateActivePage();
-  layoutBoothIcons();
-}
-
-function renderStampGrid() {
-  $app.stampGrid.innerHTML = '';
-  BOOTH_DATA.forEach(b => {
-    const on = state.stamps.has(b.id);
-    const cell = document.createElement('div');
-    cell.className = 'flex flex-col items-center';
-    cell.innerHTML = `
-      <div class="chip ${on ? 'on' : ''}" data-id="${b.id}">
-        <img src="${b.img}" alt="${b.name}">
-      </div>
-      <div class="chip-name" title="${b.name}">${b.name}</div>`;
-    cell.addEventListener('click', () => { toggleStamp(b.id); });
-    $app.stampGrid.appendChild(cell);
-  });
-}
-
-function renderBoothList() {
-  $app.boothList.innerHTML = '';
-  BOOTH_DATA.forEach((b, i) => {
-    const li = document.createElement('li');
-    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim';
-    li.style.animationDelay = `${i * 50}ms`;
-    li.innerHTML = `
-      <div class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
-        <img src="${b.img}" alt="${b.name}" class="w-full h-full object-cover" />
-      </div>
-      <div class="min-w-0 flex-1">
-        <div class="font-semibold text-slate-800">${b.name}</div>
-        <div class="text-xs text-slate-500 truncate">${b.desc}</div>
-      </div>
-      <div class="text-2xl text-slate-300">${state.stamps.has(b.id) ? '✅' : '⚪️'}</div>`;
-    li.addEventListener('click', () => openBoothSheet(b));
-    $app.boothList.appendChild(li);
-  });
+  if (state.activePage === 'map') {
+    layoutBoothIcons();
+  }
 }
 
 function renderProgress() {
-  const n = state.stamps.size;
-  const total = BOOTH_DATA.length;
-  const progressPercent = (n / total) * 100;
+  // totalPoints を「獲得スタンプ数」として扱う前提
+  const n = state.totalPoints;
 
-  $app.progress.badge.textContent = `${n}/${total}`;
-  $app.progress.bar.style.width = `${progressPercent}%`;
-  $app.progress.dot.style.left = `${progressPercent}%`;
+  $app.progress.badge.textContent = `${state.totalPoints}pt`;
 
-  $app.progress.bubble4.classList.toggle('is-achieved', n >= 4);
-  $app.progress.bubble8.classList.toggle('is-achieved', n >= 8);
-  if (n === total) {
-    $app.progress.msg.textContent = '🎉 全ての特典をゲット！おめでとうございます！';
-  } else if (n >= 4) {
-    $app.progress.msg.textContent = `💎 特典ゲット！次の特典まであと${total - n}個！`;
+  if (state.percentile !== null) {
+    const displayPercentile = (state.percentile === 0) ? 1 : state.percentile;
+    $app.progress.rankPercentile.textContent = `上位 ${displayPercentile}%`;
+    $app.progress.rankPercentile.classList.remove('hidden');
   } else {
-    $app.progress.msg.textContent = `あと${Math.max(0, 4 - n)}個で最初の特典をゲット！`;
+    $app.progress.rankPercentile.classList.add('hidden');
   }
 
-  const onMilestone = (n === 4 || n === 8);
-  $app.progress.dot.style.display = onMilestone ? 'none' : 'block';
-  $app.progress.marker4.classList.toggle('is-active', n >= 4);
-  $app.progress.marker8.classList.toggle('is-active', n >= 8);
+  // ロゴグリッド
+  if ($app.progress.logoGrid) {
+    $app.progress.logoGrid.innerHTML = '';
+    BOOTH_DATA.forEach(booth => {
+      const isAcquired = state.acquiredStamps.has(booth.id);
+      const logoItem = document.createElement('div');
+      logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
+      logoItem.innerHTML = `<img src="${booth.img}" alt="${booth.name}" />`;
+      $app.progress.logoGrid.appendChild(logoItem);
+    });
+  }
 
+  // カウント表示
+  if ($app.progress.stampCount) {
+    $app.progress.stampCount.textContent = n;
+  }
+
+  if (n >= MAX_POINTS) {
+    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> お疲れ様でした！';
+  } else {
+    $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
+  }
+
+  updateAcquiredBadges();
   state.prevCount = n;
-  syncBubbleHeights();
+}
+
+function updateAcquiredBadges() {
+  const boothIds = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const acquiredBooths = boothIds.filter(id => state.acquiredStamps.has(id)).length;
+  const boothProgress = document.getElementById('booth-progress');
+  if (boothProgress) {
+    boothProgress.textContent = `${acquiredBooths}/6 獲得済み`;
+    if (acquiredBooths === 6) {
+      boothProgress.style.color = '#059669';
+    }
+  }
 }
 
 function updateActivePage() {
@@ -661,15 +2126,16 @@ function updateActivePage() {
     const isActive = p.id === `page-${state.activePage}`;
     p.classList.toggle('active', isActive);
     p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-    p.style.visibility = isActive ? 'visible' : 'hidden';
   });
 
   let activeBtn = null;
   $app.navButtons.forEach(btn => {
     const isActive = btn.dataset.page === state.activePage;
     btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
     if (isActive) activeBtn = btn;
   });
+
   if (activeBtn) {
     const btnW = activeBtn.offsetWidth;
     const indW = Math.max(56, Math.round(btnW * 0.66));
@@ -677,253 +2143,398 @@ function updateActivePage() {
     $app.navIndicator.style.width = `${indW}px`;
     $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
   }
-  const pageTitles = { home: '進捗ホーム', map: '会場マップ', list: 'ブース一覧' };
+
+  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'イベント' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
 
-  if (state.activePage === 'list') { renderBoothList(); }
+  if (state.activePage === 'list') {
+    renderBoothList();
+  }
 
-  const isMap = state.activePage === 'map';
-  $app.map.iconsGroup?.setAttribute('pointer-events', isMap ? 'auto' : 'none');
-  if ($app.map.svg) $app.map.svg.style.display = isMap ? '' : 'none';
+  if (state.activePage === 'map') {
+    layoutBoothIcons();
+  }
+}
+
+function renderBoothList() {
+  $app.boothList.innerHTML = '';
+  EVENT_DATA.forEach((event, i) => {
+    const li = document.createElement('li');
+    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer relative';
+    li.style.animationDelay = `${i * 50}ms`;
+    li.innerHTML = `
+      <div class="w-12 h-12 rounded-lg bg-white flex-shrink-0 relative">
+        <img src="${event.img}" alt="${event.title}" class="w-full h-full object-contain bg-white" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-semibold text-slate-800">${event.title}</div>
+        <div class="text-xs text-slate-500 truncate">${event.desc}</div>
+      </div>
+      <div class="text-slate-400">›</div>
+    `;
+    li.addEventListener('click', () => {
+      if (event.type === 'category') {
+        openCategorySheet(event.id);
+      }
+    });
+    $app.boothList.appendChild(li);
+  });
+}
+
+// ========== カテゴリ / ブース 詳細シート ==========
+function openCategorySheet(categoryKey) {
+  if (categoryKey === 'booths') {
+    $app.categorySheet.title.textContent = '企業ブース';
+    $app.categorySheet.content.innerHTML = `
+      <div class="space-y-3">
+        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。アンケート回答で特典と交換できます。</p>
+        ${BOOTH_DATA.map(booth => {
+          const isAcquired = state.acquiredStamps.has(booth.id);
+          return `
+          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-100/60 to-green-100/60' : ''}" data-booth-id="${booth.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-white flex-shrink-0 relative">
+                ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
+                <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-slate-800 text-sm">${booth.name}</div>
+                <div class="text-xs text-slate-500 truncate">${booth.desc}</div>
+              </div>
+              <div class="${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold text-sm">${isAcquired ? '' : '1pt'}</div>
+            </div>
+          </div>
+        `;
+        }).join('')}
+      </div>
+    `;
+
+    $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const boothId = card.dataset.boothId;
+        const booth = BOOTH_DATA.find(b => b.id === boothId);
+        if (booth) {
+          closeCategorySheet();
+          setTimeout(() => openBoothSheet(booth), 300);
+        }
+      });
+    });
+  } else {
+    const category = CATEGORY_DATA[categoryKey];
+    $app.categorySheet.title.textContent = category.title;
+    $app.categorySheet.content.innerHTML = `
+      <div class="space-y-4">
+        <div class="flex items-center gap-3 text-sm">
+          <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
+             <img src="${category.imgPath || ''}" alt="" class="max-w-full max-h-full object-contain">
+          </div>
+          <div>
+            <div class="font-semibold text-slate-800">${category.time}</div>
+          </div>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">${category.desc}</p>
+        <div class="liquid-glass rounded-xl p-3 border border-white/40">
+          <div class="text-xs font-semibold text-slate-700 mb-1">参加条件</div>
+          <div class="text-sm text-slate-600">${category.condition}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  $app.categorySheet.el.classList.add('is-open');
+  $app.categorySheet.backdrop.classList.add('is-open');
+}
+
+function closeCategorySheet() {
+  $app.categorySheet.el.classList.remove('is-open');
+  $app.categorySheet.backdrop.classList.remove('is-open');
 }
 
 function openBoothSheet(booth) {
-  $app.sheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-cover" />`;
-  $app.sheet.title.textContent = booth.name;
-  $app.sheet.desc.textContent = booth.desc;
-  $app.sheet.condition.textContent = booth.condition;
-  $app.sheet.giveaway.textContent = booth.giveaway;
-  $app.sheet.getStampBtn.dataset.id = booth.id;
-  const hasStamp = state.stamps.has(booth.id);
-  $app.sheet.getStampBtn.textContent = hasStamp ? 'キャンセル' : 'スタンプGET';
-  $app.sheet.getStampBtn.classList.toggle('bg-red-500', hasStamp);
-  $app.sheet.getStampBtn.classList.toggle('bg-sky-500', !hasStamp);
-  $app.sheet.tags.innerHTML = '';
-  booth.tags.forEach(t => {
-    const span = document.createElement('span');
-    span.className = 'px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs';
-    span.textContent = t;
-    $app.sheet.tags.appendChild(span);
-  });
-  $app.sheet.el.classList.add('is-open');
+  $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
+  $app.boothSheet.title.textContent = booth.name;
+  $app.boothSheet.desc.textContent = booth.desc;
+
+  $app.boothSheet.el.classList.add('is-open');
+  $app.boothSheet.backdrop.classList.add('is-open');
 }
 
-function closeBoothSheet() { $app.sheet.el.classList.remove('is-open'); }
-function toggleStamp(id) { state.stamps.has(id) ? state.stamps.delete(id) : state.stamps.add(id); renderAll(); }
-
-// 共通: スタンプ付与処理
-function grantStampByBoothId(boothId) {
-  if (!boothId) return false;
-  const booth = BOOTH_DATA.find(b => b.id === boothId);
-  if (!booth) return false;
-  const firstTime = !state.stamps.has(boothId);
-  state.stamps.add(boothId);
-  renderAll();
-  showToast(firstTime ? `✅ 「${booth.name}」のスタンプを獲得！` : `ℹ️ 「${booth.name}」は取得済みです`);
-  return true;
+function closeBoothSheet() {
+  $app.boothSheet.el.classList.remove('is-open');
+  $app.boothSheet.backdrop.classList.remove('is-open');
 }
 
-/******************* QR: スキャナ制御 *******************/
+// ========== スキャナ関連 ==========
 let scanStream = null;
 let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
-let barcodeDetector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+let codeReader = null;
 
-async function openScanner() {
-  $app.scan.sheet.classList.add('is-open');
+async function openFullscreenScanner() {
+  $app.fullscreenScanner.container.classList.add('active');
   await startCamera();
 }
 
-function closeScanner() {
+function closeFullscreenScanner() {
   stopCamera();
-  $app.scan.sheet.classList.remove('is-open');
+  $app.fullscreenScanner.container.classList.remove('active');
 }
 
 async function startCamera() {
   try {
-    $app.scan.status.textContent = 'カメラを起動中…';
-    const constraints = {
-      audio: false,
-      video: {
-        facingMode: useBackCamera ? { ideal: 'environment' } : 'user',
-        width: { ideal: 1280 }, height: { ideal: 720 }
-      }
-    };
-    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
-    $app.scan.video.srcObject = scanStream;
-    await $app.scan.video.play();
+    $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
 
-    // トーチ対応チェック
-    trackWithTorch = null;
-    const [track] = scanStream.getVideoTracks();
-    const caps = track.getCapabilities?.();
-    if (caps && 'torch' in caps) {
-      trackWithTorch = track;
-      $app.scan.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
-    } else {
-      $app.scan.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+    if (!codeReader) {
+      codeReader = new ZXing.BrowserQRCodeReader();
     }
 
-    $app.scan.status.textContent = barcodeDetector ? 'QRコードを枠内に写してください' : 'この端末はネイティブQR非対応です（最新Chrome推奨）';
+    const constraints = {
+      video: {
+        facingMode: useBackCamera ? 'environment' : 'user',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+    $app.fullscreenScanner.video.srcObject = scanStream;
+    await $app.fullscreenScanner.video.play();
+
+    try {
+      const [track] = scanStream.getVideoTracks();
+      const caps = track.getCapabilities?.();
+      if (caps && 'torch' in caps) {
+        trackWithTorch = track;
+        $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+      }
+    } catch (e) {
+      console.warn('Torch not available');
+      $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+    }
+
     scanning = true;
-    requestAnimationFrame(scanLoop);
+    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+
+    scanQRCode();
   } catch (err) {
     console.error(err);
-    $app.scan.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+    $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
   }
 }
 
-function stopCamera() {
+async function scanQRCode() {
+  if (!scanning || !$app.fullscreenScanner.video.srcObject) return;
+
+  try {
+    const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
+    if (result && result.text) {
+      scanning = false;
+      await handleScanResult(result.text);
+      return;
+    }
+  } catch (err) {
+    // 見つからない等は無視してループ継続
+  }
+
+  if (scanning) {
+    requestAnimationFrame(() => scanQRCode());
+  }
+}
+
+async function stopCamera() {
   scanning = false;
+
+  if (codeReader) {
+    try {
+      await codeReader.reset();
+    } catch (e) {
+      console.warn('Failed to reset code reader', e);
+    }
+  }
+
   if (scanStream) {
-    scanStream.getTracks().forEach(t => t.stop());
+    scanStream.getTracks().forEach(t => {
+      t.stop();
+      console.log('Track stopped:', t.label);
+    });
     scanStream = null;
   }
-  $app.scan.torchBtn.dataset.on = '0';
+
+  if ($app.fullscreenScanner.video.srcObject) {
+    $app.fullscreenScanner.video.srcObject = null;
+  }
+
+  trackWithTorch = null;
+  $app.fullscreenScanner.torchBtn.dataset.on = '0';
+  $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
 }
 
 async function toggleTorch() {
   if (!trackWithTorch) return;
-  const on = $app.scan.torchBtn.dataset.on === '1';
+  const on = $app.fullscreenScanner.torchBtn.dataset.on === '1';
   try {
     await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
-    $app.scan.torchBtn.dataset.on = on ? '0' : '1';
-    $app.scan.torchBtn.classList.toggle('bg-amber-200');
-  } catch (e) { console.warn('Torch not available', e); }
+    $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
+    $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
+  } catch (e) {
+    console.warn('Torch not available', e);
+  }
 }
 
 async function switchCamera() {
   useBackCamera = !useBackCamera;
-  stopCamera();
-  await startCamera();
+  await stopCamera();
+  setTimeout(() => {
+    startCamera();
+  }, 300);
 }
 
-async function scanLoop() {
-  if (!scanning) return;
-  if (barcodeDetector && $app.scan.video.readyState >= 2) {
-    try {
-      const barcodes = await barcodeDetector.detect($app.scan.video);
-      if (barcodes && barcodes.length > 0) {
-        const text = (barcodes[0].rawValue || '').trim();
-        if (await handleScanResult(text)) return; // trueなら停止
-      }
-    } catch (e) { /* ignore */ }
-  }
-  requestAnimationFrame(scanLoop);
+function showFullscreenMessage(msg, isError = true) {
+  const el = document.getElementById('fullscreen-message');
+  const box = el.firstElementChild;
+  box.textContent = msg;
+  box.className = `px-4 py-3 rounded-2xl shadow-lg text-center font-medium ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+  el.classList.remove('hidden');
+  clearTimeout(showFullscreenMessage._t);
+  showFullscreenMessage._t = setTimeout(() => {
+    el.classList.add('hidden');
+  }, 2000);
 }
 
-async function handleScanResult(text) {
-  if (!text) return false;
-  const lowered = text.toLowerCase();
-  const boothId = QR_WHITELIST[lowered];
-  if (!boothId) {
-    showToast('未対応のQRコードです');
-    await wait(800);
+async function handleScanResult(rawText) {
+  if (!state.user?.id) {
+    showFullscreenMessage('ユーザー情報がありません', true);
     return false;
   }
-  grantStampByBoothId(boothId);
-  await wait(500);
-  closeScanner();
-  return true;
-}
 
-function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-// --- Deep Link: ネイティブカメラからの読み取りでアプリ起動時に付与 ---
-function handleDeepLinkAward() {
-  const url = new URL(window.location.href);
-  let code = url.searchParams.get('qr');
-  if (!code && url.hash) {
-    const m = url.hash.match(/qr=([^&]+)/);
-    if (m) code = decodeURIComponent(m[1]);
-  }
-  if (!code) return;
-  const boothId = QR_WHITELIST[String(code).toLowerCase()];
-  if (boothId) {
-    grantStampByBoothId(boothId);
-    url.searchParams.delete('qr');
-    const clean = url.pathname + url.search + (url.hash.replace(/qr=[^&]+&?/,'').replace(/[#&]$/,''));
-    history.replaceState({}, '', clean || '/');
-  } else {
-    showToast('未対応のQRコードです');
-  }
-}
-
-/******************* Auth Flow *******************/
-async function ensureAuth() {
-  // 1) 既存ローカル
-  const local = loadLocalUser();
-  if (local && local.id) {
-    state.user = local;
-    enableAppUI(state.user);
-    return true;
-  }
-  // 2) 未ログイン: 起動パネル
-  showAuthGate();
-  return false;
-}
-
-async function handleSignin(e){
-  e.preventDefault();
-  $app.auth.signinError.textContent = '';
-  const name = $app.auth.siName.value.trim();
-  const school = $app.auth.siSchool.value.trim();
-  const department = $app.auth.siDept.value.trim();
-  if (!name || !school || !department) {
-    $app.auth.signinError.textContent = '未入力の項目があります。';
-    return;
-  }
+  // URLからスタンプIDを抽出
+  let stampId = rawText;
   try {
-    const rec = await sbInsertUser({ name, school, department });
-    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
-    saveLocalUser(user);
-    state.user = user;
-    closeAuthModal('signin');
-    enableAppUI(user);
-    showToast('登録が完了しました。ようこそ！');
-  } catch(err){
-    console.error(err);
-    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
-      $app.auth.signinError.textContent = '現在サインイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-      return;
+    const url = new URL(rawText);
+    const urlStampId = url.searchParams.get('stamp');
+    if (urlStampId) {
+      stampId = urlStampId;
     }
-    $app.auth.signinError.textContent = '登録に失敗しました。ネットワークや設定をご確認ください。';
+  } catch (e) {
+    // URLではない場合はそのまま使う
   }
-}
 
-async function handleLogin(e){
-  e.preventDefault();
-  $app.auth.loginError.textContent = '';
-  const name = $app.auth.liName.value.trim();
-  const school = $app.auth.liSchool.value.trim();
-  if (!name || !school) {
-    $app.auth.loginError.textContent = '氏名と学校名を入力してください。';
-    return;
-  }
+  const boothId = stampId;
+  const stampCode = stampId;
+
   try {
-    const rec = await sbFindUserByNameAndSchool({ name, school });
-    if (!rec) {
-      $app.auth.loginError.textContent = '該当ユーザーが見つかりません。サインインをお試しください。';
-      return;
+    const result = await callEdgeFunction('grant-stamp', {
+      userId: state.user.id,
+      boothId,
+      stampCode
+    });
+
+    if (result.success) {
+      console.log('[DEBUG] QR Success - Before update:', {
+        oldTotalPoints: state.totalPoints,
+        oldAcquiredStamps: Array.from(state.acquiredStamps),
+        newTotalPoints: result.newTotalPoints,
+        newAcquiredStamps: result.acquiredStamps
+      });
+
+      // レスポンスから直接ポイント更新（追加API不要）
+      if (result.newTotalPoints !== undefined) {
+        state.totalPoints = result.newTotalPoints;
+        state.user.total_points = result.newTotalPoints;
+      }
+      if (result.newRedeemablePoints !== undefined) {
+        state.points = result.newRedeemablePoints;
+        state.user.redeemable_points = result.newRedeemablePoints;
+        state.user.points = result.newRedeemablePoints;
+      }
+      if (result.acquiredStamps) {
+        state.acquiredStamps = new Set(result.acquiredStamps);
+      }
+
+      console.log('[DEBUG] QR Success - After update:', {
+        newTotalPoints: state.totalPoints,
+        newAcquiredStamps: Array.from(state.acquiredStamps),
+        activePage: state.activePage
+      });
+
+      // localStorageに保存
+      saveLocalUser(state.user);
+
+      showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
+
+      // UIを完全に更新（パーセンタイル＋全UI）
+      await updatePercentile();
+      console.log('[DEBUG] Before renderAll()');
+      renderAll();
+      console.log('[DEBUG] After renderAll()');
+
+      // 待機時間を短縮 & カメラを早く閉じる
+      await wait(800);
+      closeFullscreenScanner();
+      return true;
     }
-    const user = { id: rec.id, name: rec.name, school: rec.school, department: rec.department };
-    saveLocalUser(user);
-    state.user = user;
-    closeAuthModal('login');
-    enableAppUI(user);
-    showToast('ログインしました。');
-  } catch(err){
-    console.error(err);
-    if (err?.code === 'SUPABASE_NOT_CONFIGURED') {
-      $app.auth.loginError.textContent = '現在ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-      return;
+  } catch (error) {
+    console.error('Stamp grant error:', error);
+
+    if (error.message.includes('取得済み')) {
+      showFullscreenMessage('⚠️ 既に取得済みです', true);
+    } else if (error.message.includes('未対応')) {
+      showFullscreenMessage('❌ 未対応のQRコードです', true);
+    } else {
+      showFullscreenMessage('❌ エラーが発生しました', true);
     }
-    $app.auth.loginError.textContent = 'ログインに失敗しました。';
+
+    await wait(1500);
+    return false;
   }
 }
 
-/******************* UIユーティリティ *******************/
+function wait(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function autoGrantStamp(stampId) {
+  if (!state.user?.id) {
+    showToast('エラー: ユーザーIDが見つかりません');
+    return false;
+  }
+
+  const boothId = stampId.toLowerCase();
+  const stampCode = stampId.toLowerCase();
+
+  try {
+    showToast('スタンプを確認中...');
+
+    const result = await callEdgeFunction('grant-stamp', {
+      userId: state.user.id,
+      boothId,
+      stampCode
+    });
+
+    if (result.success) {
+      showToast(`✅ ${result.pointsAdded}pt獲得！`);
+      await syncPointsFromServer();
+      return true;
+    }
+  } catch (error) {
+    console.error('[autoGrantStamp] Error:', error);
+
+    if (error.message.includes('取得済み')) {
+      showToast('⚠️ 既に取得済みです');
+    } else if (error.message.includes('未対応')) {
+      showToast('❌ 無効なQRコードです');
+    } else {
+      showToast('❌ エラーが発生しました');
+    }
+
+    return false;
+  }
+}
+
+// ========== トースト ==========
 function showToast(msg) {
   const el = $app.toast;
   const box = el.firstElementChild;
@@ -937,18 +2548,354 @@ function showToast(msg) {
   }, 1800);
 }
 
-/******************* 初期化 *******************/
-function init() {
-  // ナビ
-  $app.navButtons.forEach(btn => btn.addEventListener('click', () => { state.activePage = btn.dataset.page; updateActivePage(); }));
+// ========== マップ(ブースレイアウト) ==========
+function layoutBoothIcons() {
+  const g = $app.map.iconsGroup;
+  if (!g) return;
 
-  applySupabaseAvailabilityState();
+  g.innerHTML = '';
 
-  // ブースシート操作
-  $app.sheet.backdrop.addEventListener('click', closeBoothSheet);
-  $app.sheet.getStampBtn.addEventListener('click', (e) => { toggleStamp(e.target.dataset.id); closeBoothSheet(); });
+  const vb = $app.map.svg.viewBox.baseVal;
+  const base = Math.min(vb.width, vb.height);
+  const size = Math.max(100, Math.min(280, Math.round(base * 0.14)));
 
-  // Ripple
+  Object.keys(BOOTH_ANCHORS).forEach(id => {
+    const a = BOOTH_ANCHORS[id];
+    const cx = vb.width * a.x;
+    const cy = vb.height * a.y;
+    const x = cx - size / 2;
+    const y = cy - size / 2;
+
+    const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
+    const isAcquired = state.acquiredStamps.has(id);
+
+    const group = document.createElementNS('http://www.w3.org/2000/svg','g');
+    group.setAttribute('cursor', 'pointer');
+    group.setAttribute('role', 'button');
+    group.setAttribute('aria-label', booth.name);
+    group.dataset.id = id;
+
+    const shadowDeep = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    shadowDeep.setAttribute('x', x + 8);
+    shadowDeep.setAttribute('y', y + 8);
+    shadowDeep.setAttribute('width', size);
+    shadowDeep.setAttribute('height', size);
+    shadowDeep.setAttribute('rx', size * 0.18);
+    shadowDeep.setAttribute('fill', 'rgba(0,0,0,0.3)');
+    shadowDeep.setAttribute('filter', 'blur(12px)');
+    group.appendChild(shadowDeep);
+
+    const shadowMid = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    shadowMid.setAttribute('x', x + 2);
+    shadowMid.setAttribute('y', y + 2);
+    shadowMid.setAttribute('width', size);
+    shadowMid.setAttribute('height', size);
+    shadowMid.setAttribute('rx', size * 0.18);
+    shadowMid.setAttribute('fill', 'rgba(0,0,0,0.15)');
+    shadowMid.setAttribute('filter', 'blur(4px)');
+    group.appendChild(shadowMid);
+
+    const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    baseRect.setAttribute('x', x + 1);
+    baseRect.setAttribute('y', y + 1);
+    baseRect.setAttribute('width', size);
+    baseRect.setAttribute('height', size);
+    baseRect.setAttribute('rx', size * 0.18);
+    baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1');
+    baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
+    baseRect.setAttribute('stroke-width', '2');
+    group.appendChild(baseRect);
+
+    const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    border.setAttribute('x', x);
+    border.setAttribute('y', y);
+    border.setAttribute('width', size);
+    border.setAttribute('height', size);
+    border.setAttribute('rx', size * 0.18);
+    border.setAttribute('fill', 'white');
+    border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
+    border.setAttribute('stroke-width', '4');
+    border.setAttribute('filter', isAcquired ? 'url(#acquired-glow)' : 'url(#std-shadow)');
+    group.appendChild(border);
+
+    const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    innerShadow.setAttribute('x', x + 4);
+    innerShadow.setAttribute('y', y + 4);
+    innerShadow.setAttribute('width', size - 8);
+    innerShadow.setAttribute('height', size - 8);
+    innerShadow.setAttribute('rx', size * 0.15);
+    innerShadow.setAttribute('fill', 'none');
+    innerShadow.setAttribute('stroke', 'rgba(0,0,0,0.1)');
+    innerShadow.setAttribute('stroke-width', '1');
+    group.appendChild(innerShadow);
+
+    const clipId = `clip-${id}`;
+    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+    clipPath.setAttribute('id', clipId);
+    const clipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    clipRect.setAttribute('x', x + 5);
+    clipRect.setAttribute('y', y + 5);
+    clipRect.setAttribute('width', size - 10);
+    clipRect.setAttribute('height', size - 10);
+    clipRect.setAttribute('rx', size * 0.15);
+    clipPath.appendChild(clipRect);
+    defs.appendChild(clipPath);
+    group.appendChild(defs);
+
+    const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    fillRect.setAttribute('x', x + 5);
+    fillRect.setAttribute('y', y + 5);
+    fillRect.setAttribute('width', size - 10);
+    fillRect.setAttribute('height', size - 10);
+    fillRect.setAttribute('rx', size * 0.15);
+    fillRect.setAttribute('fill', '#fff');
+    fillRect.setAttribute('clip-path', `url(#${clipId})`);
+    group.appendChild(fillRect);
+
+    const img = document.createElementNS('http://www.w3.org/2000/svg','image');
+    img.setAttribute('x', x + 5);
+    img.setAttribute('y', y + 5);
+    img.setAttribute('width', size - 10);
+    img.setAttribute('height', size - 10);
+    img.setAttribute('href', booth.img);
+    img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', booth.img);
+    img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    img.setAttribute('clip-path', `url(#${clipId})`);
+    group.appendChild(img);
+
+    if (isAcquired) {
+      const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      checkBg.setAttribute('cx', x + size - 20);
+      checkBg.setAttribute('cy', y + 20);
+      checkBg.setAttribute('r', size * 0.12);
+      checkBg.setAttribute('fill', '#10b981');
+      checkBg.setAttribute('stroke', 'white');
+      checkBg.setAttribute('stroke-width', '3');
+      group.appendChild(checkBg);
+
+      const checkMark = document.createElementNS('http://www.w3.org/2000/svg','text');
+      checkMark.setAttribute('x', x + size - 20);
+      checkMark.setAttribute('y', y + 20);
+      checkMark.setAttribute('text-anchor', 'middle');
+      checkMark.setAttribute('dominant-baseline', 'central');
+      checkMark.setAttribute('fill', 'white');
+      checkMark.setAttribute('font-size', size * 0.12);
+      checkMark.setAttribute('font-weight', 'bold');
+      checkMark.textContent = '✓';
+      group.appendChild(checkMark);
+    }
+
+    g.appendChild(group);
+  });
+
+  if (!document.getElementById('highlight-gradient')) {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    gradient.setAttribute('id', 'highlight-gradient');
+    gradient.setAttribute('x1', '0');
+    gradient.setAttribute('y1', '0');
+    gradient.setAttribute('x2', '0');
+    gradient.setAttribute('y2', '1');
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', 'white');
+    stop1.setAttribute('stop-opacity', '0.9');
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', 'white');
+    stop2.setAttribute('stop-opacity', '0');
+    gradient.appendChild(stop1);
+    gradient.appendChild(stop2);
+    defs.appendChild(gradient);
+
+    const borderGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    borderGrad.setAttribute('id', 'border-gradient');
+    borderGrad.setAttribute('x1', '0');
+    borderGrad.setAttribute('y1', '0');
+    borderGrad.setAttribute('x2', '0');
+    borderGrad.setAttribute('y2', '1');
+    const b1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b1.setAttribute('offset', '0%');
+    b1.setAttribute('stop-color', '#f1f5f9');
+    const b2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b2.setAttribute('offset', '50%');
+    b2.setAttribute('stop-color', '#e2e8f0');
+    const b3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    b3.setAttribute('offset', '100%');
+    b3.setAttribute('stop-color', '#cbd5e1');
+    borderGrad.appendChild(b1);
+    borderGrad.appendChild(b2);
+    borderGrad.appendChild(b3);
+    defs.appendChild(borderGrad);
+
+    const acquiredGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    acquiredGrad.setAttribute('id', 'acquired-gradient');
+    acquiredGrad.setAttribute('x1', '0');
+    acquiredGrad.setAttribute('y1', '0');
+    acquiredGrad.setAttribute('x2', '0');
+    acquiredGrad.setAttribute('y2', '1');
+    const a1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a1.setAttribute('offset', '0%');
+    a1.setAttribute('stop-color', '#6ee7b7');
+    const a2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a2.setAttribute('offset', '50%');
+    a2.setAttribute('stop-color', '#34d399');
+    const a3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    a3.setAttribute('offset', '100%');
+    a3.setAttribute('stop-color', '#10b981');
+    acquiredGrad.appendChild(a1);
+    acquiredGrad.appendChild(a2);
+    acquiredGrad.appendChild(a3);
+    defs.appendChild(acquiredGrad);
+
+    const stdShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    stdShadowFilter.setAttribute('id', 'std-shadow');
+    const feStdShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    feStdShadow.setAttribute('dx', '0');
+    feStdShadow.setAttribute('dy', '2');
+    feStdShadow.setAttribute('stdDeviation', '6');
+    feStdShadow.setAttribute('flood-color', '#000000');
+    feStdShadow.setAttribute('flood-opacity', '0.2');
+    stdShadowFilter.appendChild(feStdShadow);
+    defs.appendChild(stdShadowFilter);
+
+    const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    glowFilter.setAttribute('id', 'acquired-glow');
+    const feGlowShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    feGlowShadow.setAttribute('dx', '0');
+    feGlowShadow.setAttribute('dy', '4');
+    feGlowShadow.setAttribute('stdDeviation', '10');
+    feGlowShadow.setAttribute('flood-color', '#10b981');
+    feGlowShadow.setAttribute('flood-opacity', '0.75');
+    glowFilter.appendChild(feGlowShadow);
+    defs.appendChild(glowFilter);
+
+    $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
+  }
+
+  g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
+    const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
+    if (booth) openBoothSheet(booth);
+  }));
+}
+
+// ========== アンケ注目UI(選択状態の見た目) ==========
+function setupSurveyInteractivity() {
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const group = e.target.name;
+      document.querySelectorAll(`input[name="${group}"]`).forEach(r => {
+        r.closest('.survey-option').classList.remove('checked');
+      });
+      e.target.closest('.survey-option').classList.add('checked');
+    });
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      e.target.closest('.survey-option').classList.toggle('checked', e.target.checked);
+    });
+  });
+
+  // Q4の「その他」選択時に入力欄を表示
+  const eventSourceOther = document.getElementById('event-source-other');
+  const eventSourceOtherInput = document.getElementById('event-source-other-input');
+
+  if (eventSourceOther && eventSourceOtherInput) {
+    document.querySelectorAll('input[name="event_source"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.id === 'event-source-other' && e.target.checked) {
+          eventSourceOtherInput.classList.remove('hidden');
+        } else {
+          eventSourceOtherInput.classList.add('hidden');
+        }
+      });
+    });
+  }
+}
+
+// ========== init() ==========
+async function init() {
+  // URLパラメータ (ネイティブカメラ or 深いリンク)
+  const urlParams = new URLSearchParams(window.location.search);
+  const stampId = urlParams.get('stamp');
+
+  // 匿名ユーザー準備 & サーバー側と同期 (ユーザー作成もここでやる)
+  await ensureAuth();
+
+  // 最初の最新状態を取得（ポイント/スタンプ一覧/percentileなど）
+  await syncPointsFromServer();
+
+  // stampパラメータがあれば即付与
+  if (stampId) {
+    await autoGrantStamp(stampId);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // 事前登録ユーザーの場合、パラメータ付きURLからアクセス時にUUID QRを自動表示
+  const isPreRegUrl = urlParams.get('mode') === 'prereg';
+  if (state.user?.registration_type === 'pre_registration' && isPreRegUrl) {
+    // ?mode=prereg パラメータがある場合は毎回表示
+    setTimeout(() => {
+      openUuidQrModal();
+    }, 500);
+  }
+
+  // 連番クリックでUUID QR表示（事前登録ユーザーのみ）
+  const userNumberElement = document.getElementById('user-number');
+  if (userNumberElement) {
+    userNumberElement.addEventListener('click', () => {
+      openUuidQrModal();
+    });
+    // 事前登録ユーザーの場合、クリック可能なことを示すスタイル追加
+    if (state.user?.registration_type === 'pre_registration') {
+      userNumberElement.style.cursor = 'pointer';
+      userNumberElement.title = 'クリックして受付QRを表示';
+    }
+  }
+
+  // ナビゲーション
+  $app.navButtons.forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      state.activePage = btn.dataset.page;
+      updateActivePage();
+    });
+  });
+  if ($app.nav) {
+    $app.nav.addEventListener('click', (e) => {
+      const btn = e.target.closest('.nav-btn');
+      if (!btn) return;
+      state.activePage = btn.dataset.page;
+      updateActivePage();
+    });
+  }
+
+  // 各企業ブースカード
+  document.querySelectorAll('.stamp-booth-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const boothId = card.dataset.boothId;
+      const booth = BOOTH_DATA.find(b => b.id === boothId);
+      if (booth) {
+        openBoothSheet(booth);
+      }
+    });
+  });
+
+  // カテゴリシートとブースシートの閉じる動き
+  if ($app.categorySheet.backdrop) {
+    $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
+  }
+  $app.categorySheet.closeBtn.addEventListener('click', closeCategorySheet);
+
+  if ($app.boothSheet.backdrop) {
+    $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
+  }
+  $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
+
+  // rippleエフェクト
   document.addEventListener('click', e => {
     const rippleTarget = e.target.closest('.ripple');
     if (!rippleTarget) return;
@@ -964,103 +2911,73 @@ function init() {
     setTimeout(() => ripple.remove(), 600);
   });
 
-  // レイアウト
-  window.addEventListener('resize', () => { layoutBoothIcons(); syncBubbleHeights(); });
-
-  // QR起動
-  $app.scan.openCard.addEventListener('click', openScanner);
-  $app.scan.closeBtn.addEventListener('click', closeScanner);
-  $app.scan.torchBtn.addEventListener('click', toggleTorch);
-  $app.scan.switchBtn.addEventListener('click', switchCamera);
-
-  // Deep Link からの付与
-  handleDeepLinkAward();
-
-  // ===== Auth: 起動時チェック =====
-  ensureAuth().then(ok => {
-    if (ok) {
-      // すぐアプリを有効化
-      enableAppUI(state.user);
+  // ウィンドウサイズ変化でマップ再描画
+  window.addEventListener('resize', () => {
+    if (state.activePage === 'map') {
+      layoutBoothIcons();
     }
   });
 
-  // Auth: Launch Buttons
-  $app.auth.openSignin.addEventListener('click', () => openAuthModal('signin'));
-  $app.auth.openLogin.addEventListener('click', () => openAuthModal('login'));
-  document.querySelectorAll('[data-close="signin"]').forEach(el => el.addEventListener('click', () => closeAuthModal('signin')));
-  document.querySelectorAll('[data-close="login"]').forEach(el => el.addEventListener('click', () => closeAuthModal('login')));
-  $app.auth.signinForm.addEventListener('submit', handleSignin);
-  $app.auth.loginForm.addEventListener('submit', handleLogin);
-
-  renderAll();
-}
-init();
-
-function applySupabaseAvailabilityState() {
-  if (IS_SUPABASE_CONFIGURED) return;
-  const disabledMessage = '現在サインイン/ログイン機能は利用できません。管理者はSupabaseのURLとAnonキーを設定してください。';
-  const note = document.getElementById('signin-note');
-  if (note) {
-    note.textContent = '※サインイン機能を有効にするには、SupabaseのURLと匿名キーを設定してください。';
+  // スキャナ系イベント
+  if ($app.scan.openCard) {
+    $app.scan.openCard.addEventListener('click', openFullscreenScanner);
   }
-  [$app.auth.signinError, $app.auth.loginError].forEach(el => {
-    if (el) el.textContent = disabledMessage;
-  });
-  [$app.auth.signinForm, $app.auth.loginForm].forEach(form => {
-    if (!form) return;
-    form.querySelectorAll('input, button[type="submit"]').forEach(el => {
-      el.disabled = true;
-      if (el.tagName === 'BUTTON') {
-        el.classList.add('opacity-50', 'cursor-not-allowed');
+  if ($app.fullscreenScanner.closeBtn) {
+    $app.fullscreenScanner.closeBtn.addEventListener('click', closeFullscreenScanner);
+  }
+  if ($app.fullscreenScanner.torchBtn) {
+    $app.fullscreenScanner.torchBtn.addEventListener('click', toggleTorch);
+  }
+  if ($app.fullscreenScanner.switchBtn) {
+    $app.fullscreenScanner.switchBtn.addEventListener('click', switchCamera);
+  }
+
+  // UUID QRモーダル
+  const uuidQrCloseBtn = document.getElementById('close-uuid-qr');
+  if (uuidQrCloseBtn) {
+    uuidQrCloseBtn.addEventListener('click', closeUuidQrModal);
+  }
+
+  // アンケートモーダル
+  if ($app.survey.closeBtn) {
+    $app.survey.closeBtn.addEventListener('click', closeSurveyModal);
+  }
+  if ($app.survey.form) {
+    $app.survey.form.addEventListener('submit', submitSurvey);
+  }
+
+  // Survey Action Button (アンケート回答 / 特典交換)
+  if ($app.surveyActionBtn) {
+    $app.surveyActionBtn.addEventListener('click', () => {
+      const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
+      if (!isSurveyCompleted) {
+        openSurveyModal();
+      } else if (!state.user?.badge_claimed) {
+        openBadgeExchangeModal();
       }
     });
-  });
+  }
+
+  // Badge Exchange Modal
+  if ($app.badgeExchange.closeBtn) {
+    $app.badgeExchange.closeBtn.addEventListener('click', closeBadgeExchangeModal);
+  }
+
+  // Initialize slide-to-claim slider
+  initSlider();
+
+  // アンケートのUIハイライト
+  setupSurveyInteractivity();
+
+  // 最初の描画
+  await updatePercentile();
+  renderAll();
+
+  // Update survey action button based on survey and badge claim status
+  updateSurveyActionButton();
 }
-
-function layoutBoothIcons() {
-  const g = $app.map.iconsGroup; if (!g) return; g.innerHTML = '';
-  const vb = $app.map.svg.viewBox.baseVal;
-  const marginFactorX = 0.02; const marginFactorY = 0.02;
-  const usableW = vb.width * (1 - marginFactorX * 2);
-  const usableH = vb.height * (1 - marginFactorY * 2);
-  const offsetX = vb.x + vb.width * marginFactorX;
-  const offsetY = vb.y + vb.height * marginFactorY;
-  const base = Math.min(vb.width, vb.height);
-  const size = Math.max(72, Math.min(200, Math.round(base * 0.09)));
-
-  Object.keys(BOOTH_ANCHORS).forEach(id => {
-    const a = BOOTH_ANCHORS[id];
-    const cx = offsetX + a.x * usableW;
-    const cy = offsetY + a.y * usableH;
-    const x = cx - size / 2;
-    const y = cy - size / 2;
-
-    const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
-    const img = document.createElementNS('http://www.w3.org/2000/svg','image');
-    img.setAttribute('x', x);
-    img.setAttribute('y', y);
-    img.setAttribute('width', size);
-    img.setAttribute('height', size);
-    img.setAttribute('href', booth.img);
-    img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-    img.setAttribute('cursor', 'pointer');
-    img.dataset.id = id;
-    g.appendChild(img);
-  });
-
-  g.querySelectorAll('image').forEach(el => el.addEventListener('click', () => {
-    const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
-    if (booth) openBoothSheet(booth);
-  }));
-}
-
-function syncBubbleHeights(){
-  const b4 = document.querySelector('#reward-bubble-4 .reward-bubble-content');
-  const b8 = document.querySelector('#reward-bubble-8 .reward-bubble-content');
-  if (!b4 || !b8) return; const h = Math.max(50, b4.getBoundingClientRect().height); b8.style.minHeight = h + 'px';
-}
-window.addEventListener('resize', syncBubbleHeights);
-window.addEventListener('load', syncBubbleHeights);
+// DOM構築後に初期化を1回だけ呼ぶ
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
