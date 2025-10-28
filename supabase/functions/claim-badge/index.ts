@@ -12,24 +12,20 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, boothId, stampCode } = await req.json()
-    let stampId = stampCode || boothId
+    const { userId } = await req.json()
 
-    if (!userId || !stampId) {
+    if (!userId) {
       return new Response(
-        JSON.stringify({ error: 'userId and stampId are required' }),
+        JSON.stringify({ error: 'userId is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    // Convert to uppercase to match BOOTH_DATA
-    let finalStampId = stampId.toUpperCase()
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Check if user exists
+    // Get user
     const { data: user, error: userError } = await supabase
       .from('app_users')
       .select('*')
@@ -43,63 +39,46 @@ serve(async (req) => {
       )
     }
 
-    // Check if already acquired
-    const acquiredStamps = user.acquired_stamps || []
-    if (acquiredStamps.includes(finalStampId)) {
+    // Check if survey completed
+    if (!user.survey_completed) {
       return new Response(
-        JSON.stringify({ error: '既に取得済みです', alreadyGranted: true }),
+        JSON.stringify({ error: 'Survey not completed' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Validate stamp ID (A-F for booths, or event stamps)
-    const validStamps = ['A', 'B', 'C', 'D', 'E', 'F', 'STAGE', 'TALKSESSION', 'PRESENTATION']
-    if (!validStamps.includes(finalStampId)) {
+    // Check if badge already claimed
+    if (user.badge_claimed) {
       return new Response(
-        JSON.stringify({ error: '未対応のスタンプIDです' }),
+        JSON.stringify({ error: 'Badge already claimed' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Add to acquired stamps array
-    const newAcquiredStamps = [...acquiredStamps, finalStampId]
-
-    // Update user points (+1 point per stamp)
-    const pointsToAdd = 1
-    const newTotalPoints = (user.total_points || 0) + pointsToAdd
-    const newRedeemablePoints = (user.redeemable_points || 0) + pointsToAdd
-
+    // Mark badge as claimed
     const { error: updateError } = await supabase
       .from('app_users')
       .update({
-        acquired_stamps: newAcquiredStamps,
-        total_points: newTotalPoints,
-        redeemable_points: newRedeemablePoints,
-        points: newRedeemablePoints,
+        badge_claimed: true
       })
       .eq('id', userId)
 
     if (updateError) {
-      console.error('[grant-stamp] Error updating:', updateError)
-      throw new Error('Failed to grant stamp')
+      console.error('[claim-badge] Error updating user:', updateError)
+      throw new Error('Failed to claim badge')
     }
 
-    console.log(`[grant-stamp] Granted stamp ${finalStampId} to user ${userId}`)
+    console.log(`[claim-badge] Badge claimed by user ${userId}`)
 
     return new Response(
       JSON.stringify({
-        success: true,
-        stampId: finalStampId,
-        pointsAdded: pointsToAdd,
-        newTotalPoints,
-        newRedeemablePoints,
-        acquiredStamps: newAcquiredStamps,
+        success: true
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('[grant-stamp] Error:', error)
+    console.error('[claim-badge] Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
