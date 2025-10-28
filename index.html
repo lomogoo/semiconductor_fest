@@ -574,94 +574,6 @@ li .acquired-check {
       box-shadow: none;
     }
 
-  /* ========== Slide to Claim Styles ========== */
-  .slide-to-claim-container {
-    position: relative;
-    width: 100%;
-    height: 60px;
-    background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
-    border-radius: 30px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
-    user-select: none;
-  }
-
-  .slide-to-claim-track {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .slide-to-claim-text {
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    opacity: 1;
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-
-  .slide-to-claim-success-text {
-    position: absolute;
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-
-  .slide-to-claim-container.completed .slide-to-claim-text {
-    opacity: 0;
-  }
-
-  .slide-to-claim-container.completed .slide-to-claim-success-text {
-    opacity: 1;
-  }
-
-  .slide-to-claim-container.completed {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  }
-
-  .slide-to-claim-button {
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 52px;
-    height: 52px;
-    background: white;
-    border-radius: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    touch-action: none;
-    transition: none;
-    /* No transition - follows finger immediately */
-  }
-
-  .slide-to-claim-button:active {
-    cursor: grabbing;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  .slide-to-claim-button.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .slide-icon {
-    font-size: 24px;
-  }
-
-  .slide-to-claim-container.completed .slide-to-claim-button {
-    cursor: default;
-  }
-
   /* ========== Survey Action Button States ========== */
   #survey-action-btn.ready-to-claim {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
@@ -928,12 +840,12 @@ li .acquired-check {
     <div id="badge-just-claimed" class="p-6 space-y-6 hidden">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_gold.png" alt="むすび丸 ゴールドピンバッジ" class="w-full h-full object-contain" />
+          <img src="musubi_gold.png" alt="むすび丸 ピンバッジ（横ver）" class="w-full h-full object-contain" />
         </div>
         <div>
           <div class="text-3xl font-bold text-emerald-600 mb-3">🎉 交換しました！</div>
           <div class="text-base text-slate-700 leading-relaxed">
-            むすび丸 ゴールドピンバッジを交換しました。<br>
+            むすび丸 ピンバッジ（横ver）を交換しました。<br>
             受付（L404）でお受け取りください。
           </div>
         </div>
@@ -947,10 +859,10 @@ li .acquired-check {
     <div id="badge-exchange-interface" class="p-6 space-y-6">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_gold.png" alt="むすび丸 ゴールドピンバッジ" class="w-full h-full object-contain" />
+          <img src="musubi_gold.png" alt="むすび丸 ピンバッジ（横ver）" class="w-full h-full object-contain" />
         </div>
         <div>
-          <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ゴールドピンバッジ</div>
+          <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ピンバッジ（横ver）</div>
           <div class="text-sm text-slate-600">アンケート回答特典</div>
         </div>
       </div>
@@ -960,20 +872,14 @@ li .acquired-check {
           👨‍💼 スタッフ確認
         </div>
         <div class="staff-instruction-text">
-          スタッフの目の前で下のスライダーを右端までスライドしてください。交換した特典は受付（L404）でお受け取りください。
+          スタッフの目の前で下のボタンを押してください。交換した特典は受付（L404）でお受け取りください。
         </div>
       </div>
 
-      <!-- Slide to Claim -->
-      <div class="slide-to-claim-container">
-        <div class="slide-to-claim-track">
-          <div class="slide-to-claim-text">スライドして交換</div>
-          <div class="slide-to-claim-success-text">✓ 交換完了</div>
-        </div>
-        <div id="slide-to-claim-button" class="slide-to-claim-button">
-          <span class="slide-icon">👉</span>
-        </div>
-      </div>
+      <!-- Badge Exchange Button -->
+      <button id="claim-badge-button" class="w-full px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-lg ripple shadow-lg hover:shadow-xl transition-all">
+        特典を交換する
+      </button>
 
       <div class="text-xs text-slate-500 text-center">
         ※交換は1回のみとなります
@@ -1015,18 +921,6 @@ li .acquired-check {
     </div>
   </div>
 </div>
-
-  <!-- Stamp Category Detail Sheet -->
-  <div id="category-sheet" class="bottom-sheet">
-    <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
-      <div class="p-4 border-b border-white/50 flex items-center justify-between">
-        <h4 id="category-sheet-title" class="font-semibold text-lg text-slate-800"></h4>
-        <button id="close-category-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
-      </div>
-      <div id="category-sheet-content" class="p-4"></div>
-    </div>
-  </div>
-  <div class="bottom-sheet-backdrop" data-target="category"></div>
 
   <!-- Fullscreen Scanner -->
   <div id="fullscreen-scanner" class="fullscreen-scanner">
@@ -1141,7 +1035,7 @@ li .acquired-check {
                   <span class="text-lg">📝</span>
                   <span id="survey-action-text">アンケート回答</span>
                 </div>
-                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でむすび丸 ゴールドピンバッジプレゼント！</span>
+                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でむすび丸 ピンバッジ（横ver）プレゼント！</span>
               </button>
             </div>
           </div>
@@ -1434,13 +1328,6 @@ const $app = {
     bg: document.getElementById('bg-image'),
     iconsGroup: document.getElementById('booth-icons')
   },
-  categorySheet: {
-    el: document.getElementById('category-sheet'),
-    backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="category"]'),
-    title: document.getElementById('category-sheet-title'),
-    content: document.getElementById('category-sheet-content'),
-    closeBtn: document.getElementById('close-category-sheet')
-  },
   boothSheet: {
     el: document.getElementById('booth-sheet'),
     backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
@@ -1567,8 +1454,6 @@ function openBadgeExchangeModal() {
     // Show exchange interface
     alreadyClaimedDiv.classList.add('hidden');
     exchangeInterfaceDiv.classList.remove('hidden');
-    // Reset slider
-    resetSlider();
   }
 
   $app.backdrop.classList.add('show');
@@ -1580,128 +1465,7 @@ function closeBadgeExchangeModal() {
   if (!$app.survey.modal.classList.contains('show')) {
     $app.backdrop.classList.remove('show');
   }
-
-  // Reset slider when closing
-  resetSlider();
 }
-
-// ========== Slide to Claim Logic ==========
-let slideState = {
-  isDragging: false,
-  containerLeft: 0,
-  maxSlide: 0,
-  startX: 0
-};
-
-function initSlider() {
-  const slider = document.getElementById('slide-to-claim-button');
-  const container = document.querySelector('.slide-to-claim-container');
-
-  if (!slider || !container) return;
-
-  // Calculate max slide distance
-  slideState.maxSlide = container.offsetWidth - slider.offsetWidth - 8; // 8px for padding (4px on each side)
-
-  // Mouse events
-  slider.addEventListener('mousedown', startDrag);
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', endDrag);
-
-  // Touch events with passive: false to allow preventDefault
-  slider.addEventListener('touchstart', startDrag, { passive: false });
-  document.addEventListener('touchmove', drag, { passive: false });
-  document.addEventListener('touchend', endDrag, { passive: false });
-}
-
-function startDrag(e) {
-  const container = document.querySelector('.slide-to-claim-container');
-  const slider = document.getElementById('slide-to-claim-button');
-
-  if (container.classList.contains('completed')) return;
-
-  slideState.isDragging = true;
-
-  // Get container's left position
-  const containerRect = container.getBoundingClientRect();
-  slideState.containerLeft = containerRect.left;
-
-  // Get starting position
-  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-  const sliderRect = slider.getBoundingClientRect();
-  slideState.startX = currentPos - sliderRect.left;
-
-  // Ensure no transition during drag
-  slider.style.transition = 'none';
-
-  e.preventDefault();
-}
-
-function drag(e) {
-  if (!slideState.isDragging) return;
-
-  const slider = document.getElementById('slide-to-claim-button');
-
-  // Get current touch/mouse position
-  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-
-  // Calculate position relative to container
-  let newX = currentPos - slideState.containerLeft - slideState.startX;
-
-  // Constrain movement
-  newX = Math.max(4, Math.min(newX, slideState.maxSlide + 4));
-
-  slider.style.left = `${newX}px`;
-
-  e.preventDefault();
-}
-
-function endDrag(e) {
-  if (!slideState.isDragging) return;
-
-  const slider = document.getElementById('slide-to-claim-button');
-  const container = document.querySelector('.slide-to-claim-container');
-  const currentLeft = parseInt(slider.style.left) || 4;
-
-  // Check if slid far enough (90% of max distance)
-  if (currentLeft >= slideState.maxSlide * 0.9) {
-    // Complete the slide with transition
-    slider.style.transition = 'left 0.3s ease-out';
-    slider.style.left = `${slideState.maxSlide + 4}px`;
-    container.classList.add('completed');
-
-    // Execute badge claim
-    setTimeout(() => {
-      claimBadge();
-      // Remove transition after animation
-      setTimeout(() => {
-        slider.style.transition = 'none';
-      }, 300);
-    }, 300);
-  } else {
-    // Reset to start with transition
-    slider.style.transition = 'left 0.3s ease-out';
-    slider.style.left = '4px';
-    setTimeout(() => {
-      slider.style.transition = 'none';
-    }, 300);
-  }
-
-  slideState.isDragging = false;
-  e.preventDefault();
-}
-
-function resetSlider() {
-  const slider = document.getElementById('slide-to-claim-button');
-  const container = document.querySelector('.slide-to-claim-container');
-
-  if (!slider || !container) return;
-
-  slider.style.transition = 'none';
-  slider.style.left = '4px';
-  container.classList.remove('completed');
-  slideState.isDragging = false;
-}
-
 
 // ========== アンケート提出 ==========
 async function submitSurvey(e) {
@@ -2745,16 +2509,13 @@ async function init() {
     });
   });
 
-  // カテゴリシートとブースシートの閉じる動き
-  if ($app.categorySheet.backdrop) {
-    $app.categorySheet.backdrop.addEventListener('click', closeCategorySheet);
-  }
-  $app.categorySheet.closeBtn.addEventListener('click', closeCategorySheet);
-
+  // ブースシートの閉じる動き
   if ($app.boothSheet.backdrop) {
     $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
   }
-  $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
+  if ($app.boothSheet.closeBtn) {
+    $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
+  }
 
   // rippleエフェクト
   document.addEventListener('click', e => {
@@ -2835,8 +2596,11 @@ async function init() {
     });
   }
 
-  // Initialize slide-to-claim slider
-  initSlider();
+  // Badge claim button
+  const claimBadgeBtn = document.getElementById('claim-badge-button');
+  if (claimBadgeBtn) {
+    claimBadgeBtn.addEventListener('click', claimBadge);
+  }
 
   // アンケートのUIハイライト
   setupSurveyInteractivity();
