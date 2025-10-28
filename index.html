@@ -640,6 +640,7 @@ li .acquired-check {
     cursor: grab;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     touch-action: none;
+    transition: none;
     /* No transition - follows finger immediately */
   }
 
@@ -731,41 +732,41 @@ li .acquired-check {
         <!-- Q2: 興味のある研究分野 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q2. 興味のある研究分野は？（複数選択可）
+            Q2. 興味のある学問分野は？（複数選択可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="半導体デバイス" />
-              <span>半導体デバイス</span>
+              <input type="checkbox" name="research_interest" value="工学" />
+              <span>工学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="半導体材料" />
-              <span>半導体材料</span>
+              <input type="checkbox" name="research_interest" value="理学" />
+              <span>理学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="半導体製造プロセス" />
-              <span>半導体製造プロセス</span>
+              <input type="checkbox" name="research_interest" value="情報科学" />
+              <span>情報科学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="電子工学" />
-              <span>電子工学</span>
+              <input type="checkbox" name="research_interest" value="経済学・経営学" />
+              <span>経済学・経営学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="材料工学" />
-              <span>材料工学</span>
+              <input type="checkbox" name="research_interest" value="文学・人文科学" />
+              <span>文学・人文科学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="機械工学" />
-              <span>機械工学</span>
+              <input type="checkbox" name="research_interest" value="社会科学" />
+              <span>社会科学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="化学工学" />
-              <span>化学工学</span>
+              <input type="checkbox" name="research_interest" value="医学・薬学" />
+              <span>医学・薬学</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="物理学" />
-              <span>物理学</span>
+              <input type="checkbox" name="research_interest" value="農学" />
+              <span>農学</span>
             </label>
             <label class="survey-option">
               <input type="checkbox" name="research_interest" value="その他" />
@@ -786,12 +787,12 @@ li .acquired-check {
               <span>研究開発</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="製造技術" />
-              <span>製造技術</span>
+              <input type="checkbox" name="career_interest" value="製造・生産技術" />
+              <span>製造・生産技術</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="品質管理" />
-              <span>品質管理</span>
+              <input type="checkbox" name="career_interest" value="品質管理・品質保証" />
+              <span>品質管理・品質保証</span>
             </label>
             <label class="survey-option">
               <input type="checkbox" name="career_interest" value="設計・開発" />
@@ -804,6 +805,18 @@ li .acquired-check {
             <label class="survey-option">
               <input type="checkbox" name="career_interest" value="企画・事業開発" />
               <span>企画・事業開発</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="人材開発・人事" />
+              <span>人材開発・人事</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="経営・管理" />
+              <span>経営・管理</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="career_interest" value="情報システム・IT" />
+              <span>情報システム・IT</span>
             </label>
             <label class="survey-option">
               <input type="checkbox" name="career_interest" value="その他" />
@@ -836,16 +849,19 @@ li .acquired-check {
               <span>友人・知人の紹介</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="event_source" value="その他" />
+              <input type="radio" name="event_source" value="その他" id="event-source-other" />
               <span>その他</span>
             </label>
+          </div>
+          <div id="event-source-other-input" class="mt-2 hidden">
+            <input type="text" name="event_source_other_text" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-sky-500 focus:outline-none text-sm" placeholder="詳しく教えてください" />
           </div>
         </div>
 
         <!-- Q5: 良かったコンテンツ -->
         <div class="survey-field">
           <label class="survey-label">
-            Q5. どのコンテンツが良かったですか？（複数選択可）
+            Q5. 特にどのコンテンツが良かったですか？（複数選択可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
@@ -918,7 +934,7 @@ li .acquired-check {
           <div class="slide-to-claim-success-text">✓ 交換完了</div>
         </div>
         <div id="slide-to-claim-button" class="slide-to-claim-button">
-          <span class="slide-icon">🎁</span>
+          <span class="slide-icon">👉</span>
         </div>
       </div>
 
@@ -1002,9 +1018,9 @@ li .acquired-check {
   <!-- Booth Detail Sheet -->
   <div id="booth-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
-      <div class="p-4 border-b border-white/50 flex items-start gap-3">
+      <div class="p-4 border-b border-white/50 flex items-center gap-3">
         <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 flex-1 text-center">
           <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
         </div>
         <button id="close-booth-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
@@ -1083,9 +1099,12 @@ li .acquired-check {
               </button>
 
               <!-- アンケート回答 / 特典交換ボタン -->
-              <button id="survey-action-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2">
-                <span class="text-lg">📝</span>
-                <span id="survey-action-text">アンケート回答</span>
+              <button id="survey-action-btn" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold text-sm ripple shadow-lg hover:shadow-xl transition-shadow flex flex-col items-center justify-center gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">📝</span>
+                  <span id="survey-action-text">アンケート回答</span>
+                </div>
+                <span class="text-xs opacity-90 font-normal">アンケート回答でゴールドピンバッジプレゼント！</span>
               </button>
             </div>
           </div>
@@ -1587,7 +1606,8 @@ function closeBadgeExchangeModal() {
 let slideState = {
   isDragging: false,
   containerLeft: 0,
-  maxSlide: 0
+  maxSlide: 0,
+  startX: 0
 };
 
 function initSlider() {
@@ -1604,14 +1624,16 @@ function initSlider() {
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 
-  // Touch events
-  slider.addEventListener('touchstart', startDrag);
-  document.addEventListener('touchmove', drag);
-  document.addEventListener('touchend', endDrag);
+  // Touch events with passive: false to allow preventDefault
+  slider.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener('touchmove', drag, { passive: false });
+  document.addEventListener('touchend', endDrag, { passive: false });
 }
 
 function startDrag(e) {
   const container = document.querySelector('.slide-to-claim-container');
+  const slider = document.getElementById('slide-to-claim-button');
+
   if (container.classList.contains('completed')) return;
 
   slideState.isDragging = true;
@@ -1619,6 +1641,14 @@ function startDrag(e) {
   // Get container's left position
   const containerRect = container.getBoundingClientRect();
   slideState.containerLeft = containerRect.left;
+
+  // Get starting position
+  const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  const sliderRect = slider.getBoundingClientRect();
+  slideState.startX = currentPos - sliderRect.left;
+
+  // Ensure no transition during drag
+  slider.style.transition = 'none';
 
   e.preventDefault();
 }
@@ -1632,7 +1662,7 @@ function drag(e) {
   const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
 
   // Calculate position relative to container
-  let newX = currentPos - slideState.containerLeft - (slider.offsetWidth / 2);
+  let newX = currentPos - slideState.containerLeft - slideState.startX;
 
   // Constrain movement
   newX = Math.max(4, Math.min(newX, slideState.maxSlide + 4));
@@ -1661,7 +1691,7 @@ function endDrag(e) {
       claimBadge();
       // Remove transition after animation
       setTimeout(() => {
-        slider.style.transition = '';
+        slider.style.transition = 'none';
       }, 300);
     }, 300);
   } else {
@@ -1669,7 +1699,7 @@ function endDrag(e) {
     slider.style.transition = 'left 0.3s ease-out';
     slider.style.left = '4px';
     setTimeout(() => {
-      slider.style.transition = '';
+      slider.style.transition = 'none';
     }, 300);
   }
 
@@ -1683,7 +1713,7 @@ function resetSlider() {
 
   if (!slider || !container) return;
 
-  slider.style.transition = '';
+  slider.style.transition = 'none';
   slider.style.left = '4px';
   container.classList.remove('completed');
   slideState.isDragging = false;
@@ -2710,6 +2740,22 @@ function setupSurveyInteractivity() {
       e.target.closest('.survey-option').classList.toggle('checked', e.target.checked);
     });
   });
+
+  // Q4の「その他」選択時に入力欄を表示
+  const eventSourceOther = document.getElementById('event-source-other');
+  const eventSourceOtherInput = document.getElementById('event-source-other-input');
+
+  if (eventSourceOther && eventSourceOtherInput) {
+    document.querySelectorAll('input[name="event_source"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.id === 'event-source-other' && e.target.checked) {
+          eventSourceOtherInput.classList.remove('hidden');
+        } else {
+          eventSourceOtherInput.classList.add('hidden');
+        }
+      });
+    });
+  }
 }
 
 // ========== init() ==========
