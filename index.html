@@ -1745,6 +1745,12 @@ function updateSurveyActionButton() {
   const isSurveyCompleted = state.surveyCompleted || (state.user && state.user.survey_completed);
   const isBadgeClaimed = state.user?.badge_claimed || false;
 
+  console.log('[updateSurveyActionButton] State:', {
+    survey_completed: isSurveyCompleted,
+    badge_claimed: isBadgeClaimed,
+    'state.user': state.user
+  });
+
   if (!$app.surveyActionBtn) return;
 
   // Remove all state classes first
@@ -1859,6 +1865,11 @@ async function ensureAuth() {
     });
 
     if (serverData && serverData.user) {
+      console.log('[ensureAuth] Received from Supabase:', {
+        survey_completed: serverData.user.survey_completed,
+        badge_claimed: serverData.user.badge_claimed
+      });
+
       state.user = {
         id: serverData.user.id,
         user_number: serverData.user.user_number || 0,
@@ -1870,6 +1881,8 @@ async function ensureAuth() {
         total_points: serverData.user.total_points ?? 0,
         redeemable_points: serverData.user.redeemable_points ?? 0
       };
+
+      console.log('[ensureAuth] Set state.user.badge_claimed:', state.user.badge_claimed);
 
       state.points = serverData.user.redeemable_points ?? 0;
       state.totalPoints = serverData.user.total_points ?? 0;
