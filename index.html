@@ -2513,7 +2513,9 @@ async function init() {
   if ($app.boothSheet.backdrop) {
     $app.boothSheet.backdrop.addEventListener('click', closeBoothSheet);
   }
-  $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
+  if ($app.boothSheet.closeBtn) {
+    $app.boothSheet.closeBtn.addEventListener('click', closeBoothSheet);
+  }
 
   // rippleエフェクト
   document.addEventListener('click', e => {
