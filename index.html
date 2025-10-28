@@ -639,8 +639,8 @@ li .acquired-check {
     justify-content: center;
     cursor: grab;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    transition: box-shadow 0.2s;
     touch-action: none;
+    /* No transition - follows finger immediately */
   }
 
   .slide-to-claim-button:active {
@@ -659,6 +659,28 @@ li .acquired-check {
 
   .slide-to-claim-container.completed .slide-to-claim-button {
     cursor: default;
+  }
+
+  /* ========== Survey Action Button States ========== */
+  #survey-action-btn.ready-to-claim {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), 0 6px 25px rgba(16, 185, 129, 0.6);
+    }
+  }
+
+  #survey-action-btn.claimed {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+    box-shadow: none !important;
+    animation: none !important;
   }
 
   </style>
@@ -1564,8 +1586,7 @@ function closeBadgeExchangeModal() {
 // ========== Slide to Claim Logic ==========
 let slideState = {
   isDragging: false,
-  startX: 0,
-  currentX: 0,
+  containerLeft: 0,
   maxSlide: 0
 };
 
@@ -1594,8 +1615,10 @@ function startDrag(e) {
   if (container.classList.contains('completed')) return;
 
   slideState.isDragging = true;
-  slideState.startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-  slideState.currentX = parseInt(document.getElementById('slide-to-claim-button').style.left) || 4;
+
+  // Get container's left position
+  const containerRect = container.getBoundingClientRect();
+  slideState.containerLeft = containerRect.left;
 
   e.preventDefault();
 }
@@ -1604,9 +1627,12 @@ function drag(e) {
   if (!slideState.isDragging) return;
 
   const slider = document.getElementById('slide-to-claim-button');
+
+  // Get current touch/mouse position
   const currentPos = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-  const diff = currentPos - slideState.startX;
-  let newX = slideState.currentX + diff;
+
+  // Calculate position relative to container
+  let newX = currentPos - slideState.containerLeft - (slider.offsetWidth / 2);
 
   // Constrain movement
   newX = Math.max(4, Math.min(newX, slideState.maxSlide + 4));
@@ -1625,17 +1651,26 @@ function endDrag(e) {
 
   // Check if slid far enough (90% of max distance)
   if (currentLeft >= slideState.maxSlide * 0.9) {
-    // Complete the slide
+    // Complete the slide with transition
+    slider.style.transition = 'left 0.3s ease-out';
     slider.style.left = `${slideState.maxSlide + 4}px`;
     container.classList.add('completed');
 
     // Execute badge claim
     setTimeout(() => {
       claimBadge();
+      // Remove transition after animation
+      setTimeout(() => {
+        slider.style.transition = '';
+      }, 300);
     }, 300);
   } else {
-    // Reset to start
+    // Reset to start with transition
+    slider.style.transition = 'left 0.3s ease-out';
     slider.style.left = '4px';
+    setTimeout(() => {
+      slider.style.transition = '';
+    }, 300);
   }
 
   slideState.isDragging = false;
@@ -1648,6 +1683,7 @@ function resetSlider() {
 
   if (!slider || !container) return;
 
+  slider.style.transition = '';
   slider.style.left = '4px';
   container.classList.remove('completed');
   slideState.isDragging = false;
@@ -1688,11 +1724,15 @@ async function submitSurvey(e) {
       saveLocalUser(state.user);
 
       $app.survey.modal.classList.remove('show');
-      $app.backdrop.classList.remove('show');
       showToast('✅ アンケートありがとうございました！');
 
-      // Update button to "特典交換"
+      // Update button to "特典交換" with green glow
       updateSurveyActionButton();
+
+      // Auto-open badge exchange modal after 500ms
+      setTimeout(() => {
+        openBadgeExchangeModal();
+      }, 500);
     }
   } catch (err) {
     console.error('Survey submission failed:', err);
@@ -1707,20 +1747,22 @@ function updateSurveyActionButton() {
 
   if (!$app.surveyActionBtn) return;
 
+  // Remove all state classes first
+  $app.surveyActionBtn.classList.remove('ready-to-claim', 'claimed', 'opacity-50', 'cursor-not-allowed');
+
   if (isBadgeClaimed) {
-    // Badge already claimed - disable button
+    // Badge already claimed - disable button with grey style
     $app.surveyActionBtn.disabled = true;
-    $app.surveyActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    $app.surveyActionBtn.classList.add('opacity-50', 'cursor-not-allowed', 'claimed');
     $app.surveyActionText.textContent = '交換済み';
   } else if (isSurveyCompleted) {
-    // Survey completed but badge not claimed - show "特典交換"
+    // Survey completed but badge not claimed - show "特典交換" with green glow
     $app.surveyActionBtn.disabled = false;
-    $app.surveyActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    $app.surveyActionBtn.classList.add('ready-to-claim');
     $app.surveyActionText.textContent = '特典交換';
   } else {
     // Survey not completed - show "アンケート回答"
     $app.surveyActionBtn.disabled = false;
-    $app.surveyActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     $app.surveyActionText.textContent = 'アンケート回答';
   }
 }
@@ -1822,6 +1864,7 @@ async function ensureAuth() {
         user_number: serverData.user.user_number || 0,
         registration_type: serverData.user.registration_type,
         survey_completed: serverData.user.survey_completed || false,
+        badge_claimed: serverData.user.badge_claimed || false,
         created_at: serverData.user.created_at,
         points: serverData.user.points ?? 0,
         total_points: serverData.user.total_points ?? 0,
@@ -1870,6 +1913,7 @@ async function syncPointsFromServer() {
 
       state.user.user_number = data.user.user_number || state.user.user_number;
       state.user.survey_completed = data.user.survey_completed || false;
+      state.user.badge_claimed = data.user.badge_claimed || false;
       state.user.points = data.user.points ?? 0;
       state.user.total_points = data.user.total_points ?? 0;
       state.user.redeemable_points = data.user.redeemable_points ?? 0;
