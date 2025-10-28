@@ -732,7 +732,7 @@ li .acquired-check {
         <!-- Q2: 興味のある研究分野 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q2. 興味のある学問分野は？（複数選択可）
+            Q2. どのような学問の分野に関心がありますか？（複数選択可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
@@ -778,7 +778,7 @@ li .acquired-check {
         <!-- Q3: 興味のあるキャリア分野 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q3. 興味のあるキャリア分野は？（複数選択可）
+            Q3. どのような職種や分野に関心がありますか？（複数選択可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
@@ -828,28 +828,28 @@ li .acquired-check {
         <!-- Q4: イベントを知ったきっかけ -->
         <div class="survey-field">
           <label class="survey-label">
-            Q4. 本イベントはどこで知りましたか？
+            Q4. 本イベントはどこで知りましたか？（複数選択可）
             <span class="survey-required">*</span>
           </label>
-          <div class="survey-radio-group">
+          <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="radio" name="event_source" value="学校からの案内" required />
+              <input type="checkbox" name="event_source" value="特設サイト" />
+              <span>特設サイト</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="event_source" value="地下鉄広告" />
+              <span>地下鉄広告</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="event_source" value="学校からの案内" />
               <span>学校からの案内</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="event_source" value="SNS" />
-              <span>SNS</span>
+              <input type="checkbox" name="event_source" value="WEB広告（Instagram・Yahoo！・Google）" />
+              <span>WEB広告（Instagram・Yahoo！・Google）</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="event_source" value="ウェブサイト" />
-              <span>ウェブサイト</span>
-            </label>
-            <label class="survey-option">
-              <input type="radio" name="event_source" value="友人・知人の紹介" />
-              <span>友人・知人の紹介</span>
-            </label>
-            <label class="survey-option">
-              <input type="radio" name="event_source" value="その他" id="event-source-other" />
+              <input type="checkbox" name="event_source" value="その他" id="event-source-other" />
               <span>その他</span>
             </label>
           </div>
@@ -878,8 +878,8 @@ li .acquired-check {
               <span>企業研究発表会</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="good_content" value="企業ブース" />
-              <span>企業ブース</span>
+              <input type="checkbox" name="good_content" value="企業交流ブース" />
+              <span>企業交流ブース</span>
             </label>
           </div>
         </div>
@@ -924,14 +924,33 @@ li .acquired-check {
       </div>
     </div>
 
+    <!-- Just Claimed Display -->
+    <div id="badge-just-claimed" class="p-6 space-y-6 hidden">
+      <div class="text-center space-y-4">
+        <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
+          <img src="musubi_gold.png" alt="むすび丸 ゴールドピンバッジ" class="w-full h-full object-contain" />
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-emerald-600 mb-3">🎉 交換しました！</div>
+          <div class="text-base text-slate-700 leading-relaxed">
+            むすび丸 ゴールドピンバッジを交換しました。<br>
+            受付（L404）でお受け取りください。
+          </div>
+        </div>
+        <button id="close-just-claimed" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 text-white font-semibold ripple">
+          閉じる
+        </button>
+      </div>
+    </div>
+
     <!-- Exchange Interface -->
     <div id="badge-exchange-interface" class="p-6 space-y-6">
       <div class="text-center space-y-4">
-        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
-          <span class="text-6xl">🏅</span>
+        <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
+          <img src="musubi_gold.png" alt="むすび丸 ゴールドピンバッジ" class="w-full h-full object-contain" />
         </div>
         <div>
-          <div class="text-2xl font-bold text-slate-800 mb-2">ゴールドピンバッジ</div>
+          <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ゴールドピンバッジ</div>
           <div class="text-sm text-slate-600">アンケート回答特典</div>
         </div>
       </div>
@@ -1122,7 +1141,7 @@ li .acquired-check {
                   <span class="text-lg">📝</span>
                   <span id="survey-action-text">アンケート回答</span>
                 </div>
-                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でゴールドピンバッジプレゼント！</span>
+                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でむすび丸 ゴールドピンバッジプレゼント！</span>
               </button>
             </div>
           </div>
@@ -1228,10 +1247,6 @@ li .acquired-check {
           </svg>
         </div>
       </div>
-
-      <div id="page-list" class="page p-4">
-        <ul id="booth-list" class="space-y-2"></ul>
-      </div>
     </main>
 
     <div id="staff-confirm-modal" class="auth-modal">
@@ -1270,11 +1285,10 @@ li .acquired-check {
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 z-40 p-3">
-      <nav class="h-16 grid grid-cols-3 items-center floating-nav rounded-3xl">
+      <nav class="h-16 grid grid-cols-2 items-center floating-nav rounded-3xl">
         <div id="nav-indicator"></div>
         <button data-page="home" class="nav-btn active flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🏠</div><span class="text-xs font-medium">ホーム</span></button>
         <button data-page="map" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">🗺️</div><span class="text-xs font-medium">マップ</span></button>
-        <button data-page="list" class="nav-btn flex flex-col items-center justify-center h-full transition-colors duration-200 ripple"><div class="nav-icon text-2xl transition-transform">📄</div><span class="text-xs font-medium">イベント</span></button>
       </nav>
     </div>
   </div>
@@ -1384,63 +1398,6 @@ const BOOTH_DATA = [
   },
 ];
 
-const CATEGORY_DATA = {
-  stage: {
-    title: '特別セミナー：ものづくり太郎氏',
-    icon: '🎤',
-    imgPath: 'monomaker.png',
-    time: '16:00〜',
-    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。',
-    condition: 'ステージイベントに参加'
-  },
-  talksession: {
-    title: 'トークセッション',
-    icon: '💬',
-    imgPath: 'talksession.png',
-    time: '時間未定',
-    desc: 'ここにトークセッションの説明文を入力します。',
-    condition: 'トークセッションに参加'
-  },
-  presentation: {
-    title: '企業研究発表会',
-    icon: '📊',
-    imgPath: 'student_presentation.png',
-    time: '17:30〜',
-    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。',
-    condition: '研究発表会に参加'
-  }
-};
-
-const EVENT_DATA = [
-  {
-    id: 'stage',
-    type: 'category',
-    title: '特別セミナー！ものづくり太郎氏',
-    img: 'monomaker.png',
-    desc: 'メインステージでのトークセッションです。業界のトップランナーによる貴重なお話が聞けます。'
-  },
-  {
-    id: 'talksession',
-    type: 'category',
-    title: 'トークセッション',
-    img: 'talksession.png',
-    desc: 'ここにトークセッションの説明文を入力します。'
-  },
-  {
-    id: 'presentation',
-    type: 'category',
-    title: '企業研究発表会',
-    img: 'student_presentation.png',
-    desc: '学生による半導体関連の研究発表会です。最新の研究成果を学び、質疑応答にも参加できます。'
-  },
-  {
-    id: 'booths',
-    type: 'category',
-    title: '企業ブース',
-    img: 'firmbooth.png',
-    desc: '各企業ブースを訪問してスタンプを獲得しましょう。6社のブースがあります。'
-  }
-];
 
 // アプリ状態
 const state = {
@@ -1862,8 +1819,11 @@ async function claimBadge() {
       state.user.badge_claimed = true;
       saveLocalUser(state.user);
 
-      closeBadgeExchangeModal();
-      showToast('🎉 ゴールドピンバッジを交換しました！受付（L404）でお受け取りください');
+      // Show "Just Claimed" screen instead of closing modal
+      const exchangeInterfaceDiv = document.getElementById('badge-exchange-interface');
+      const justClaimedDiv = document.getElementById('badge-just-claimed');
+      exchangeInterfaceDiv.classList.add('hidden');
+      justClaimedDiv.classList.remove('hidden');
 
       // Update button to disabled state
       updateSurveyActionButton();
@@ -2144,112 +2104,15 @@ function updateActivePage() {
     $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
   }
 
-  const pageTitles = { home: 'ホーム', map: 'マップ', list: 'イベント' };
+  const pageTitles = { home: 'ホーム', map: 'マップ' };
   $app.headerTitle.textContent = pageTitles[state.activePage];
-
-  if (state.activePage === 'list') {
-    renderBoothList();
-  }
 
   if (state.activePage === 'map') {
     layoutBoothIcons();
   }
 }
 
-function renderBoothList() {
-  $app.boothList.innerHTML = '';
-  EVENT_DATA.forEach((event, i) => {
-    const li = document.createElement('li');
-    li.className = 'liquid-glass rounded-2xl flex items-center gap-3 p-3 ripple list-item-anim cursor-pointer relative';
-    li.style.animationDelay = `${i * 50}ms`;
-    li.innerHTML = `
-      <div class="w-12 h-12 rounded-lg bg-white flex-shrink-0 relative">
-        <img src="${event.img}" alt="${event.title}" class="w-full h-full object-contain bg-white" />
-      </div>
-      <div class="min-w-0 flex-1">
-        <div class="font-semibold text-slate-800">${event.title}</div>
-        <div class="text-xs text-slate-500 truncate">${event.desc}</div>
-      </div>
-      <div class="text-slate-400">›</div>
-    `;
-    li.addEventListener('click', () => {
-      if (event.type === 'category') {
-        openCategorySheet(event.id);
-      }
-    });
-    $app.boothList.appendChild(li);
-  });
-}
-
-// ========== カテゴリ / ブース 詳細シート ==========
-function openCategorySheet(categoryKey) {
-  if (categoryKey === 'booths') {
-    $app.categorySheet.title.textContent = '企業ブース';
-    $app.categorySheet.content.innerHTML = `
-      <div class="space-y-3">
-        <p class="text-sm text-slate-600 mb-4">各企業ブースを訪問してスタンプを獲得しましょう。アンケート回答で特典と交換できます。</p>
-        ${BOOTH_DATA.map(booth => {
-          const isAcquired = state.acquiredStamps.has(booth.id);
-          return `
-          <div class="company-mini-card liquid-glass rounded-xl p-3 border border-white/40${isAcquired ? ' bg-gradient-to-r from-emerald-100/60 to-green-100/60' : ''}" data-booth-id="${booth.id}">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-white flex-shrink-0 relative">
-                ${isAcquired ? '<div class="acquired-check">✓</div>' : ''}
-                <img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="font-semibold text-slate-800 text-sm">${booth.name}</div>
-                <div class="text-xs text-slate-500 truncate">${booth.desc}</div>
-              </div>
-              <div class="${isAcquired ? 'text-emerald-600' : 'text-sky-600'} font-semibold text-sm">${isAcquired ? '' : '1pt'}</div>
-            </div>
-          </div>
-        `;
-        }).join('')}
-      </div>
-    `;
-
-    $app.categorySheet.content.querySelectorAll('.company-mini-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const boothId = card.dataset.boothId;
-        const booth = BOOTH_DATA.find(b => b.id === boothId);
-        if (booth) {
-          closeCategorySheet();
-          setTimeout(() => openBoothSheet(booth), 300);
-        }
-      });
-    });
-  } else {
-    const category = CATEGORY_DATA[categoryKey];
-    $app.categorySheet.title.textContent = category.title;
-    $app.categorySheet.content.innerHTML = `
-      <div class="space-y-4">
-        <div class="flex items-center gap-3 text-sm">
-          <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
-             <img src="${category.imgPath || ''}" alt="" class="max-w-full max-h-full object-contain">
-          </div>
-          <div>
-            <div class="font-semibold text-slate-800">${category.time}</div>
-          </div>
-        </div>
-        <p class="text-sm text-slate-700 leading-relaxed">${category.desc}</p>
-        <div class="liquid-glass rounded-xl p-3 border border-white/40">
-          <div class="text-xs font-semibold text-slate-700 mb-1">参加条件</div>
-          <div class="text-sm text-slate-600">${category.condition}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  $app.categorySheet.el.classList.add('is-open');
-  $app.categorySheet.backdrop.classList.add('is-open');
-}
-
-function closeCategorySheet() {
-  $app.categorySheet.el.classList.remove('is-open');
-  $app.categorySheet.backdrop.classList.remove('is-open');
-}
-
+// ========== ブース 詳細シート ==========
 function openBoothSheet(booth) {
   $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
   $app.boothSheet.title.textContent = booth.name;
@@ -2799,19 +2662,17 @@ function setupSurveyInteractivity() {
     });
   });
 
-  // Q4の「その他」選択時に入力欄を表示
+  // Q4の「その他」選択時に入力欄を表示（チェックボックス）
   const eventSourceOther = document.getElementById('event-source-other');
   const eventSourceOtherInput = document.getElementById('event-source-other-input');
 
   if (eventSourceOther && eventSourceOtherInput) {
-    document.querySelectorAll('input[name="event_source"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        if (e.target.id === 'event-source-other' && e.target.checked) {
-          eventSourceOtherInput.classList.remove('hidden');
-        } else {
-          eventSourceOtherInput.classList.add('hidden');
-        }
-      });
+    eventSourceOther.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        eventSourceOtherInput.classList.remove('hidden');
+      } else {
+        eventSourceOtherInput.classList.add('hidden');
+      }
     });
   }
 }
@@ -2961,6 +2822,17 @@ async function init() {
   // Badge Exchange Modal
   if ($app.badgeExchange.closeBtn) {
     $app.badgeExchange.closeBtn.addEventListener('click', closeBadgeExchangeModal);
+  }
+
+  // Close Just Claimed button
+  const closeJustClaimedBtn = document.getElementById('close-just-claimed');
+  if (closeJustClaimedBtn) {
+    closeJustClaimedBtn.addEventListener('click', () => {
+      closeBadgeExchangeModal();
+      // Reset to exchange interface for next time
+      document.getElementById('badge-just-claimed').classList.add('hidden');
+      document.getElementById('badge-exchange-interface').classList.remove('hidden');
+    });
   }
 
   // Initialize slide-to-claim slider
