@@ -216,6 +216,20 @@
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
     .auth-modal.show { display:flex; }
 
+    /* First Time Warning Modal */
+    .first-time-warning-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display:none;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      background: rgba(15,23,42,.7);
+      backdrop-filter: blur(8px);
+    }
+    .first-time-warning-modal.show { display:flex; }
+
     .fullscreen-scanner {
       position: fixed;
       inset: 0;
@@ -459,26 +473,29 @@ li .acquired-check {
     }
 
     .staff-instruction {
-      padding: 1rem;
-      background: linear-gradient(135deg, rgba(252, 211, 77, 0.1), rgba(251, 146, 60, 0.1));
-      border: 2px solid #fbbf24;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(252, 211, 77, 0.2), rgba(251, 146, 60, 0.2));
+      border: 3px solid #f59e0b;
       border-radius: 1rem;
       margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }
 
     .staff-instruction-title {
       font-weight: 700;
+      font-size: 1.125rem;
       color: #d97706;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
     .staff-instruction-text {
-      font-size: 0.875rem;
-      color: #d97706;
-      line-height: 1.6;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #b45309;
+      line-height: 1.7;
     }
 
     .survey-completed-message {
@@ -602,6 +619,37 @@ li .acquired-check {
 <body>
   <!-- General Modal Backdrop -->
   <div id="modal-backdrop" class="auth-backdrop"></div>
+
+  <!-- First Time Warning Modal -->
+  <div id="first-time-warning-modal" class="first-time-warning-modal">
+    <div class="liquid-glass rounded-3xl border border-white/50 w-[min(92vw,480px)] p-6 mx-4">
+      <div class="text-center space-y-4">
+        <div class="text-5xl">⚠️</div>
+        <h3 class="text-xl font-bold text-slate-800">ご利用にあたっての注意</h3>
+        <div class="text-left text-slate-700 space-y-3 bg-amber-50 p-4 rounded-xl border-2 border-amber-200">
+          <p class="font-semibold text-amber-800">以下の場合、スタンプの進捗がクリアされる可能性があります：</p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 mt-0.5">•</span>
+              <span>ブラウザのキャッシュをクリアした場合</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 mt-0.5">•</span>
+              <span>プライベートモード（シークレットモード）でアクセスした場合</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 mt-0.5">•</span>
+              <span>異なるブラウザやデバイスでアクセスした場合</span>
+            </li>
+          </ul>
+          <p class="text-sm font-semibold text-amber-800 mt-3">💡 同じブラウザで継続してご利用ください</p>
+        </div>
+        <button id="close-first-time-warning" class="w-full px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-base ripple shadow-lg">
+          理解しました
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Survey Modal -->
   <div id="survey-modal" class="auth-modal">
@@ -846,7 +894,8 @@ li .acquired-check {
           <div class="text-3xl font-bold text-emerald-600 mb-3">🎉 交換しました！</div>
           <div class="text-base text-slate-700 leading-relaxed">
             むすび丸 ピンバッジ（横ver）を交換しました。<br>
-            受付（L404）でお受け取りください。
+            <span class="font-bold text-amber-700 mt-2 inline-block">📍 この画面をL404教室にて、スタッフにお見せください</span><br>
+            <span class="text-sm text-slate-600">受付（L404）でお受け取りください。</span>
           </div>
         </div>
         <button id="close-just-claimed" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 text-white font-semibold ripple">
@@ -869,10 +918,11 @@ li .acquired-check {
 
       <div class="staff-instruction">
         <div class="staff-instruction-title">
-          👨‍💼 スタッフ確認
+          ⚠️ 重要：スタッフ確認が必要です
         </div>
         <div class="staff-instruction-text">
-          スタッフの目の前で下のボタンを押してください。交換した特典は受付（L404）でお受け取りください。
+          📍 L404教室にて、スタッフの目の前で下のボタンを押してください。<br>
+          <span class="text-sm mt-1 inline-block">交換した特典は受付（L404）でお受け取りください。</span>
         </div>
       </div>
 
@@ -1376,6 +1426,41 @@ const LS_KEY_USER = 'app_user';
 function saveLocalUser(u) {
   localStorage.setItem(LS_KEY_USER, JSON.stringify(u));
 }
+
+// ========== First Time Warning ==========
+const LS_KEY_FIRST_VISIT = 'first_visit_shown';
+
+function isFirstVisit() {
+  return !localStorage.getItem(LS_KEY_FIRST_VISIT);
+}
+
+function markFirstVisitShown() {
+  localStorage.setItem(LS_KEY_FIRST_VISIT, 'true');
+}
+
+function showFirstTimeWarning() {
+  const modal = document.getElementById('first-time-warning-modal');
+  if (modal) {
+    modal.classList.add('show');
+  }
+}
+
+function closeFirstTimeWarning() {
+  const modal = document.getElementById('first-time-warning-modal');
+  if (modal) {
+    modal.classList.remove('show');
+  }
+  markFirstVisitShown();
+
+  // If should open UUID QR modal after closing
+  if (window._shouldOpenUuidQrAfterWarning) {
+    window._shouldOpenUuidQrAfterWarning = false;
+    setTimeout(() => {
+      openUuidQrModal();
+    }, 300);
+  }
+}
+
 // ========== モーダル / UI オープン・クローズ ==========
 function openSurveyModal() {
   $app.backdrop.classList.add('show');
@@ -2461,8 +2546,17 @@ async function init() {
 
   // 事前登録ユーザーの場合、パラメータ付きURLからアクセス時にUUID QRを自動表示
   const isPreRegUrl = urlParams.get('mode') === 'prereg';
-  if (state.user?.registration_type === 'pre_registration' && isPreRegUrl) {
-    // ?mode=prereg パラメータがある場合は毎回表示
+  const shouldShowUuidQr = state.user?.registration_type === 'pre_registration' && isPreRegUrl;
+
+  // 初回訪問時の警告モーダル表示（事前登録QRよりも前に表示）
+  if (isFirstVisit()) {
+    showFirstTimeWarning();
+    // 事前登録QRを表示する必要がある場合、警告モーダル閉じた後に表示
+    if (shouldShowUuidQr) {
+      window._shouldOpenUuidQrAfterWarning = true;
+    }
+  } else if (shouldShowUuidQr) {
+    // 初回訪問でない場合は通常通り表示
     setTimeout(() => {
       openUuidQrModal();
     }, 500);
@@ -2600,6 +2694,12 @@ async function init() {
   const claimBadgeBtn = document.getElementById('claim-badge-button');
   if (claimBadgeBtn) {
     claimBadgeBtn.addEventListener('click', claimBadge);
+  }
+
+  // First time warning close button
+  const firstTimeWarningCloseBtn = document.getElementById('close-first-time-warning');
+  if (firstTimeWarningCloseBtn) {
+    firstTimeWarningCloseBtn.addEventListener('click', closeFirstTimeWarning);
   }
 
   // アンケートのUIハイライト
