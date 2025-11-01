@@ -531,19 +531,25 @@ li .acquired-check {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
       position: relative;
-    }
-
-    .company-logo-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 8px;
-      transition: filter 0.3s ease;
     }
 
-    .company-logo-item.not-acquired img {
-      filter: grayscale(100%) brightness(1.1);
+    .company-name-text {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: center;
+      line-height: 1.2;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: opacity 0.3s ease;
+    }
+
+    .company-logo-item.not-acquired .company-name-text {
       opacity: 0.4;
+      color: #94a3b8;
     }
 
     .company-logo-item.acquired {
@@ -551,9 +557,9 @@ li .acquired-check {
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    .company-logo-item.acquired img {
-      filter: grayscale(0%);
+    .company-logo-item.acquired .company-name-text {
       opacity: 1;
+      color: #1e293b;
     }
 
     .company-logo-item.acquired::after {
@@ -1229,84 +1235,42 @@ li .acquired-check {
             <!-- 6社の企業ブース -->
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/restar.jpeg" alt="株式会社レスター" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">株式会社レスター</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">株式会社レスター</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/kioxia.png" alt="キオクシア岩手株式会社" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/sont.png" alt="ソニーセミコンダクタマニュファクチャリング株式会社" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/tel.png" alt="東京エレクトロン宮城株式会社" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="E">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/toppan.jpg" alt="TOPPAN株式会社" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-16 h-16 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <img src="assets/lapis.png" alt="ラピスセミコンダクタ株式会社" class="max-w-full max-h-full object-contain">
-                  </div>
-                  <div>
-                    <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
-                  </div>
-                </div>
+                <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
@@ -1417,7 +1381,7 @@ const BOOTH_DATA = [
     name: '株式会社レスター',
     img: 'assets/restar.jpeg',
     icon: '⚡',
-    desc: '国内屈指の売上を誇る半導体商社。半導体製品を専門とした買い付け・販売に加え、顧客の納品管理等のサポートも行う。',
+    desc: '国内外の最先端の半導体や電子部品を扱うエレクトロニクス商社。多数のエンジニアが在籍、回路設計・開発等のサービスを提供。',
     tags:['エッチング', '製造装置', 'プラズマ'],
     giveaway:'TELオリジナルウエハーストラップ',
     condition:'エッチング工程に関するクイズに正解'
@@ -1427,7 +1391,7 @@ const BOOTH_DATA = [
     name: 'キオクシア岩手株式会社',
     img: 'assets/kioxia.png',
     icon: '🖼️',
-    desc: '国内唯一のメモリ半導体メーカー「キオクシア」のグループ企業。東北地域の半導体人材育成等に取り組む「東北半導体・エレクトロニクスデザインコンソーシアム」の事務局も務めている。',
+    desc: 'キオクシアグループとして世界シェア第2位のフラッシュメモリ生産量。グループの将来の一翼を担う3次元フラッシュメモリの量産工場。',
     tags:['フォトマスク', 'EUV', 'リソグラフィ'],
     giveaway:'フォトマスクデザイン定規',
     condition:'ミニチュアマスクの重ね合わせ体験'
@@ -1437,7 +1401,7 @@ const BOOTH_DATA = [
     name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
     img: 'assets/sont.png',
     icon: '💡',
-    desc: 'ソニーグループの半導体生産会社。スマートフォンのカメラ等に使用される「イメージセンサ」で世界トップのシェアを誇る。白石市にレーザー半導体の生産工場が立地している。',
+    desc: 'ソニーグループの半導体部門において開発・生産を担う拠点。グループが生産するイメージセンサーは世界シェアNo.1 。',
     tags:['LSI', 'MCU', 'IoT'],
     giveaway:'オリジナルICチップキーホルダー',
     condition:'IoTデバイスのデモを体験'
@@ -1447,7 +1411,7 @@ const BOOTH_DATA = [
     name: '東京エレクトロン宮城株式会社',
     img: 'assets/tel.png',
     icon: '🔥',
-    desc: '国内トップ、世界でも第4位の半導体製造装置メーカーのグループ企業であり、大和町でプラズマエッチング装置の製造等を行っている。',
+    desc: '東京エレクトロングループとして半導体製造装置メーカー売上世界4位。半導体の主要工程で多くの世界トップシェアを誇るほか、特許保有数世界No.1。',
     tags:['セラミックス', '装置部品', '静電チャック'],
     giveaway:'セラミック製コースター',
     condition:'セラミックスの熱伝導実験に参加'
@@ -1457,7 +1421,7 @@ const BOOTH_DATA = [
     name: 'TOPPAN株式会社',
     img: 'assets/toppan.jpg',
     icon: '🏺',
-    desc: '印刷・微細加工技術を駆使した半導体パッケージ基板等の部素材メーカーとして世界屈指の技術力を誇る。',
+    desc: 'グループにおけるエレクトロニクス部門として半導体やディスプレイ事業を展開。印刷テクノロジーを様々な領域に応用し、新たな製品・サービスを創出',
     tags:['材料', 'セラミックス', '高純度'],
     giveaway:'ミニチュアセラミックプレート',
     condition:'製品サンプルに触れてみる'
@@ -1467,7 +1431,7 @@ const BOOTH_DATA = [
     name: 'ラピスセミコンダクタ株式会社',
     img: 'assets/lapis.png',
     icon: '🌡️',
-    desc: '国内第4位の半導体メーカー「ローム株式会社」のグループ企業。大衡村に半導体製造工場が立地している。',
+    desc: 'パワー半導体で世界上位のシェアを誇るロームグループの主力生産拠点。宮城工場ではローパワーマイコン、 無線通信用などの半導体LSI商品を製造。',
     tags:['計測', '成膜', 'コントローラー'],
     giveaway:'液晶温度計カード',
     condition:'膜厚計のデモンストレーションを見学'
@@ -2048,7 +2012,7 @@ function renderProgress() {
       const isAcquired = state.acquiredStamps.has(booth.id);
       const logoItem = document.createElement('div');
       logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
-      logoItem.innerHTML = `<img src="${booth.img}" alt="${booth.name}" />`;
+      logoItem.innerHTML = `<div class="company-name-text">${booth.name}</div>`;
       $app.progress.logoGrid.appendChild(logoItem);
     });
   }
@@ -2515,16 +2479,33 @@ function layoutBoothIcons() {
     fillRect.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(fillRect);
 
-    const img = document.createElementNS('http://www.w3.org/2000/svg','image');
-    img.setAttribute('x', x + 5);
-    img.setAttribute('y', y + 5);
-    img.setAttribute('width', size - 10);
-    img.setAttribute('height', size - 10);
-    img.setAttribute('href', booth.img);
-    img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', booth.img);
-    img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    img.setAttribute('clip-path', `url(#${clipId})`);
-    group.appendChild(img);
+    // 企業名をテキストで表示
+    const foreignObj = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+    foreignObj.setAttribute('x', x + 10);
+    foreignObj.setAttribute('y', y + 10);
+    foreignObj.setAttribute('width', size - 20);
+    foreignObj.setAttribute('height', size - 20);
+    foreignObj.setAttribute('clip-path', `url(#${clipId})`);
+
+    const companyNameDiv = document.createElement('div');
+    companyNameDiv.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+      font-size: ${size * 0.12}px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      color: ${isAcquired ? '#1e293b' : '#94a3b8'};
+      opacity: ${isAcquired ? '1' : '0.5'};
+      padding: ${size * 0.05}px;
+    `;
+    companyNameDiv.textContent = booth.name || id;
+    foreignObj.appendChild(companyNameDiv);
+    group.appendChild(foreignObj);
 
     if (isAcquired) {
       const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
