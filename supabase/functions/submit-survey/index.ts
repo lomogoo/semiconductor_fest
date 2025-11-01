@@ -21,6 +21,14 @@ serve(async (req) => {
       )
     }
 
+    // Validate required fields
+    if (!surveyData.affiliation || !surveyData.gender || !surveyData.participation_trigger || !surveyData.satisfaction) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
@@ -45,6 +53,29 @@ serve(async (req) => {
         JSON.stringify({ error: 'Survey already completed' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Insert survey response
+    const { error: insertError } = await supabase
+      .from('survey_responses')
+      .insert({
+        user_id: userId,
+        affiliation: surveyData.affiliation,
+        gender: surveyData.gender,
+        participation_trigger: surveyData.participation_trigger,
+        satisfaction: surveyData.satisfaction,
+        good_programs: surveyData.good_programs || [],
+        unknown_companies: surveyData.unknown_companies || [],
+        good_companies: surveyData.good_companies || [],
+        desired_companies: surveyData.desired_companies || [],
+        work_reasons: surveyData.work_reasons || [],
+        work_reasons_other: surveyData.work_reasons_other,
+        other_feedback: surveyData.other_feedback,
+      })
+
+    if (insertError) {
+      console.error('[submit-survey] Error inserting survey response:', insertError)
+      throw new Error('Failed to save survey response')
     }
 
     // Award bonus point for completing survey

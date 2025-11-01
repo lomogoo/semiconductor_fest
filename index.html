@@ -659,28 +659,32 @@ li .acquired-check {
         <button id="close-survey" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">✕</button>
       </div>
       <form id="survey-form" class="p-4 space-y-4">
-        <!-- Q1: 現在の所属 -->
+        <!-- Q1: 属性 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q1. 現在の所属は？
+            Q1. あなたの属性を選んでください
             <span class="survey-required">*</span>
           </label>
           <div class="survey-radio-group">
             <label class="survey-option">
-              <input type="radio" name="affiliation" value="高校" required />
-              <span>高校</span>
+              <input type="radio" name="affiliation" value="大学生" required />
+              <span>大学生</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="affiliation" value="専門学校" />
-              <span>専門学校</span>
+              <input type="radio" name="affiliation" value="大学院生" />
+              <span>大学院生</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="affiliation" value="高等専門学校" />
-              <span>高等専門学校</span>
+              <input type="radio" name="affiliation" value="高専生" />
+              <span>高専生</span>
             </label>
             <label class="survey-option">
-              <input type="radio" name="affiliation" value="大学" />
-              <span>大学</span>
+              <input type="radio" name="affiliation" value="高校生" />
+              <span>高校生</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="affiliation" value="教員" />
+              <span>教員</span>
             </label>
             <label class="survey-option">
               <input type="radio" name="affiliation" value="その他" />
@@ -689,167 +693,298 @@ li .acquired-check {
           </div>
         </div>
 
-        <!-- Q2: 興味のある研究分野 -->
+        <!-- Q2: 性別 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q2. どのような学問の分野に関心がありますか？（複数選択可）
+            Q2. あなたの性別を教えてください
             <span class="survey-required">*</span>
           </label>
-          <div class="survey-checkbox-group">
+          <div class="survey-radio-group">
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="工学" />
-              <span>工学</span>
+              <input type="radio" name="gender" value="男性" required />
+              <span>男性</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="理学" />
-              <span>理学</span>
+              <input type="radio" name="gender" value="女性" />
+              <span>女性</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="情報科学" />
-              <span>情報科学</span>
+              <input type="radio" name="gender" value="回答しない" />
+              <span>回答しない</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: フェスに参加した最大のきっかけ -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q3. フェスに参加した最大のきっかけを教えてください
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="participation_trigger" value="当日の勧誘(授業からの帰路だった)" required />
+              <span>当日の勧誘（授業からの帰路だった）</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="経済学・経営学" />
-              <span>経済学・経営学</span>
+              <input type="radio" name="participation_trigger" value="学校の紹介" />
+              <span>学校の紹介</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="文学・人文科学" />
-              <span>文学・人文科学</span>
+              <input type="radio" name="participation_trigger" value="友人・知人の紹介" />
+              <span>友人・知人の紹介</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="社会科学" />
-              <span>社会科学</span>
+              <input type="radio" name="participation_trigger" value="県からの紹介" />
+              <span>県からの紹介</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="医学・薬学" />
-              <span>医学・薬学</span>
+              <input type="radio" name="participation_trigger" value="広告(チラシ配布、地下鉄、WEB等)" />
+              <span>広告（チラシ配布、地下鉄、WEB等）</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="農学" />
-              <span>農学</span>
-            </label>
-            <label class="survey-option">
-              <input type="checkbox" name="research_interest" value="その他" />
+              <input type="radio" name="participation_trigger" value="その他" />
               <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q3: 興味のあるキャリア分野 -->
+        <!-- Q4: フェスに参加した感想 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q3. どのような職種や分野に関心がありますか？（複数選択可）
+            Q4. フェスに参加した感想を教えてください
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-radio-group">
+            <label class="survey-option">
+              <input type="radio" name="satisfaction" value="大変参考になった" required />
+              <span>大変参考になった</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="satisfaction" value="参考になった" />
+              <span>参考になった</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="satisfaction" value="どちらともいえない" />
+              <span>どちらともいえない</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="satisfaction" value="あまり参考にならなかった" />
+              <span>あまり参考にならなかった</span>
+            </label>
+            <label class="survey-option">
+              <input type="radio" name="satisfaction" value="参考にならなかった" />
+              <span>参考にならなかった</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q5: 良かった企画 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q5. フェスの中で良かったと思う企画を教えてください（複数回答可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="研究開発" />
-              <span>研究開発</span>
+              <input type="checkbox" name="good_programs" value="ものづくり太郎のセミナー" />
+              <span>ものづくり太郎のセミナー</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="製造・生産技術" />
-              <span>製造・生産技術</span>
+              <input type="checkbox" name="good_programs" value="企業担当者によるトークセッション" />
+              <span>企業担当者によるトークセッション</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="品質管理・品質保証" />
-              <span>品質管理・品質保証</span>
+              <input type="checkbox" name="good_programs" value="企業との交流ブース(プレゼン・展示)" />
+              <span>企業との交流ブース（プレゼン・展示）</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="設計・開発" />
-              <span>設計・開発</span>
+              <input type="checkbox" name="good_programs" value="学生による企業研究発表会" />
+              <span>学生による企業研究発表会</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="営業・マーケティング" />
-              <span>営業・マーケティング</span>
+              <input type="checkbox" name="good_programs" value="企業見学ツアーの受付" />
+              <span>企業見学ツアーの受付</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="企画・事業開発" />
-              <span>企画・事業開発</span>
+              <input type="checkbox" name="good_programs" value="半導体の基礎知識パネル展示" />
+              <span>半導体の基礎知識パネル展示</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="人材開発・人事" />
-              <span>人材開発・人事</span>
+              <input type="checkbox" name="good_programs" value="むすび丸ピンバッジ特典" />
+              <span>むすび丸ピンバッジ特典</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="経営・管理" />
-              <span>経営・管理</span>
+              <input type="checkbox" name="good_programs" value="QUOカード特典" />
+              <span>QUOカード特典</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="情報システム・IT" />
-              <span>情報システム・IT</span>
-            </label>
-            <label class="survey-option">
-              <input type="checkbox" name="career_interest" value="その他" />
+              <input type="checkbox" name="good_programs" value="その他" />
               <span>その他</span>
             </label>
           </div>
         </div>
 
-        <!-- Q4: イベントを知ったきっかけ -->
+        <!-- Q6: 知らなかった企業 -->
         <div class="survey-field">
           <label class="survey-label">
-            Q4. 本イベントはどこで知りましたか？（複数選択可）
+            Q6. フェスに参加するまで知らなかった企業はありますか（複数回答可）
             <span class="survey-required">*</span>
           </label>
           <div class="survey-checkbox-group">
             <label class="survey-option">
-              <input type="checkbox" name="event_source" value="特設サイト" />
-              <span>特設サイト</span>
+              <input type="checkbox" name="unknown_companies" value="レスター" />
+              <span>レスター</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="event_source" value="地下鉄広告" />
-              <span>地下鉄広告</span>
+              <input type="checkbox" name="unknown_companies" value="キオクシア岩手" />
+              <span>キオクシア岩手</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="event_source" value="学校からの案内" />
-              <span>学校からの案内</span>
+              <input type="checkbox" name="unknown_companies" value="ソニーセミコンダクタマニュファクチャリング" />
+              <span>ソニーセミコンダクタマニュファクチャリング</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="event_source" value="WEB広告（Instagram・Yahoo！・Google）" />
-              <span>WEB広告（Instagram・Yahoo！・Google）</span>
+              <input type="checkbox" name="unknown_companies" value="東京エレクトロン宮城" />
+              <span>東京エレクトロン宮城</span>
             </label>
             <label class="survey-option">
-              <input type="checkbox" name="event_source" value="その他" id="event-source-other" />
+              <input type="checkbox" name="unknown_companies" value="TOPPAN" />
+              <span>TOPPAN</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="unknown_companies" value="ラピスセミコンダクタ" />
+              <span>ラピスセミコンダクタ</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="unknown_companies" value="全て知っていた" />
+              <span>全て知っていた</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q7: 良かった企業 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q7. 企業との交流ブースに参加して良かった企業を教えてください（複数回答可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="レスター" />
+              <span>レスター</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="キオクシア岩手" />
+              <span>キオクシア岩手</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="ソニーセミコンダクタマニュファクチャリング" />
+              <span>ソニーセミコンダクタマニュファクチャリング</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="東京エレクトロン宮城" />
+              <span>東京エレクトロン宮城</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="TOPPAN" />
+              <span>TOPPAN</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="ラピスセミコンダクタ" />
+              <span>ラピスセミコンダクタ</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="good_companies" value="交流ブースには行かなかった" />
+              <span>交流ブースには行かなかった</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q8: 働いてみたい企業 -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q8. フェスを通じてあなたが働いてみたいと思った企業を教えてください（複数回答可）
+            <span class="survey-required">*</span>
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="レスター" />
+              <span>レスター</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="キオクシア岩手" />
+              <span>キオクシア岩手</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="ソニーセミコンダクタマニュファクチャリング" />
+              <span>ソニーセミコンダクタマニュファクチャリング</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="東京エレクトロン宮城" />
+              <span>東京エレクトロン宮城</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="TOPPAN" />
+              <span>TOPPAN</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="ラピスセミコンダクタ" />
+              <span>ラピスセミコンダクタ</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="desired_companies" value="働いてみたい企業はなかった" />
+              <span>働いてみたい企業はなかった</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q9: 働きたい理由 (任意) -->
+        <div class="survey-field">
+          <label class="survey-label">
+            Q9. Q8で働きたいと思った理由を教えてください（複数回答可）
+          </label>
+          <div class="survey-checkbox-group">
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="企業の成長が見込めると感じたから" />
+              <span>企業の成長が見込めると感じたから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="技術力・付加価値の高さを感じたから" />
+              <span>技術力・付加価値の高さを感じたから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="自分が学んできたことを活かせそうだから" />
+              <span>自分が学んできたことを活かせそうだから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="給料や福利厚生などの待遇が良さそうだから" />
+              <span>給料や福利厚生などの待遇が良さそうだから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="働きやすい職場だと感じたから" />
+              <span>働きやすい職場だと感じたから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="有名な会社だから" />
+              <span>有名な会社だから</span>
+            </label>
+            <label class="survey-option">
+              <input type="checkbox" name="work_reasons" value="その他" id="work-reasons-other" />
               <span>その他</span>
             </label>
           </div>
-          <div id="event-source-other-input" class="mt-2 hidden">
-            <input type="text" name="event_source_other_text" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-sky-500 focus:outline-none text-sm" placeholder="詳しく教えてください" />
+          <div id="work-reasons-other-input" class="mt-2 hidden">
+            <input type="text" name="work_reasons_other_text" class="survey-text-input" maxlength="100" placeholder="その他の理由をご記入ください（100字以内）" />
           </div>
         </div>
 
-        <!-- Q5: 良かったコンテンツ -->
+        <!-- Q10: その他感想 (任意) -->
         <div class="survey-field">
           <label class="survey-label">
-            Q5. 特にどのコンテンツが良かったですか？（複数選択可）
-            <span class="survey-required">*</span>
+            Q10. その他、フェス全般についての意見・感想をお聞かせください（200字以内）
           </label>
-          <div class="survey-checkbox-group">
-            <label class="survey-option">
-              <input type="checkbox" name="good_content" value="特別セミナー（ものづくり太郎）" />
-              <span>特別セミナー（ものづくり太郎）</span>
-            </label>
-            <label class="survey-option">
-              <input type="checkbox" name="good_content" value="トークセッション" />
-              <span>トークセッション</span>
-            </label>
-            <label class="survey-option">
-              <input type="checkbox" name="good_content" value="企業研究発表会" />
-              <span>企業研究発表会</span>
-            </label>
-            <label class="survey-option">
-              <input type="checkbox" name="good_content" value="企業交流ブース" />
-              <span>企業交流ブース</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Q6: 感想・要望 -->
-        <div class="survey-field">
-          <label class="survey-label">
-            Q6. 本日のイベントの感想、要望があればお聞かせください
-          </label>
-          <textarea name="feedback" class="survey-textarea" placeholder="ご感想をお聞かせください..."></textarea>
+          <textarea name="other_feedback" class="survey-textarea" maxlength="200" placeholder="ご感想をお聞かせください..."></textarea>
         </div>
 
         <button type="submit" class="w-full px-4 py-3 rounded-2xl bg-sky-600 text-white font-semibold ripple">
@@ -1558,17 +1693,35 @@ async function submitSurvey(e) {
   }
 
   const formData = new FormData($app.survey.form);
+
+  // Validate required checkbox fields (Q5-Q8)
+  const requiredCheckboxFields = [
+    { name: 'good_programs', label: 'Q5' },
+    { name: 'unknown_companies', label: 'Q6' },
+    { name: 'good_companies', label: 'Q7' },
+    { name: 'desired_companies', label: 'Q8' }
+  ];
+
+  for (const field of requiredCheckboxFields) {
+    if (formData.getAll(field.name).length === 0) {
+      $app.survey.error.textContent = `${field.label}は必須項目です。少なくとも1つ選択してください。`;
+      return;
+    }
+  }
+
   const surveyData = {
     affiliation: formData.get('affiliation'),
-    event_source: formData.get('event_source'),
-    feedback: formData.get('feedback'),
-    research_interests: [],
-    career_interests: [],
-    good_contents: []
+    gender: formData.get('gender'),
+    participation_trigger: formData.get('participation_trigger'),
+    satisfaction: formData.get('satisfaction'),
+    good_programs: formData.getAll('good_programs'),
+    unknown_companies: formData.getAll('unknown_companies'),
+    good_companies: formData.getAll('good_companies'),
+    desired_companies: formData.getAll('desired_companies'),
+    work_reasons: formData.getAll('work_reasons'),
+    work_reasons_other: formData.get('work_reasons_other_text') || null,
+    other_feedback: formData.get('other_feedback') || null
   };
-  formData.getAll('research_interest').forEach(v => surveyData.research_interests.push(v));
-  formData.getAll('career_interest').forEach(v => surveyData.career_interests.push(v));
-  formData.getAll('good_content').forEach(v => surveyData.good_contents.push(v));
 
   try {
     $app.survey.error.textContent = '';
@@ -2508,16 +2661,16 @@ function setupSurveyInteractivity() {
     });
   });
 
-  // Q4の「その他」選択時に入力欄を表示（チェックボックス）
-  const eventSourceOther = document.getElementById('event-source-other');
-  const eventSourceOtherInput = document.getElementById('event-source-other-input');
+  // Q9の「その他」選択時に入力欄を表示（チェックボックス）
+  const workReasonsOther = document.getElementById('work-reasons-other');
+  const workReasonsOtherInput = document.getElementById('work-reasons-other-input');
 
-  if (eventSourceOther && eventSourceOtherInput) {
-    eventSourceOther.addEventListener('change', (e) => {
+  if (workReasonsOther && workReasonsOtherInput) {
+    workReasonsOther.addEventListener('change', (e) => {
       if (e.target.checked) {
-        eventSourceOtherInput.classList.remove('hidden');
+        workReasonsOtherInput.classList.remove('hidden');
       } else {
-        eventSourceOtherInput.classList.add('hidden');
+        workReasonsOtherInput.classList.add('hidden');
       }
     });
   }
