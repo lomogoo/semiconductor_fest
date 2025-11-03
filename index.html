@@ -1367,18 +1367,19 @@ const IMG_DEFAULT = 'logo.jpg';
 const MAX_POINTS = 6;
 
 const BOOTH_ANCHORS = {
-  A: { x: 0.85, y: 0.22 },
-  B: { x: 0.83, y: 0.35 },
-  C: { x: 0.82, y: 0.60 },
+  A: { x: 0.82, y: 0.60 },
+  B: { x: 0.85, y: 0.22 },
+  C: { x: 0.82, y: 0.83 },
   D: { x: 0.175, y: 0.60 },
   E: { x: 0.175, y: 0.83 },
-  F: { x: 0.82, y: 0.83 }
+  F: { x: 0.83, y: 0.35 }
 };
 
 const BOOTH_DATA = [
   {
     id: 'A',
     name: '株式会社レスター',
+    room: 'L404',
     img: 'assets/restar.jpeg',
     icon: '⚡',
     desc: '国内外の最先端の半導体や電子部品を扱うエレクトロニクス商社。多数のエンジニアが在籍、回路設計・開発等のサービスを提供。',
@@ -1389,6 +1390,7 @@ const BOOTH_DATA = [
   {
     id: 'B',
     name: 'キオクシア岩手株式会社',
+    room: 'L406',
     img: 'assets/kioxia.png',
     icon: '🖼️',
     desc: 'キオクシアグループとして世界シェア第2位のフラッシュメモリ生産量。グループの将来の一翼を担う3次元フラッシュメモリの量産工場。',
@@ -1399,6 +1401,7 @@ const BOOTH_DATA = [
   {
     id: 'C',
     name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
+    room: 'L404',
     img: 'assets/sont.png',
     icon: '💡',
     desc: 'ソニーグループの半導体部門において開発・生産を担う拠点。グループが生産するイメージセンサーは世界シェアNo.1 。',
@@ -1409,6 +1412,7 @@ const BOOTH_DATA = [
   {
     id: 'D',
     name: '東京エレクトロン宮城株式会社',
+    room: 'L402',
     img: 'assets/tel.png',
     icon: '🔥',
     desc: '東京エレクトロングループとして半導体製造装置メーカー売上世界4位。半導体の主要工程で多くの世界トップシェアを誇るほか、特許保有数世界No.1。',
@@ -1419,6 +1423,7 @@ const BOOTH_DATA = [
   {
     id: 'E',
     name: 'TOPPAN株式会社',
+    room: 'L403',
     img: 'assets/toppan.jpg',
     icon: '🏺',
     desc: 'グループにおけるエレクトロニクス部門として半導体やディスプレイ事業を展開。印刷テクノロジーを様々な領域に応用し、新たな製品・サービスを創出',
@@ -1429,6 +1434,7 @@ const BOOTH_DATA = [
   {
     id: 'F',
     name: 'ラピスセミコンダクタ株式会社',
+    room: 'L405',
     img: 'assets/lapis.png',
     icon: '🌡️',
     desc: 'パワー半導体で世界上位のシェアを誇るロームグループの主力生産拠点。宮城工場ではローパワーマイコン、 無線通信用などの半導体LSI商品を製造。',
@@ -2012,7 +2018,7 @@ function renderProgress() {
       const isAcquired = state.acquiredStamps.has(booth.id);
       const logoItem = document.createElement('div');
       logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
-      logoItem.innerHTML = `<div class="company-name-text">${booth.name}</div>`;
+      logoItem.innerHTML = `<div class="text-center"><div class="text-xs font-semibold text-slate-600 mb-1">${booth.room}</div><div class="company-name-text">${booth.name}</div></div>`;
       $app.progress.logoGrid.appendChild(logoItem);
     });
   }
