@@ -1381,6 +1381,7 @@ const BOOTH_DATA = [
     name: '株式会社レスター',
     room: 'L404',
     img: 'assets/restar.jpeg',
+    mapIcon: 'restar',
     icon: '⚡',
     desc: '国内外の最先端の半導体や電子部品を扱うエレクトロニクス商社。多数のエンジニアが在籍、回路設計・開発等のサービスを提供。',
     tags:['エッチング', '製造装置', 'プラズマ'],
@@ -1392,6 +1393,7 @@ const BOOTH_DATA = [
     name: 'キオクシア岩手株式会社',
     room: 'L406',
     img: 'assets/kioxia.png',
+    mapIcon: 'kioxia',
     icon: '🖼️',
     desc: 'キオクシアグループとして世界シェア第2位のフラッシュメモリ生産量。グループの将来の一翼を担う3次元フラッシュメモリの量産工場。',
     tags:['フォトマスク', 'EUV', 'リソグラフィ'],
@@ -1403,6 +1405,7 @@ const BOOTH_DATA = [
     name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
     room: 'L404',
     img: 'assets/sont.png',
+    mapIcon: 'sony',
     icon: '💡',
     desc: 'ソニーグループの半導体部門において開発・生産を担う拠点。グループが生産するイメージセンサーは世界シェアNo.1 。',
     tags:['LSI', 'MCU', 'IoT'],
@@ -1414,6 +1417,7 @@ const BOOTH_DATA = [
     name: '東京エレクトロン宮城株式会社',
     room: 'L402',
     img: 'assets/tel.png',
+    mapIcon: 'tel',
     icon: '🔥',
     desc: '東京エレクトロングループとして半導体製造装置メーカー売上世界4位。半導体の主要工程で多くの世界トップシェアを誇るほか、特許保有数世界No.1。',
     tags:['セラミックス', '装置部品', '静電チャック'],
@@ -1425,6 +1429,7 @@ const BOOTH_DATA = [
     name: 'TOPPAN株式会社',
     room: 'L403',
     img: 'assets/toppan.jpg',
+    mapIcon: 'toppan',
     icon: '🏺',
     desc: 'グループにおけるエレクトロニクス部門として半導体やディスプレイ事業を展開。印刷テクノロジーを様々な領域に応用し、新たな製品・サービスを創出',
     tags:['材料', 'セラミックス', '高純度'],
@@ -1436,6 +1441,7 @@ const BOOTH_DATA = [
     name: 'ラピスセミコンダクタ株式会社',
     room: 'L405',
     img: 'assets/lapis.png',
+    mapIcon: 'rapis',
     icon: '🌡️',
     desc: 'パワー半導体で世界上位のシェアを誇るロームグループの主力生産拠点。宮城工場ではローパワーマイコン、 無線通信用などの半導体LSI商品を製造。',
     tags:['計測', '成膜', 'コントローラー'],
@@ -2485,33 +2491,21 @@ function layoutBoothIcons() {
     fillRect.setAttribute('clip-path', `url(#${clipId})`);
     group.appendChild(fillRect);
 
-    // 企業名をテキストで表示
-    const foreignObj = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
-    foreignObj.setAttribute('x', x + 10);
-    foreignObj.setAttribute('y', y + 10);
-    foreignObj.setAttribute('width', size - 20);
-    foreignObj.setAttribute('height', size - 20);
-    foreignObj.setAttribute('clip-path', `url(#${clipId})`);
+    // 企業アイコン画像を表示
+    const iconSuffix = isAcquired ? '2' : '';
+    const iconPath = booth.mapIcon ? `booth/${booth.mapIcon}${iconSuffix}.png` : '';
 
-    const companyNameDiv = document.createElement('div');
-    companyNameDiv.style.cssText = `
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
-      font-size: ${size * 0.12}px;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.2;
-      color: ${isAcquired ? '#1e293b' : '#94a3b8'};
-      opacity: ${isAcquired ? '1' : '0.5'};
-      padding: ${size * 0.05}px;
-    `;
-    companyNameDiv.textContent = booth.name || id;
-    foreignObj.appendChild(companyNameDiv);
-    group.appendChild(foreignObj);
+    if (iconPath) {
+      const iconImage = document.createElementNS('http://www.w3.org/2000/svg','image');
+      iconImage.setAttribute('x', x + 5);
+      iconImage.setAttribute('y', y + 5);
+      iconImage.setAttribute('width', size - 10);
+      iconImage.setAttribute('height', size - 10);
+      iconImage.setAttribute('href', iconPath);
+      iconImage.setAttribute('clip-path', `url(#${clipId})`);
+      iconImage.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      group.appendChild(iconImage);
+    }
 
     if (isAcquired) {
       const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
