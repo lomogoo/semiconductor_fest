@@ -2033,7 +2033,7 @@ function renderProgress() {
     $app.progress.logoGrid.innerHTML = '';
     BOOTH_DATA.forEach(booth => {
       const isAcquired = state.acquiredStamps.has(booth.id);
-      const imgSrc = isAcquired ? `assets/${booth.mapIcon}2.png` : `assets/${booth.mapIcon}.png`;
+      const imgSrc = isAcquired ? `booth/${booth.mapIcon}2.png` : `booth/${booth.mapIcon}.png`;
       const logoItem = document.createElement('div');
       logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
       logoItem.innerHTML = `
