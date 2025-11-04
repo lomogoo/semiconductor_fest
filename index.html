@@ -58,8 +58,8 @@
         rgba(255, 255, 255, 0.7) 0%,
         rgba(255, 255, 255, 0.5) 100%
       );
-      backdrop-filter: blur(40px) saturate(200%);
-      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
       border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow:
         inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
@@ -74,8 +74,8 @@
         rgba(255, 255, 255, 0.35) 0%,
         rgba(255, 255, 255, 0.25) 100%
       );
-      backdrop-filter: blur(40px) saturate(200%);
-      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
       border: 1px solid rgba(255, 255, 255, 0.4);
       box-shadow:
         inset 0 1px 1px 0 rgba(255, 255, 255, 0.8),
@@ -96,8 +96,8 @@
       background:
         linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.28)),
         linear-gradient(180deg, rgba(14,165,233,0.10), rgba(14,165,233,0.00));
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
       border: 1px solid rgba(255,255,255,0.48);
       box-shadow:
         inset 0 1px 1px rgba(255,255,255,0.85),
@@ -125,6 +125,15 @@
     @keyframes shimmer {
       0% { transform: translateX(-100%) skewX(-12deg); }
       100% { transform: translateX(200%) skewX(-12deg); }
+    }
+
+    /* アニメーションの最適化 */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     .progress-area { position: relative; padding-top: 3rem; margin-top: 1rem; overflow: visible; }
@@ -156,6 +165,7 @@
       inset: 0;
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
       animation: shimmer 2.5s infinite;
+      will-change: transform;
     }
     #progress-bar::after {
       content: '';
@@ -211,7 +221,7 @@
 
     .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 100; }
 
-    .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(6px); z-index: 80; display:none; }
+    .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(4px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
     .auth-modal.show { display:flex; }
@@ -1214,7 +1224,7 @@ li .acquired-check {
                     </svg>
                   </div>
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite;"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 transform -skew-x-12" style="animation: shimmer 3s infinite; will-change: transform;"></div>
               </button>
 
               <!-- アンケート回答 / 特典交換ボタン -->
@@ -2409,11 +2419,12 @@ function showToast(msg) {
 }
 
 // ========== マップ(ブースレイアウト) ==========
+// SVGアイコンのキャッシュ
+const boothIconsCache = new Map();
+
 function layoutBoothIcons() {
   const g = $app.map.iconsGroup;
   if (!g) return;
-
-  g.innerHTML = '';
 
   const vb = $app.map.svg.viewBox.baseVal;
   const base = Math.min(vb.width, vb.height);
@@ -2429,129 +2440,146 @@ function layoutBoothIcons() {
     const booth = BOOTH_DATA.find(b => b.id === id) || { img: IMG_DEFAULT };
     const isAcquired = state.acquiredStamps.has(id);
 
-    const group = document.createElementNS('http://www.w3.org/2000/svg','g');
-    group.setAttribute('cursor', 'pointer');
-    group.setAttribute('role', 'button');
-    group.setAttribute('aria-label', booth.name);
-    group.dataset.id = id;
+    // キャッシュから取得または新規作成
+    let group = boothIconsCache.get(id);
 
-    const shadowDeep = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    shadowDeep.setAttribute('x', x + 8);
-    shadowDeep.setAttribute('y', y + 8);
-    shadowDeep.setAttribute('width', size);
-    shadowDeep.setAttribute('height', size);
-    shadowDeep.setAttribute('rx', size * 0.18);
-    shadowDeep.setAttribute('fill', 'rgba(0,0,0,0.3)');
-    shadowDeep.setAttribute('filter', 'blur(12px)');
-    group.appendChild(shadowDeep);
+    if (!group) {
+      // 初回作成
+      group = document.createElementNS('http://www.w3.org/2000/svg','g');
+      group.setAttribute('cursor', 'pointer');
+      group.setAttribute('role', 'button');
+      group.setAttribute('aria-label', booth.name);
+      group.dataset.id = id;
 
-    const shadowMid = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    shadowMid.setAttribute('x', x + 2);
-    shadowMid.setAttribute('y', y + 2);
-    shadowMid.setAttribute('width', size);
-    shadowMid.setAttribute('height', size);
-    shadowMid.setAttribute('rx', size * 0.18);
-    shadowMid.setAttribute('fill', 'rgba(0,0,0,0.15)');
-    shadowMid.setAttribute('filter', 'blur(4px)');
-    group.appendChild(shadowMid);
+      const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      baseRect.setAttribute('rx', size * 0.18);
+      baseRect.setAttribute('stroke-width', '2');
+      baseRect.classList.add('booth-base-rect');
+      group.appendChild(baseRect);
 
-    const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      border.setAttribute('rx', size * 0.18);
+      border.setAttribute('fill', 'white');
+      border.setAttribute('stroke-width', '4');
+      border.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))';
+      border.classList.add('booth-border');
+      group.appendChild(border);
+
+      const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      innerShadow.setAttribute('rx', size * 0.15);
+      innerShadow.setAttribute('fill', 'none');
+      innerShadow.setAttribute('stroke', 'rgba(0,0,0,0.1)');
+      innerShadow.setAttribute('stroke-width', '1');
+      innerShadow.classList.add('booth-inner-shadow');
+      group.appendChild(innerShadow);
+
+      const clipId = `clip-${id}`;
+      const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+      const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+      clipPath.setAttribute('id', clipId);
+      const clipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      clipRect.setAttribute('rx', size * 0.15);
+      clipRect.classList.add('booth-clip-rect');
+      clipPath.appendChild(clipRect);
+      defs.appendChild(clipPath);
+      group.appendChild(defs);
+
+      const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      fillRect.setAttribute('rx', size * 0.15);
+      fillRect.setAttribute('fill', '#fff');
+      fillRect.setAttribute('clip-path', `url(#${clipId})`);
+      fillRect.classList.add('booth-fill-rect');
+      group.appendChild(fillRect);
+
+      const iconImage = document.createElementNS('http://www.w3.org/2000/svg','image');
+      iconImage.setAttribute('clip-path', `url(#${clipId})`);
+      iconImage.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      iconImage.classList.add('booth-icon-image');
+      group.appendChild(iconImage);
+
+      const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      checkBg.setAttribute('fill', '#10b981');
+      checkBg.setAttribute('stroke', 'white');
+      checkBg.setAttribute('stroke-width', '3');
+      checkBg.classList.add('booth-check-bg');
+      checkBg.style.display = 'none';
+      group.appendChild(checkBg);
+
+      const checkMark = document.createElementNS('http://www.w3.org/2000/svg','text');
+      checkMark.setAttribute('text-anchor', 'middle');
+      checkMark.setAttribute('dominant-baseline', 'central');
+      checkMark.setAttribute('fill', 'white');
+      checkMark.setAttribute('font-weight', 'bold');
+      checkMark.textContent = '✓';
+      checkMark.classList.add('booth-check-mark');
+      checkMark.style.display = 'none';
+      group.appendChild(checkMark);
+
+      boothIconsCache.set(id, group);
+      g.appendChild(group);
+    }
+
+    // 位置とサイズを更新
+    const baseRect = group.querySelector('.booth-base-rect');
     baseRect.setAttribute('x', x + 1);
     baseRect.setAttribute('y', y + 1);
     baseRect.setAttribute('width', size);
     baseRect.setAttribute('height', size);
-    baseRect.setAttribute('rx', size * 0.18);
     baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1');
     baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
-    baseRect.setAttribute('stroke-width', '2');
-    group.appendChild(baseRect);
 
-    const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const border = group.querySelector('.booth-border');
     border.setAttribute('x', x);
     border.setAttribute('y', y);
     border.setAttribute('width', size);
     border.setAttribute('height', size);
-    border.setAttribute('rx', size * 0.18);
-    border.setAttribute('fill', 'white');
     border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
-    border.setAttribute('stroke-width', '4');
-    border.setAttribute('filter', isAcquired ? 'url(#acquired-glow)' : 'url(#std-shadow)');
-    group.appendChild(border);
 
-    const innerShadow = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const innerShadow = group.querySelector('.booth-inner-shadow');
     innerShadow.setAttribute('x', x + 4);
     innerShadow.setAttribute('y', y + 4);
     innerShadow.setAttribute('width', size - 8);
     innerShadow.setAttribute('height', size - 8);
-    innerShadow.setAttribute('rx', size * 0.15);
-    innerShadow.setAttribute('fill', 'none');
-    innerShadow.setAttribute('stroke', 'rgba(0,0,0,0.1)');
-    innerShadow.setAttribute('stroke-width', '1');
-    group.appendChild(innerShadow);
 
-    const clipId = `clip-${id}`;
-    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
-    const clipPath = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
-    clipPath.setAttribute('id', clipId);
-    const clipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const clipRect = group.querySelector('.booth-clip-rect');
     clipRect.setAttribute('x', x + 5);
     clipRect.setAttribute('y', y + 5);
     clipRect.setAttribute('width', size - 10);
     clipRect.setAttribute('height', size - 10);
-    clipRect.setAttribute('rx', size * 0.15);
-    clipPath.appendChild(clipRect);
-    defs.appendChild(clipPath);
-    group.appendChild(defs);
 
-    const fillRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const fillRect = group.querySelector('.booth-fill-rect');
     fillRect.setAttribute('x', x + 5);
     fillRect.setAttribute('y', y + 5);
     fillRect.setAttribute('width', size - 10);
     fillRect.setAttribute('height', size - 10);
-    fillRect.setAttribute('rx', size * 0.15);
-    fillRect.setAttribute('fill', '#fff');
-    fillRect.setAttribute('clip-path', `url(#${clipId})`);
-    group.appendChild(fillRect);
 
-    // 企業アイコン画像を表示
+    // アイコン画像を更新
     const iconSuffix = isAcquired ? '2' : '';
     const iconPath = booth.mapIcon ? `booth/${booth.mapIcon}${iconSuffix}.png` : '';
+    const iconImage = group.querySelector('.booth-icon-image');
+    iconImage.setAttribute('x', x + 5);
+    iconImage.setAttribute('y', y + 5);
+    iconImage.setAttribute('width', size - 10);
+    iconImage.setAttribute('height', size - 10);
+    iconImage.setAttribute('href', iconPath);
 
-    if (iconPath) {
-      const iconImage = document.createElementNS('http://www.w3.org/2000/svg','image');
-      iconImage.setAttribute('x', x + 5);
-      iconImage.setAttribute('y', y + 5);
-      iconImage.setAttribute('width', size - 10);
-      iconImage.setAttribute('height', size - 10);
-      iconImage.setAttribute('href', iconPath);
-      iconImage.setAttribute('clip-path', `url(#${clipId})`);
-      iconImage.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      group.appendChild(iconImage);
-    }
-
+    // チェックマークの表示/非表示
+    const checkBg = group.querySelector('.booth-check-bg');
+    const checkMark = group.querySelector('.booth-check-mark');
     if (isAcquired) {
-      const checkBg = document.createElementNS('http://www.w3.org/2000/svg','circle');
       checkBg.setAttribute('cx', x + size - 20);
       checkBg.setAttribute('cy', y + 20);
       checkBg.setAttribute('r', size * 0.12);
-      checkBg.setAttribute('fill', '#10b981');
-      checkBg.setAttribute('stroke', 'white');
-      checkBg.setAttribute('stroke-width', '3');
-      group.appendChild(checkBg);
+      checkBg.style.display = 'block';
 
-      const checkMark = document.createElementNS('http://www.w3.org/2000/svg','text');
       checkMark.setAttribute('x', x + size - 20);
       checkMark.setAttribute('y', y + 20);
-      checkMark.setAttribute('text-anchor', 'middle');
-      checkMark.setAttribute('dominant-baseline', 'central');
-      checkMark.setAttribute('fill', 'white');
       checkMark.setAttribute('font-size', size * 0.12);
-      checkMark.setAttribute('font-weight', 'bold');
-      checkMark.textContent = '✓';
-      group.appendChild(checkMark);
+      checkMark.style.display = 'block';
+    } else {
+      checkBg.style.display = 'none';
+      checkMark.style.display = 'none';
     }
-
-    g.appendChild(group);
   });
 
   if (!document.getElementById('highlight-gradient')) {
@@ -2780,11 +2808,15 @@ async function init() {
     setTimeout(() => ripple.remove(), 600);
   });
 
-  // ウィンドウサイズ変化でマップ再描画
+  // ウィンドウサイズ変化でマップ再描画（デバウンス処理付き）
+  let resizeTimer;
   window.addEventListener('resize', () => {
-    if (state.activePage === 'map') {
-      layoutBoothIcons();
-    }
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (state.activePage === 'map') {
+        layoutBoothIcons();
+      }
+    }, 150);
   });
 
   // スキャナ系イベント
