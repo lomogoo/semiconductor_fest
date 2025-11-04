@@ -270,6 +270,14 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
 
+    .booth-company-name {
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      min-width: 0;
+      flex: 1;
+    }
+
     .booth-progress {
       font-size: 11px;
       color: #059669;
@@ -1131,7 +1139,7 @@ li .acquired-check {
   <div id="booth-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
       <div class="p-4 border-b border-white/50 flex items-center gap-3">
-        <div class="min-w-0 flex-1 text-center">
+        <div class="min-w-0 flex-1 text-left">
           <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
         </div>
         <button id="close-booth-sheet" class="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 border border-slate-300">閉じる</button>
@@ -1226,44 +1234,44 @@ li .acquired-check {
           <div class="space-y-3" id="stamp-categories">
             <!-- 6社の企業ブース -->
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="E">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">TOPPAN株式会社</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">TOPPAN株式会社</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">株式会社レスター</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">株式会社レスター</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
-                <div class="text-slate-400">›</div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="booth-company-name font-semibold text-slate-800">キオクシア岩手株式会社</div>
+                <div class="text-slate-400 flex-shrink-0">›</div>
               </div>
             </div>
 
@@ -1992,6 +2000,26 @@ function renderAll() {
   if (state.activePage === 'map') {
     layoutBoothIcons();
   }
+}
+
+// 企業名のフォントサイズを自動調整
+function adjustBoothCompanyNameSizes() {
+  const companyNames = document.querySelectorAll('.booth-company-name');
+  companyNames.forEach(nameEl => {
+    const text = nameEl.textContent || '';
+    const length = text.length;
+
+    // 文字数に応じてフォントサイズを調整
+    if (length > 20) {
+      nameEl.style.fontSize = '0.75rem'; // 12px
+    } else if (length > 15) {
+      nameEl.style.fontSize = '0.85rem'; // 13.6px
+    } else if (length > 12) {
+      nameEl.style.fontSize = '0.9rem'; // 14.4px
+    } else {
+      nameEl.style.fontSize = '1rem'; // 16px
+    }
+  });
 }
 
 function renderProgress() {
@@ -2836,6 +2864,9 @@ async function init() {
 
   // Update survey action button based on survey and badge claim status
   updateSurveyActionButton();
+
+  // 企業名のフォントサイズを調整
+  adjustBoothCompanyNameSizes();
 }
 // DOM構築後に初期化を1回だけ呼ぶ
 document.addEventListener('DOMContentLoaded', init);
