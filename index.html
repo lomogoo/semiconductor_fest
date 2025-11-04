@@ -1131,7 +1131,6 @@ li .acquired-check {
   <div id="booth-sheet" class="bottom-sheet">
     <div class="liquid-glass rounded-t-3xl max-h-[85dvh] overflow-y-auto">
       <div class="p-4 border-b border-white/50 flex items-center gap-3">
-        <div id="booth-sheet-icon" class="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0"></div>
         <div class="min-w-0 flex-1 text-center">
           <h4 id="booth-sheet-title" class="font-semibold text-lg text-slate-800 leading-tight"></h4>
         </div>
@@ -1226,27 +1225,6 @@ li .acquired-check {
           <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
           <div class="space-y-3" id="stamp-categories">
             <!-- 6社の企業ブース -->
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">株式会社レスター</div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
-                <div class="text-slate-400">›</div>
-              </div>
-            </div>
-
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
               <div class="flex items-center justify-between">
                 <div class="font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
@@ -1261,9 +1239,30 @@ li .acquired-check {
               </div>
             </div>
 
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-slate-800">株式会社レスター</div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
             <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
               <div class="flex items-center justify-between">
                 <div class="font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
+                <div class="text-slate-400">›</div>
+              </div>
+            </div>
+
+            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-slate-800">キオクシア岩手株式会社</div>
                 <div class="text-slate-400">›</div>
               </div>
             </div>
@@ -1370,42 +1369,6 @@ const BOOTH_ANCHORS = {
 
 const BOOTH_DATA = [
   {
-    id: 'A',
-    name: '株式会社レスター',
-    room: 'L404',
-    img: 'assets/restar.jpeg',
-    mapIcon: 'restar',
-    icon: '⚡',
-    desc: '国内外の最先端の半導体や電子部品を扱うエレクトロニクス商社。多数のエンジニアが在籍、回路設計・開発等のサービスを提供。',
-    tags:['エッチング', '製造装置', 'プラズマ'],
-    giveaway:'TELオリジナルウエハーストラップ',
-    condition:'エッチング工程に関するクイズに正解'
-  },
-  {
-    id: 'B',
-    name: 'キオクシア岩手株式会社',
-    room: 'L406',
-    img: 'assets/kioxia.png',
-    mapIcon: 'kioxia',
-    icon: '🖼️',
-    desc: 'キオクシアグループとして世界シェア第2位のフラッシュメモリ生産量。グループの将来の一翼を担う3次元フラッシュメモリの量産工場。',
-    tags:['フォトマスク', 'EUV', 'リソグラフィ'],
-    giveaway:'フォトマスクデザイン定規',
-    condition:'ミニチュアマスクの重ね合わせ体験'
-  },
-  {
-    id: 'C',
-    name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
-    room: 'L404',
-    img: 'assets/sont.png',
-    mapIcon: 'sony',
-    icon: '💡',
-    desc: 'ソニーグループの半導体部門において開発・生産を担う拠点。グループが生産するイメージセンサーは世界シェアNo.1 。',
-    tags:['LSI', 'MCU', 'IoT'],
-    giveaway:'オリジナルICチップキーホルダー',
-    condition:'IoTデバイスのデモを体験'
-  },
-  {
     id: 'D',
     name: '東京エレクトロン宮城株式会社',
     room: 'L402',
@@ -1430,6 +1393,30 @@ const BOOTH_DATA = [
     condition:'製品サンプルに触れてみる'
   },
   {
+    id: 'A',
+    name: '株式会社レスター',
+    room: 'L404',
+    img: 'assets/restar.jpeg',
+    mapIcon: 'restar',
+    icon: '⚡',
+    desc: '国内外の最先端の半導体や電子部品を扱うエレクトロニクス商社。多数のエンジニアが在籍、回路設計・開発等のサービスを提供。',
+    tags:['エッチング', '製造装置', 'プラズマ'],
+    giveaway:'TELオリジナルウエハーストラップ',
+    condition:'エッチング工程に関するクイズに正解'
+  },
+  {
+    id: 'C',
+    name: 'ソニーセミコンダクタマニュファクチャリング株式会社',
+    room: 'L404',
+    img: 'assets/sont.png',
+    mapIcon: 'sony',
+    icon: '💡',
+    desc: 'ソニーグループの半導体部門において開発・生産を担う拠点。グループが生産するイメージセンサーは世界シェアNo.1 。',
+    tags:['LSI', 'MCU', 'IoT'],
+    giveaway:'オリジナルICチップキーホルダー',
+    condition:'IoTデバイスのデモを体験'
+  },
+  {
     id: 'F',
     name: 'ラピスセミコンダクタ株式会社',
     room: 'L405',
@@ -1440,6 +1427,18 @@ const BOOTH_DATA = [
     tags:['計測', '成膜', 'コントローラー'],
     giveaway:'液晶温度計カード',
     condition:'膜厚計のデモンストレーションを見学'
+  },
+  {
+    id: 'B',
+    name: 'キオクシア岩手株式会社',
+    room: 'L406',
+    img: 'assets/kioxia.png',
+    mapIcon: 'kioxia',
+    icon: '🖼️',
+    desc: 'キオクシアグループとして世界シェア第2位のフラッシュメモリ生産量。グループの将来の一翼を担う3次元フラッシュメモリの量産工場。',
+    tags:['フォトマスク', 'EUV', 'リソグラフィ'],
+    giveaway:'フォトマスクデザイン定規',
+    condition:'ミニチュアマスクの重ね合わせ体験'
   },
 ];
 
@@ -1482,7 +1481,6 @@ const $app = {
   boothSheet: {
     el: document.getElementById('booth-sheet'),
     backdrop: document.querySelector('.bottom-sheet-backdrop[data-target="booth"]'),
-    icon: document.getElementById('booth-sheet-icon'),
     title: document.getElementById('booth-sheet-title'),
     desc: document.getElementById('booth-sheet-desc'),
     closeBtn: document.getElementById('close-booth-sheet')
@@ -2086,7 +2084,6 @@ function updateActivePage() {
 
 // ========== ブース 詳細シート ==========
 function openBoothSheet(booth) {
-  $app.boothSheet.icon.innerHTML = `<img src="${booth.img}" alt="${booth.name}" class="w-full h-full object-contain bg-white" />`;
   $app.boothSheet.title.textContent = booth.name;
   $app.boothSheet.desc.textContent = booth.desc;
 
