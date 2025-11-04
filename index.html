@@ -525,31 +525,26 @@ li .acquired-check {
     .company-logo-item {
       aspect-ratio: 1;
       border-radius: 12px;
-      overflow: hidden;
+      overflow: visible;
       background: white;
       border: 2px solid #e2e8f0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
+      display: block;
     }
 
-    .company-name-text {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #1e293b;
-      text-align: center;
-      line-height: 1.2;
-      font-family: 'Noto Sans JP', sans-serif;
+    .company-logo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
       transition: opacity 0.3s ease;
     }
 
-    .company-logo-item.not-acquired .company-name-text {
+    .company-logo-item.not-acquired img {
       opacity: 0.4;
-      color: #94a3b8;
+      filter: grayscale(100%);
     }
 
     .company-logo-item.acquired {
@@ -557,9 +552,25 @@ li .acquired-check {
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    .company-logo-item.acquired .company-name-text {
+    .company-logo-item.acquired img {
       opacity: 1;
-      color: #1e293b;
+      filter: grayscale(0%);
+    }
+
+    .company-room-badge {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+      white-space: nowrap;
+      z-index: 10;
     }
 
     .company-logo-item.acquired::after {
@@ -1367,12 +1378,12 @@ const IMG_DEFAULT = 'logo.jpg';
 const MAX_POINTS = 6;
 
 const BOOTH_ANCHORS = {
-  A: { x: 0.82, y: 0.60 },
-  B: { x: 0.85, y: 0.22 },
-  C: { x: 0.82, y: 0.83 },
+  A: { x: 0.85, y: 0.22 },
+  B: { x: 0.82, y: 0.83 },
+  C: { x: 0.83, y: 0.35 },
   D: { x: 0.175, y: 0.60 },
   E: { x: 0.175, y: 0.83 },
-  F: { x: 0.83, y: 0.35 }
+  F: { x: 0.82, y: 0.60 }
 };
 
 const BOOTH_DATA = [
@@ -2022,9 +2033,13 @@ function renderProgress() {
     $app.progress.logoGrid.innerHTML = '';
     BOOTH_DATA.forEach(booth => {
       const isAcquired = state.acquiredStamps.has(booth.id);
+      const imgSrc = isAcquired ? `assets/${booth.mapIcon}2.png` : `assets/${booth.mapIcon}.png`;
       const logoItem = document.createElement('div');
       logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
-      logoItem.innerHTML = `<div class="text-center"><div class="text-xs font-semibold text-slate-600 mb-1">${booth.room}</div><div class="company-name-text">${booth.name}</div></div>`;
+      logoItem.innerHTML = `
+        <div class="company-room-badge">${booth.room}</div>
+        <img src="${imgSrc}" alt="${booth.name}">
+      `;
       $app.progress.logoGrid.appendChild(logoItem);
     });
   }
