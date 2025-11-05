@@ -2380,6 +2380,7 @@ let useBackCamera = true;
 let trackWithTorch = null;
 let scanning = false;
 let codeReader = null;
+let scanTimerId = null; // iPhone等でのメモリリーク防止用
 
 async function openFullscreenScanner() {
   try {
@@ -2421,8 +2422,8 @@ async function startCamera() {
     const constraints = {
       video: {
         facingMode: useBackCamera ? 'environment' : 'user',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 640 },  // iPhone13/14での負荷軽減のため解像度を下げる
+        height: { ideal: 480 }
       }
     };
 
@@ -2485,14 +2486,22 @@ async function scanQRCode() {
     // 見つからない等は無視してループ継続
   }
 
-  // 競合状態を防ぐ: 次のフレームまで待ってから再帰
+  // iPhone13/14でのメモリリーク・クラッシュ防止:
+  // requestAnimationFrame(毎フレーム=約60回/秒)の代わりに
+  // setTimeout(300ms間隔)を使用してCPU/メモリ負荷を軽減
   if (scanning) {
-    requestAnimationFrame(scanQRCode); // 矢印関数を削除（同期的に再帰）
+    scanTimerId = setTimeout(scanQRCode, 300);
   }
 }
 
 async function stopCamera() {
   scanning = false;
+
+  // タイマーをクリア（メモリリーク防止）
+  if (scanTimerId) {
+    clearTimeout(scanTimerId);
+    scanTimerId = null;
+  }
 
   if (codeReader) {
     try {
