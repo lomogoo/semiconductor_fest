@@ -2033,8 +2033,9 @@ function adjustBoothCompanyNameSizes() {
 }
 
 function renderProgress() {
-  // totalPoints を「獲得スタンプ数」として扱う前提
-  const n = state.totalPoints;
+  try {
+    // totalPoints を「獲得スタンプ数」として扱う前提
+    const n = state.totalPoints;
 
   $app.progress.badge.textContent = `${state.totalPoints}pt`;
 
@@ -2056,7 +2057,7 @@ function renderProgress() {
       logoItem.className = `company-logo-item ${isAcquired ? 'acquired' : 'not-acquired'}`;
       logoItem.innerHTML = `
         <div class="company-room-badge">${booth.room}</div>
-        <img src="${imgSrc}" alt="${booth.name}">
+        <img src="${imgSrc}" alt="${booth.name}" loading="lazy">
       `;
       $app.progress.logoGrid.appendChild(logoItem);
     });
@@ -2073,8 +2074,12 @@ function renderProgress() {
     $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
   }
 
-  updateAcquiredBadges();
-  state.prevCount = n;
+    updateAcquiredBadges();
+    state.prevCount = n;
+  } catch (error) {
+    console.error('renderProgress でエラーが発生しました:', error);
+    // エラーが発生してもアプリを続行
+  }
 }
 
 function updateAcquiredBadges() {
@@ -2423,14 +2428,15 @@ function showToast(msg) {
 const boothIconsCache = new Map();
 
 function layoutBoothIcons() {
-  const g = $app.map.iconsGroup;
-  if (!g) return;
+  try {
+    const g = $app.map.iconsGroup;
+    if (!g) return;
 
-  const vb = $app.map.svg.viewBox.baseVal;
-  const base = Math.min(vb.width, vb.height);
-  const size = Math.max(100, Math.min(280, Math.round(base * 0.14)));
+    const vb = $app.map.svg.viewBox.baseVal;
+    const base = Math.min(vb.width, vb.height);
+    const size = Math.max(100, Math.min(280, Math.round(base * 0.14)));
 
-  Object.keys(BOOTH_ANCHORS).forEach(id => {
+    Object.keys(BOOTH_ANCHORS).forEach(id => {
     const a = BOOTH_ANCHORS[id];
     const cx = vb.width * a.x;
     const cy = vb.height * a.y;
@@ -2519,66 +2525,80 @@ function layoutBoothIcons() {
       g.appendChild(group);
     }
 
-    // 位置とサイズを更新
+    // 位置とサイズを更新（nullチェック追加）
     const baseRect = group.querySelector('.booth-base-rect');
-    baseRect.setAttribute('x', x + 1);
-    baseRect.setAttribute('y', y + 1);
-    baseRect.setAttribute('width', size);
-    baseRect.setAttribute('height', size);
-    baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1');
-    baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
+    if (baseRect) {
+      baseRect.setAttribute('x', x + 1);
+      baseRect.setAttribute('y', y + 1);
+      baseRect.setAttribute('width', size);
+      baseRect.setAttribute('height', size);
+      baseRect.setAttribute('fill', isAcquired ? '#34d399' : '#cbd5e1');
+      baseRect.setAttribute('stroke', isAcquired ? '#10b981' : '#64748b');
+    }
 
     const border = group.querySelector('.booth-border');
-    border.setAttribute('x', x);
-    border.setAttribute('y', y);
-    border.setAttribute('width', size);
-    border.setAttribute('height', size);
-    border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
+    if (border) {
+      border.setAttribute('x', x);
+      border.setAttribute('y', y);
+      border.setAttribute('width', size);
+      border.setAttribute('height', size);
+      border.setAttribute('stroke', isAcquired ? 'url(#acquired-gradient)' : 'url(#border-gradient)');
+    }
 
     const innerShadow = group.querySelector('.booth-inner-shadow');
-    innerShadow.setAttribute('x', x + 4);
-    innerShadow.setAttribute('y', y + 4);
-    innerShadow.setAttribute('width', size - 8);
-    innerShadow.setAttribute('height', size - 8);
+    if (innerShadow) {
+      innerShadow.setAttribute('x', x + 4);
+      innerShadow.setAttribute('y', y + 4);
+      innerShadow.setAttribute('width', size - 8);
+      innerShadow.setAttribute('height', size - 8);
+    }
 
     const clipRect = group.querySelector('.booth-clip-rect');
-    clipRect.setAttribute('x', x + 5);
-    clipRect.setAttribute('y', y + 5);
-    clipRect.setAttribute('width', size - 10);
-    clipRect.setAttribute('height', size - 10);
+    if (clipRect) {
+      clipRect.setAttribute('x', x + 5);
+      clipRect.setAttribute('y', y + 5);
+      clipRect.setAttribute('width', size - 10);
+      clipRect.setAttribute('height', size - 10);
+    }
 
     const fillRect = group.querySelector('.booth-fill-rect');
-    fillRect.setAttribute('x', x + 5);
-    fillRect.setAttribute('y', y + 5);
-    fillRect.setAttribute('width', size - 10);
-    fillRect.setAttribute('height', size - 10);
+    if (fillRect) {
+      fillRect.setAttribute('x', x + 5);
+      fillRect.setAttribute('y', y + 5);
+      fillRect.setAttribute('width', size - 10);
+      fillRect.setAttribute('height', size - 10);
+    }
 
     // アイコン画像を更新
     const iconSuffix = isAcquired ? '2' : '';
     const iconPath = booth.mapIcon ? `booth/${booth.mapIcon}${iconSuffix}.png` : '';
     const iconImage = group.querySelector('.booth-icon-image');
-    iconImage.setAttribute('x', x + 5);
-    iconImage.setAttribute('y', y + 5);
-    iconImage.setAttribute('width', size - 10);
-    iconImage.setAttribute('height', size - 10);
-    iconImage.setAttribute('href', iconPath);
+    if (iconImage) {
+      iconImage.setAttribute('x', x + 5);
+      iconImage.setAttribute('y', y + 5);
+      iconImage.setAttribute('width', size - 10);
+      iconImage.setAttribute('height', size - 10);
+      iconImage.setAttribute('href', iconPath);
+    }
 
     // チェックマークの表示/非表示
     const checkBg = group.querySelector('.booth-check-bg');
     const checkMark = group.querySelector('.booth-check-mark');
-    if (isAcquired) {
-      checkBg.setAttribute('cx', x + size - 20);
-      checkBg.setAttribute('cy', y + 20);
-      checkBg.setAttribute('r', size * 0.12);
-      checkBg.style.display = 'block';
+    if (checkBg && checkMark) {
+      if (isAcquired) {
+        checkBg.setAttribute('cx', x + size - 20);
+        checkBg.setAttribute('cy', y + 20);
+        checkBg.setAttribute('r', size * 0.12);
+        checkBg.style.display = 'block';
 
-      checkMark.setAttribute('x', x + size - 20);
-      checkMark.setAttribute('y', y + 20);
-      checkMark.setAttribute('font-size', size * 0.12);
-      checkMark.style.display = 'block';
-    } else {
-      checkBg.style.display = 'none';
-      checkMark.style.display = 'none';
+        checkMark.setAttribute('x', x + size - 20);
+        checkMark.setAttribute('y', y + 20);
+        checkMark.setAttribute('font-size', size * 0.12);
+        checkMark.style.display = 'block';
+      } else {
+        checkBg.style.display = 'none';
+        checkMark.style.display = 'none';
+      }
     }
   });
 
@@ -2668,10 +2688,14 @@ function layoutBoothIcons() {
     $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
   }
 
-  g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
-    const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
-    if (booth) openBoothSheet(booth);
-  }));
+    g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
+      const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
+      if (booth) openBoothSheet(booth);
+    }));
+  } catch (error) {
+    console.error('layoutBoothIcons でエラーが発生しました:', error);
+    // エラーが発生してもアプリを続行
+  }
 }
 
 // ========== アンケ注目UI(選択状態の見た目) ==========
