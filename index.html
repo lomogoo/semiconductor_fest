@@ -2407,41 +2407,82 @@ function closeFullscreenScanner() {
 
 async function startCamera() {
   try {
+    // 既存のストリームを確実にクリーンアップ（重要）
+    if (scanStream) {
+      console.log('[startCamera] Cleaning up existing stream...');
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+
     if ($app.fullscreenScanner.status) {
       $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
     }
 
+    // ZXing初期化（エラーハンドリング強化）
     if (!codeReader) {
-      codeReader = new ZXing.BrowserQRCodeReader();
+      try {
+        codeReader = new ZXing.BrowserQRCodeReader();
+        console.log('[startCamera] ZXing reader initialized');
+      } catch (zxingErr) {
+        console.error('[startCamera] ZXing initialization failed:', zxingErr);
+        throw new Error('QRスキャナーの初期化に失敗しました');
+      }
     }
 
-    // iPhone13/14でのメモリクラッシュ対策: 解像度を大幅に削減
+    // iPhone13/14でのクラッシュ対策: 解像度を最小限に削減
     const constraints = {
       video: {
         facingMode: useBackCamera ? 'environment' : 'user',
-        width: { ideal: 480, max: 640 },
-        height: { ideal: 360, max: 480 },
-        frameRate: { ideal: 15, max: 24 }  // フレームレートも制限
+        width: { ideal: 320, max: 480 },   // さらに削減: 480→320
+        height: { ideal: 240, max: 360 },  // さらに削減: 360→240
+        frameRate: { ideal: 10, max: 15 }  // さらに削減: 15→10
       }
     };
 
-    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+    console.log('[startCamera] Requesting camera with constraints:', constraints);
+
+    // タイムアウト付きでカメラアクセス
+    const cameraPromise = navigator.mediaDevices.getUserMedia(constraints);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Camera access timeout')), 8000)
+    );
+
+    scanStream = await Promise.race([cameraPromise, timeoutPromise]);
+    console.log('[startCamera] Camera stream acquired');
+
     if ($app.fullscreenScanner.video) {
       $app.fullscreenScanner.video.srcObject = scanStream;
 
-      // iPhone対策: ビデオの再生を待ってからスキャン開始
+      // iPhone対策: ビデオの再生を待つ（タイムアウト延長）
       await new Promise((resolve, reject) => {
         const video = $app.fullscreenScanner.video;
-        video.onloadedmetadata = () => {
+        let resolved = false;
+
+        const onLoadedMetadata = () => {
+          if (resolved) return;
           video.play()
-            .then(resolve)
+            .then(() => {
+              resolved = true;
+              resolve();
+            })
             .catch(reject);
         };
-        // タイムアウト設定
-        setTimeout(() => reject(new Error('Video load timeout')), 5000);
+
+        video.onloadedmetadata = onLoadedMetadata;
+
+        // タイムアウト延長
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            reject(new Error('Video load timeout'));
+          }
+        }, 10000); // 5秒→10秒に延長
       });
+
+      console.log('[startCamera] Video playback started');
     }
 
+    // Torch機能の確認
     try {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
@@ -2456,7 +2497,7 @@ async function startCamera() {
         }
       }
     } catch (e) {
-      console.warn('Torch not available');
+      console.warn('[startCamera] Torch not available:', e);
       if ($app.fullscreenScanner.torchBtn) {
         $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
       }
@@ -2467,73 +2508,121 @@ async function startCamera() {
       $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
     }
 
-    // iPhone対策: スキャン開始前に少し待つ
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // iPhone対策: スキャン開始前に待機時間を延長
+    console.log('[startCamera] Waiting before starting scan...');
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 500ms→1000msに延長
+
+    console.log('[startCamera] Starting QR scan loop');
     scanQRCode();
   } catch (err) {
-    console.error('カメラエラー:', err, { useBackCamera });
+    console.error('[startCamera] Camera error:', err, { useBackCamera });
+
+    // エラー時にストリームをクリーンアップ
+    if (scanStream) {
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+
+    scanning = false;
+
     if ($app.fullscreenScanner.status) {
       $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+    }
+
+    // ユーザーにわかりやすいエラーメッセージ
+    if (err.name === 'NotAllowedError') {
+      alert('カメラへのアクセスが拒否されました。\nブラウザの設定でカメラ権限を許可してください。');
+    } else if (err.name === 'NotFoundError') {
+      alert('カメラが見つかりませんでした。');
+    } else if (err.message.includes('timeout')) {
+      alert('カメラの起動がタイムアウトしました。\nもう一度お試しください。');
+    } else {
+      alert('カメラの起動に失敗しました。\nページを再読み込みしてください。');
     }
   }
 }
 
 async function scanQRCode() {
-  if (!scanning || !$app.fullscreenScanner.video || !$app.fullscreenScanner.video.srcObject) return;
+  if (!scanning || !$app.fullscreenScanner.video || !$app.fullscreenScanner.video.srcObject) {
+    console.log('[scanQRCode] Scan aborted: invalid state');
+    return;
+  }
 
   try {
-    const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
+    // ZXingのdecodeが重いのでタイムアウトを設定
+    const decodePromise = codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Decode timeout')), 3000)
+    );
+
+    const result = await Promise.race([decodePromise, timeoutPromise]);
+
     if (result && result.text) {
+      console.log('[scanQRCode] QR code detected:', result.text);
       scanning = false;
       await handleScanResult(result.text);
       return; // 成功したら終了
     }
   } catch (err) {
-    // 見つからない等は無視してループ継続
+    // デコードエラーやタイムアウトは無視してループ継続
+    if (err.message !== 'Decode timeout' && err.name !== 'NotFoundException') {
+      console.warn('[scanQRCode] Scan error:', err.message);
+    }
   }
 
   // iPhone13/14でのメモリリーク・クラッシュ防止:
-  // requestAnimationFrame(毎フレーム=約60回/秒)の代わりに
-  // setTimeout(500ms間隔)を使用してCPU/メモリ負荷を軽減
+  // スキャン間隔を1秒に延長してCPU/メモリ負荷を大幅に軽減
   if (scanning) {
-    scanTimerId = setTimeout(scanQRCode, 500);
+    scanTimerId = setTimeout(scanQRCode, 1000); // 500ms→1000msに延長
   }
 }
 
 async function stopCamera() {
+  console.log('[stopCamera] Stopping camera...');
   scanning = false;
 
   // タイマーをクリア（メモリリーク防止）
   if (scanTimerId) {
     clearTimeout(scanTimerId);
     scanTimerId = null;
+    console.log('[stopCamera] Scan timer cleared');
   }
 
+  // ZXingのリセット
   if (codeReader) {
     try {
       await codeReader.reset();
+      console.log('[stopCamera] Code reader reset');
     } catch (e) {
-      console.warn('Failed to reset code reader', e);
+      console.warn('[stopCamera] Failed to reset code reader:', e);
     }
   }
 
+  // カメラストリームの停止
   if (scanStream) {
+    const trackCount = scanStream.getTracks().length;
     scanStream.getTracks().forEach(t => {
       t.stop();
-      console.log('Track stopped:', t.label);
+      console.log('[stopCamera] Track stopped:', t.label);
     });
     scanStream = null;
+    console.log(`[stopCamera] ${trackCount} track(s) stopped`);
   }
 
+  // ビデオ要素のクリーンアップ
   if ($app.fullscreenScanner.video && $app.fullscreenScanner.video.srcObject) {
     $app.fullscreenScanner.video.srcObject = null;
+    console.log('[stopCamera] Video srcObject cleared');
   }
 
+  // Torch設定のリセット
   trackWithTorch = null;
   if ($app.fullscreenScanner.torchBtn) {
     $app.fullscreenScanner.torchBtn.dataset.on = '0';
     $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
   }
+
+  console.log('[stopCamera] Camera stopped successfully');
 }
 
 async function toggleTorch() {
