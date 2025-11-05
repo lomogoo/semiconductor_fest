@@ -1079,12 +1079,12 @@ li .acquired-check {
     <div id="badge-just-claimed" class="p-6 space-y-6 hidden">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ（横ver）" class="w-full h-full object-contain" />
+          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" />
         </div>
         <div>
           <div class="text-3xl font-bold text-emerald-600 mb-3">🎉 交換しました！</div>
           <div class="text-base text-slate-700 leading-relaxed">
-            むすび丸 ピンバッジ（横ver）を交換しました。<br>
+            むすび丸 ピンバッジを交換しました。<br>
             <span class="font-bold text-amber-700 mt-2 inline-block">📍 この画面をL404教室にて、スタッフにお見せください</span>
           </div>
         </div>
@@ -1098,10 +1098,10 @@ li .acquired-check {
     <div id="badge-exchange-interface" class="p-6 space-y-6">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ（横ver）" class="w-full h-full object-contain" />
+          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" />
         </div>
         <div>
-          <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ピンバッジ（横ver）</div>
+          <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ピンバッジ</div>
           <div class="text-sm text-slate-600">アンケート回答特典</div>
         </div>
       </div>
@@ -1233,7 +1233,7 @@ li .acquired-check {
               <h3 class="font-semibold text-sky-800">スタンプ進捗</h3>
               <div class="flex items-center gap-2">
                 <span id="rank-percentile" class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium"></span>
-                <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono">0pt</span>
+                <span id="progress-badge" class="text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-mono" style="display: none;">0pt</span>
               </div>
             </div>
             <!-- 企業ロゴグリッド (2×3) -->
@@ -1273,7 +1273,7 @@ li .acquired-check {
                   <span class="text-lg">📝</span>
                   <span id="survey-action-text">アンケート回答</span>
                 </div>
-                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でむすび丸 ピンバッジ（横ver）プレゼント！</span>
+                <span id="survey-action-subtext" class="text-xs opacity-90 font-normal">アンケート回答でむすび丸 ピンバッジプレゼント！</span>
               </button>
             </div>
           </div>
@@ -2082,7 +2082,7 @@ function renderProgress() {
     // totalPoints を「獲得スタンプ数」として扱う前提
     const n = state.totalPoints;
 
-  $app.progress.badge.textContent = `${state.totalPoints}pt`;
+  // $app.progress.badge.textContent = `${state.totalPoints}pt`; // pt表記を非表示
 
   if (state.percentile !== null) {
     const displayPercentile = (state.percentile === 0) ? 1 : state.percentile;
@@ -2114,7 +2114,7 @@ function renderProgress() {
   }
 
   if (n >= MAX_POINTS) {
-    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong> お疲れ様でした！';
+    $app.progress.msg.innerHTML = '🎉 <strong>全てのブースを回りました！</strong>';
   } else {
     $app.progress.msg.innerHTML = `あと<strong>${MAX_POINTS - n}</strong>ブースで全スタンプコンプリート！`;
   }
