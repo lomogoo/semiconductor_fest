@@ -288,25 +288,6 @@
       z-index: 101;
     }
 
-    .stamp-category-card, .stamp-booth-card {
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    .stamp-category-card:hover, .stamp-booth-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-
-    .booth-company-name {
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
-      flex: 1;
-      line-height: 1.2;
-    }
 
     .booth-progress {
       font-size: 11px;
@@ -557,13 +538,13 @@ li .acquired-check {
     }
     /* 企業ロゴグリッドのスタイル */
     #company-logo-grid {
-      padding: 0.5rem;
-      min-height: 350px; /* CLS対策: 画像読み込み前の高さ確保 (3行 × 約116px) */
+      padding: 0.25rem;
+      min-height: 240px; /* CLS対策: 画像読み込み前の高さ確保 (2行 × 約120px) - 行間を詰めた */
     }
 
     .company-logo-item {
       aspect-ratio: 1;
-      min-height: 100px; /* CLS対策: 最小サイズ確保 */
+      min-height: 80px; /* CLS対策: 最小サイズ確保 - スマホ向けに縮小 */
       border-radius: 12px;
       overflow: visible;
       background: white;
@@ -1341,7 +1322,7 @@ li .acquired-check {
               </div>
             </div>
             <!-- 企業ロゴグリッド (2×3) -->
-            <div id="company-logo-grid" class="grid grid-cols-3 gap-3 mt-3">
+            <div id="company-logo-grid" class="grid grid-cols-3 gap-2 mt-3">
               <!-- ロゴはJavaScriptで動的に生成 -->
             </div>
             <p id="progress-msg" class="mt-4 text-sm text-center text-slate-600"></p>
@@ -1383,54 +1364,6 @@ li .acquired-check {
           </div>
         </div>
 
-        <div class="liquid-glass rounded-3xl p-4">
-          <h3 class="font-semibold text-sky-800 mb-3">スタンプ</h3>
-          <div class="space-y-3" id="stamp-categories">
-            <!-- 6社の企業ブース -->
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="D">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">東京エレクトロン宮城株式会社</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="E">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">TOPPAN株式会社</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="A">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">株式会社レスター</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="C">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">ソニーセミコンダクタマニュファクチャリング株式会社</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="F">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">ラピスセミコンダクタ株式会社</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-            <div class="stamp-booth-card liquid-glass rounded-2xl p-4 border border-white/50" data-booth-id="B">
-              <div class="flex items-center justify-between gap-2">
-                <div class="booth-company-name font-semibold text-slate-800">キオクシア岩手株式会社</div>
-                <div class="text-slate-400 flex-shrink-0">›</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
       </div>
 
       <div id="page-map" class="page p-3 pt-2">
@@ -2858,9 +2791,6 @@ function layoutBoothIcons() {
     if (!group) {
       // 初回作成
       group = document.createElementNS('http://www.w3.org/2000/svg','g');
-      group.setAttribute('cursor', 'pointer');
-      group.setAttribute('role', 'button');
-      group.setAttribute('aria-label', booth.name);
       group.dataset.id = id;
 
       const baseRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -3019,17 +2949,8 @@ function layoutBoothIcons() {
 
 // ========== マップアイコンのイベント設定（イベント委譲でメモリリーク防止） ==========
 function setupMapIconEvents() {
-  const g = $app.map.iconsGroup;
-  if (!g) return;
-
-  // イベント委譲：親要素で一度だけリスナー登録
-  g.addEventListener('click', (e) => {
-    const boothEl = e.target.closest('g[data-id]');
-    if (boothEl) {
-      const booth = BOOTH_DATA.find(b => b.id === boothEl.dataset.id);
-      if (booth) openBoothSheet(booth);
-    }
-  });
+  // マップアイコンはクリックしても反応しないように変更
+  // イベントリスナーを設定しない
 }
 
 // ========== アンケ注目UI(選択状態の見た目・最適化済み) ==========
@@ -3139,16 +3060,6 @@ async function init() {
     });
   }
 
-  // 各企業ブースカード
-  document.querySelectorAll('.stamp-booth-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const boothId = card.dataset.boothId;
-      const booth = BOOTH_DATA.find(b => b.id === boothId);
-      if (booth) {
-        openBoothSheet(booth);
-      }
-    });
-  });
 
   // ブースシートの閉じる動き
   if ($app.boothSheet.backdrop) {
