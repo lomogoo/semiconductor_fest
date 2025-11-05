@@ -49,7 +49,15 @@
       z-index: 0;
     }
 
-    #app { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+    #app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      visibility: hidden; /* 初期化完了まで非表示 */
+      opacity: 0;
+    }
     main { flex: 1; overflow-y: auto; position: relative; }
 
     .page { display: none; width: 100%; position: relative; }
@@ -646,7 +654,10 @@ li .acquired-check {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 10000; /* より高いz-indexで確実に最前面に */
+    opacity: 1;
+    width: 100vw;
+    height: 100vh;
   }
 
   .loading-spinner {
@@ -3154,6 +3165,14 @@ async function init() {
     // 企業名のフォントサイズを調整
     adjustBoothCompanyNameSizes();
 
+    // #appを表示（初期化完了後）
+    const app = document.getElementById('app');
+    if (app) {
+      app.style.visibility = 'visible';
+      app.style.opacity = '1';
+      app.style.transition = 'opacity 0.3s ease';
+    }
+
     // ローディング画面を非表示
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
@@ -3165,6 +3184,13 @@ async function init() {
     }
   } catch (error) {
     console.error('init でエラーが発生しました:', error);
+
+    // エラー時も#appを表示
+    const app = document.getElementById('app');
+    if (app) {
+      app.style.visibility = 'visible';
+      app.style.opacity = '1';
+    }
 
     // エラー時もローディング画面を消す
     const loadingScreen = document.getElementById('loading-screen');
