@@ -1818,7 +1818,7 @@ async function submitSurvey(e) {
     const result = await callEdgeFunction('submit-survey', {
       userId: state.user.id,
       surveyData
-    });
+    }, 5000); // タイムアウトを5秒に短縮
 
     if (result.success) {
       state.surveyCompleted = true;
@@ -1902,7 +1902,7 @@ async function claimBadge() {
   try {
     const result = await callEdgeFunction('claim-badge', {
       userId: state.user.id
-    });
+    }, 5000); // タイムアウトを5秒に短縮
 
     if (result.success) {
       state.user.badge_claimed = true;
@@ -1998,7 +1998,7 @@ async function ensureAuth() {
     const serverData = await callEdgeFunction('get-user-data', {
       userId: uuid,
       registrationType: registrationType
-    });
+    }, 5000); // タイムアウトを5秒に短縮（初期化高速化）
 
     if (serverData && serverData.user) {
       console.log('[ensureAuth] Received from Supabase:', {
@@ -2060,7 +2060,7 @@ async function syncPointsFromServer() {
   try {
     const data = await callEdgeFunction('get-user-data', {
       userId: state.user.id
-    });
+    }, 5000); // タイムアウトを5秒に短縮
 
     if (data && data.user) {
       state.points = data.user.redeemable_points ?? 0;
@@ -2087,7 +2087,9 @@ async function syncPointsFromServer() {
       state.acquiredStamps = new Set(data.progress.acquiredBooths);
     }
 
-    await updatePercentile();
+    // percentileは非同期で取得（初期化を待たない）
+    updatePercentile().catch(err => console.error('[syncPointsFromServer] Percentile update failed:', err));
+
     renderAll();
 
     // Update survey action button to reflect badge_claimed status
@@ -2097,7 +2099,8 @@ async function syncPointsFromServer() {
     // タイムアウトやネットワークエラーでも、ローカルデータで表示を継続
     // ローカルストレージのデータを使って表示を更新
     try {
-      await updatePercentile();
+      // percentileは非同期で取得（初期化を待たない）
+      updatePercentile().catch(err => console.error('[syncPointsFromServer] Percentile update failed:', err));
       renderAll();
     } catch (renderErr) {
       console.error('[syncPointsFromServer] Render failed:', renderErr);
@@ -2114,7 +2117,7 @@ async function updatePercentile() {
   try {
     const result = await callEdgeFunction('get-percentile', {
       userId: state.user.id
-    });
+    }, 5000); // タイムアウトを5秒に短縮
     state.percentile = result.percentile;
   } catch (err) {
     console.error('Failed to calculate percentile:', err);
@@ -2632,7 +2635,7 @@ async function handleScanResult(rawText) {
       userId: state.user.id,
       boothId,
       stampCode
-    });
+    }, 5000); // タイムアウトを5秒に短縮
 
     if (result.success) {
       console.log('[DEBUG] QR Success - Before update:', {
@@ -2667,8 +2670,8 @@ async function handleScanResult(rawText) {
 
       showFullscreenMessage(`✅ ${result.pointsAdded}pt獲得！`, false);
 
-      // UIを完全に更新（パーセンタイル＋全UI）
-      await updatePercentile();
+      // UIを完全に更新（パーセンタイルは非同期、UIは即座に更新）
+      updatePercentile().catch(err => console.error('[handleScanResult] Percentile update failed:', err));
       console.log('[DEBUG] Before renderAll()');
       renderAll();
       console.log('[DEBUG] After renderAll()');
@@ -2714,11 +2717,22 @@ async function autoGrantStamp(stampId) {
       userId: state.user.id,
       boothId,
       stampCode
-    });
+    }, 5000); // タイムアウトを5秒に短縮
 
     if (result.success) {
       showToast(`✅ ${result.pointsAdded}pt獲得！`);
-      await syncPointsFromServer();
+
+      // syncPointsFromServer()を呼ばず、直接stateを更新（重複リクエスト防止）
+      state.acquiredStamps.add(boothId.toUpperCase());
+      state.totalPoints = (state.totalPoints || 0) + (result.pointsAdded || 0);
+      state.points = (state.points || 0) + (result.pointsAdded || 0);
+
+      // percentileは非同期で更新
+      updatePercentile().catch(err => console.error('[autoGrantStamp] Percentile update failed:', err));
+
+      // 画面を更新
+      renderAll();
+
       return true;
     }
   } catch (error) {
@@ -3003,13 +3017,13 @@ async function init() {
     // 匿名ユーザー準備 & サーバー側と同期 (ユーザー作成もここでやる)
     await ensureAuth();
 
-  // 最初の最新状態を取得（ポイント/スタンプ一覧/percentileなど）
-  await syncPointsFromServer();
-
-  // stampパラメータがあれば即付与
+  // stampパラメータがあれば即付与（syncPointsFromServerは不要、autoGrantStamp内でrenderAll実行）
   if (stampId) {
     await autoGrantStamp(stampId);
     window.history.replaceState({}, '', window.location.pathname);
+  } else {
+    // stampがない場合のみ通常の同期を実行
+    await syncPointsFromServer();
   }
 
   // 事前登録ユーザーの場合、パラメータ付きURLからアクセス時にUUID QRを自動表示
