@@ -1428,26 +1428,44 @@ li .acquired-check {
 const SUPABASE_URL = "https://fsaeuowdijoeqhnrqazx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYWV1b3dkaWpvZXFobnJxYXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MjA0MjYsImV4cCI6MjA3NTQ5NjQyNn0.xgIQ9jf3qa4oy6Dbc8mVaP8woRDWBwMxLAJwiCGEWmk";
 
-async function callEdgeFunction(functionName, body = {}) {
+async function callEdgeFunction(functionName, body = {}, timeout = 10000) {
   const headers = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY
   };
+
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/${functionName}`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body)
+    // タイムアウト処理を追加（iPhone等でのクラッシュ防止）
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/${functionName}`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        console.error(`API Response:`, response.status, error);
+        throw new Error(error.error || `API Error: ${response.status}`);
       }
-    );
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error(`API Response:`, response.status, error);
-      throw new Error(error.error || `API Error: ${response.status}`);
+      return await response.json();
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        console.error(`[callEdgeFunction] ${functionName} timed out after ${timeout}ms`);
+        throw new Error(`Request timeout: ${functionName}`);
+      }
+      throw fetchError;
     }
-    return await response.json();
   } catch (error) {
     console.error(`[callEdgeFunction] ${functionName} failed:`, error);
     throw error;
@@ -2017,7 +2035,13 @@ async function ensureAuth() {
     }
   } catch (err) {
     console.error('[ensureAuth] Failed to sync user from server:', err);
-    // fail soft: アプリは動かす
+    // タイムアウトやネットワークエラーでもアプリは動作を継続（オフライン対応）
+    // ローカルストレージから前回のデータを復元
+    const savedUser = loadLocalUser();
+    if (savedUser && savedUser.id === uuid) {
+      state.user = savedUser;
+      console.log('[ensureAuth] Using cached user data:', state.user);
+    }
   }
   updateSurveyActionButton();
 }
@@ -2065,6 +2089,14 @@ async function syncPointsFromServer() {
     updateSurveyActionButton();
   } catch (err) {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
+    // タイムアウトやネットワークエラーでも、ローカルデータで表示を継続
+    // ローカルストレージのデータを使って表示を更新
+    try {
+      await updatePercentile();
+      renderAll();
+    } catch (renderErr) {
+      console.error('[syncPointsFromServer] Render failed:', renderErr);
+    }
   }
 }
 
