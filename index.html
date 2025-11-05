@@ -630,10 +630,50 @@ li .acquired-check {
     animation: none !important;
   }
 
+  /* ========== ローディング画面 ========== */
+  #loading-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f8 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #0ea5e9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
   </style>
   
 </head>
 <body>
+  <!-- ローディング画面 -->
+  <div id="loading-screen">
+    <div style="text-align: center;">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">読み込み中...</p>
+    </div>
+  </div>
+
   <!-- General Modal Backdrop -->
   <div id="modal-backdrop" class="auth-backdrop"></div>
 
@@ -3004,8 +3044,25 @@ async function init() {
 
     // 企業名のフォントサイズを調整
     adjustBoothCompanyNameSizes();
+
+    // ローディング画面を非表示
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.style.transition = 'opacity 0.3s ease';
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.remove();
+      }, 300);
+    }
   } catch (error) {
     console.error('init でエラーが発生しました:', error);
+
+    // エラー時もローディング画面を消す
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.remove();
+    }
+
     // エラーが発生した場合でも基本的な表示を試みる
     try {
       renderAll();
