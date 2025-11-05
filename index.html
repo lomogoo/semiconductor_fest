@@ -722,6 +722,50 @@ li .acquired-check {
     font-weight: 500;
   }
 
+  /* iPhone 13/14対策: backdrop-filterを無効化してメモリ/GPU負荷を軽減 */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS Safari用の最適化 */
+    .liquid-glass,
+    .floating-nav,
+    #nav-indicator,
+    .progress-track,
+    .auth-backdrop,
+    .first-time-warning-modal {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* backdrop-filterの代わりに半透明背景を強化 */
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    .floating-nav {
+      background: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    #nav-indicator {
+      background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(14,165,233,0.15)) !important;
+    }
+
+    .progress-track {
+      background: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    .auth-backdrop {
+      background: rgba(15,23,42,.75) !important;
+    }
+
+    .first-time-warning-modal {
+      background: rgba(15,23,42,.8) !important;
+    }
+
+    /* アニメーションのGPU最適化 */
+    #progress-bar::before {
+      animation: none !important;
+    }
+  }
+
   </style>
   
 </head>
@@ -1174,7 +1218,7 @@ li .acquired-check {
     <div id="badge-just-claimed" class="p-6 space-y-6 hidden">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" />
+          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" loading="lazy" decoding="async" />
         </div>
         <div>
           <div class="text-3xl font-bold text-emerald-600 mb-3">🎉 交換しました！</div>
@@ -1193,7 +1237,7 @@ li .acquired-check {
     <div id="badge-exchange-interface" class="p-6 space-y-6">
       <div class="text-center space-y-4">
         <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-xl">
-          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" />
+          <img src="musubi_yoko.jpeg" alt="むすび丸 ピンバッジ" class="w-full h-full object-contain" loading="lazy" decoding="async" />
         </div>
         <div>
           <div class="text-2xl font-bold text-slate-800 mb-2">むすび丸 ピンバッジ</div>
@@ -1302,7 +1346,7 @@ li .acquired-check {
         <!-- ロゴエリア -->
         <div class="flex items-center gap-3 flex-shrink-0">
           <div class="relative w-16 h-10 rounded-xl overflow-hidden bg-white shadow-md" style="box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);">
-            <img src="logo.png" alt="Logo" class="w-full h-full object-contain p-1" />
+            <img src="logo.png" alt="Logo" class="w-full h-full object-contain p-1" loading="lazy" decoding="async" />
           </div>
         </div>
 
@@ -2419,18 +2463,31 @@ async function startCamera() {
       codeReader = new ZXing.BrowserQRCodeReader();
     }
 
+    // iPhone13/14でのメモリクラッシュ対策: 解像度を大幅に削減
     const constraints = {
       video: {
         facingMode: useBackCamera ? 'environment' : 'user',
-        width: { ideal: 640 },  // iPhone13/14での負荷軽減のため解像度を下げる
-        height: { ideal: 480 }
+        width: { ideal: 480, max: 640 },
+        height: { ideal: 360, max: 480 },
+        frameRate: { ideal: 15, max: 24 }  // フレームレートも制限
       }
     };
 
     scanStream = await navigator.mediaDevices.getUserMedia(constraints);
     if ($app.fullscreenScanner.video) {
       $app.fullscreenScanner.video.srcObject = scanStream;
-      await $app.fullscreenScanner.video.play();
+
+      // iPhone対策: ビデオの再生を待ってからスキャン開始
+      await new Promise((resolve, reject) => {
+        const video = $app.fullscreenScanner.video;
+        video.onloadedmetadata = () => {
+          video.play()
+            .then(resolve)
+            .catch(reject);
+        };
+        // タイムアウト設定
+        setTimeout(() => reject(new Error('Video load timeout')), 5000);
+      });
     }
 
     try {
@@ -2458,6 +2515,8 @@ async function startCamera() {
       $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
     }
 
+    // iPhone対策: スキャン開始前に少し待つ
+    await new Promise(resolve => setTimeout(resolve, 500));
     scanQRCode();
   } catch (err) {
     console.error(err);
@@ -2488,9 +2547,9 @@ async function scanQRCode() {
 
   // iPhone13/14でのメモリリーク・クラッシュ防止:
   // requestAnimationFrame(毎フレーム=約60回/秒)の代わりに
-  // setTimeout(300ms間隔)を使用してCPU/メモリ負荷を軽減
+  // setTimeout(500ms間隔)を使用してCPU/メモリ負荷を軽減
   if (scanning) {
-    scanTimerId = setTimeout(scanQRCode, 300);
+    scanTimerId = setTimeout(scanQRCode, 500);
   }
 }
 
