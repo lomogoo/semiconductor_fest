@@ -21,7 +21,10 @@
       --dot-border: 4px;
       --chip-size: 64px;
     }
-    html { font-family: 'Inter', sans-serif; }
+    html {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-display: swap; /* フォント読み込み時のCLS削減 */
+    }
     body {
       background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f8 25%, #f5f8fa 50%, #e8f0f8 75%, #f2f6f9 100%);
       background-attachment: fixed;
@@ -538,10 +541,12 @@ li .acquired-check {
     /* 企業ロゴグリッドのスタイル */
     #company-logo-grid {
       padding: 0.5rem;
+      min-height: 350px; /* CLS対策: 画像読み込み前の高さ確保 (3行 × 約116px) */
     }
 
     .company-logo-item {
       aspect-ratio: 1;
+      min-height: 100px; /* CLS対策: 最小サイズ確保 */
       border-radius: 12px;
       overflow: visible;
       background: white;
@@ -666,6 +671,41 @@ li .acquired-check {
   
 </head>
 <body>
+  <!-- SVG定義（グラデーション・フィルタ） -->
+  <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
+    <defs>
+      <!-- ハイライトグラデーション -->
+      <linearGradient id="highlight-gradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="white" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- ボーダーグラデーション -->
+      <linearGradient id="border-gradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f1f5f9"/>
+        <stop offset="50%" stop-color="#e2e8f0"/>
+        <stop offset="100%" stop-color="#cbd5e1"/>
+      </linearGradient>
+
+      <!-- 取得済みグラデーション -->
+      <linearGradient id="acquired-gradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6ee7b7"/>
+        <stop offset="50%" stop-color="#34d399"/>
+        <stop offset="100%" stop-color="#10b981"/>
+      </linearGradient>
+
+      <!-- 標準シャドウフィルタ -->
+      <filter id="std-shadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000000" flood-opacity="0.2"/>
+      </filter>
+
+      <!-- 取得済みグローフィルタ -->
+      <filter id="acquired-glow">
+        <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#10b981" flood-opacity="0.75"/>
+      </filter>
+    </defs>
+  </svg>
+
   <!-- ローディング画面 -->
   <div id="loading-screen">
     <div style="text-align: center;">
@@ -2312,14 +2352,15 @@ async function scanQRCode() {
     if (result && result.text) {
       scanning = false;
       await handleScanResult(result.text);
-      return;
+      return; // 成功したら終了
     }
   } catch (err) {
     // 見つからない等は無視してループ継続
   }
 
+  // 競合状態を防ぐ: 次のフレームまで待ってから再帰
   if (scanning) {
-    requestAnimationFrame(() => scanQRCode());
+    requestAnimationFrame(scanQRCode); // 矢印関数を削除（同期的に再帰）
   }
 }
 
@@ -2722,108 +2763,43 @@ function layoutBoothIcons() {
     }
   });
 
-  if (!document.getElementById('highlight-gradient')) {
-    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  // SVG定義はHTMLに移動済み（グラデーション・フィルタ）
+  // 古いコード（グラデーション生成）を削除
 
-    const gradient = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
-    gradient.setAttribute('id', 'highlight-gradient');
-    gradient.setAttribute('x1', '0');
-    gradient.setAttribute('y1', '0');
-    gradient.setAttribute('x2', '0');
-    gradient.setAttribute('y2', '1');
-    const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    stop1.setAttribute('offset', '0%');
-    stop1.setAttribute('stop-color', 'white');
-    stop1.setAttribute('stop-opacity', '0.9');
-    const stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    stop2.setAttribute('offset', '100%');
-    stop2.setAttribute('stop-color', 'white');
-    stop2.setAttribute('stop-opacity', '0');
-    gradient.appendChild(stop1);
-    gradient.appendChild(stop2);
-    defs.appendChild(gradient);
-
-    const borderGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
-    borderGrad.setAttribute('id', 'border-gradient');
-    borderGrad.setAttribute('x1', '0');
-    borderGrad.setAttribute('y1', '0');
-    borderGrad.setAttribute('x2', '0');
-    borderGrad.setAttribute('y2', '1');
-    const b1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    b1.setAttribute('offset', '0%');
-    b1.setAttribute('stop-color', '#f1f5f9');
-    const b2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    b2.setAttribute('offset', '50%');
-    b2.setAttribute('stop-color', '#e2e8f0');
-    const b3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    b3.setAttribute('offset', '100%');
-    b3.setAttribute('stop-color', '#cbd5e1');
-    borderGrad.appendChild(b1);
-    borderGrad.appendChild(b2);
-    borderGrad.appendChild(b3);
-    defs.appendChild(borderGrad);
-
-    const acquiredGrad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
-    acquiredGrad.setAttribute('id', 'acquired-gradient');
-    acquiredGrad.setAttribute('x1', '0');
-    acquiredGrad.setAttribute('y1', '0');
-    acquiredGrad.setAttribute('x2', '0');
-    acquiredGrad.setAttribute('y2', '1');
-    const a1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    a1.setAttribute('offset', '0%');
-    a1.setAttribute('stop-color', '#6ee7b7');
-    const a2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    a2.setAttribute('offset', '50%');
-    a2.setAttribute('stop-color', '#34d399');
-    const a3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
-    a3.setAttribute('offset', '100%');
-    a3.setAttribute('stop-color', '#10b981');
-    acquiredGrad.appendChild(a1);
-    acquiredGrad.appendChild(a2);
-    acquiredGrad.appendChild(a3);
-    defs.appendChild(acquiredGrad);
-
-    const stdShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    stdShadowFilter.setAttribute('id', 'std-shadow');
-    const feStdShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
-    feStdShadow.setAttribute('dx', '0');
-    feStdShadow.setAttribute('dy', '2');
-    feStdShadow.setAttribute('stdDeviation', '6');
-    feStdShadow.setAttribute('flood-color', '#000000');
-    feStdShadow.setAttribute('flood-opacity', '0.2');
-    stdShadowFilter.appendChild(feStdShadow);
-    defs.appendChild(stdShadowFilter);
-
-    const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    glowFilter.setAttribute('id', 'acquired-glow');
-    const feGlowShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
-    feGlowShadow.setAttribute('dx', '0');
-    feGlowShadow.setAttribute('dy', '4');
-    feGlowShadow.setAttribute('stdDeviation', '10');
-    feGlowShadow.setAttribute('flood-color', '#10b981');
-    feGlowShadow.setAttribute('flood-opacity', '0.75');
-    glowFilter.appendChild(feGlowShadow);
-    defs.appendChild(glowFilter);
-
-    $app.map.svg.insertBefore(defs, $app.map.svg.firstChild);
-  }
-
-    g.querySelectorAll('g[data-id]').forEach(el => el.addEventListener('click', () => {
-      const booth = BOOTH_DATA.find(b => b.id === el.dataset.id);
-      if (booth) openBoothSheet(booth);
-    }));
   } catch (error) {
     console.error('layoutBoothIcons でエラーが発生しました:', error);
     // エラーが発生してもアプリを続行
   }
 }
 
-// ========== アンケ注目UI(選択状態の見た目) ==========
+// ========== マップアイコンのイベント設定（イベント委譲でメモリリーク防止） ==========
+function setupMapIconEvents() {
+  const g = $app.map.iconsGroup;
+  if (!g) return;
+
+  // イベント委譲：親要素で一度だけリスナー登録
+  g.addEventListener('click', (e) => {
+    const boothEl = e.target.closest('g[data-id]');
+    if (boothEl) {
+      const booth = BOOTH_DATA.find(b => b.id === boothEl.dataset.id);
+      if (booth) openBoothSheet(booth);
+    }
+  });
+}
+
+// ========== アンケ注目UI(選択状態の見た目・最適化済み) ==========
 function setupSurveyInteractivity() {
+  // ラジオボタンのグループをキャッシュ（querySelectorAllの重複実行を防ぐ）
+  const radioGroups = {};
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    const group = radio.name;
+    if (!radioGroups[group]) {
+      radioGroups[group] = document.querySelectorAll(`input[name="${group}"]`);
+    }
+
     radio.addEventListener('change', (e) => {
-      const group = e.target.name;
-      document.querySelectorAll(`input[name="${group}"]`).forEach(r => {
+      // キャッシュ済みのNodeListを使用
+      radioGroups[group].forEach(r => {
         r.closest('.survey-option').classList.remove('checked');
       });
       e.target.closest('.survey-option').classList.add('checked');
@@ -3034,6 +3010,9 @@ async function init() {
 
   // アンケートのUIハイライト
   setupSurveyInteractivity();
+
+  // マップアイコンのイベント設定（イベント委譲・1回のみ）
+  setupMapIconEvents();
 
   // 最初の描画
   await updatePercentile();
