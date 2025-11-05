@@ -2479,16 +2479,28 @@ async function autoGrantStamp(stampId) {
 
 // ========== トースト ==========
 function showToast(msg) {
-  const el = $app.toast;
-  const box = el.firstElementChild;
-  box.textContent = msg;
-  el.classList.remove('hidden');
-  el.classList.add('animate-bounce');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => {
-    el.classList.add('hidden');
-    el.classList.remove('animate-bounce');
-  }, 1800);
+  try {
+    const el = $app.toast;
+    if (!el) {
+      console.warn('Toast element not found:', msg);
+      return;
+    }
+    const box = el.firstElementChild;
+    if (!box) {
+      console.warn('Toast box element not found:', msg);
+      return;
+    }
+    box.textContent = msg;
+    el.classList.remove('hidden');
+    el.classList.add('animate-bounce');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => {
+      el.classList.add('hidden');
+      el.classList.remove('animate-bounce');
+    }, 1800);
+  } catch (error) {
+    console.error('showToast でエラーが発生しました:', error, 'Message:', msg);
+  }
 }
 
 // ========== マップ(ブースレイアウト) ==========
