@@ -232,6 +232,13 @@
 
     .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 100; }
 
+    /* スキャンボタン無効化スタイル */
+    #scan-card:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(4px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
@@ -1346,7 +1353,7 @@ li .acquired-check {
             <!-- アクションボタンエリア -->
             <div class="mt-5 space-y-3">
               <!-- QRスキャンボタン -->
-              <button id="scan-card" class="w-full relative overflow-hidden rounded-2xl p-4 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);">
+              <button id="scan-card" class="w-full relative overflow-hidden rounded-2xl p-4 ripple" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);" disabled>
                 <div class="relative z-10 flex items-center justify-center gap-3">
                   <div class="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm grid place-items-center text-3xl">
                     📷
@@ -1626,7 +1633,8 @@ const state = {
   percentile: null,
   acquiredStamps: new Set(), // 回ったブースID
   claimedRewards: new Set(), // 交換済み景品
-  surveyCompleted: false
+  surveyCompleted: false,
+  isInitialized: false      // 初期化完了フラグ（カメラクラッシュ防止）
 };
 
 // DOM参照
@@ -2385,6 +2393,13 @@ let scanTimerId = null; // iPhone等でのメモリリーク防止用
 
 async function openFullscreenScanner() {
   try {
+    // 初期化が完了していない場合は警告を表示して中断
+    if (!state.isInitialized) {
+      console.warn('[openFullscreenScanner] App not fully initialized yet');
+      alert('アプリを準備中です。\n数秒お待ちください。');
+      return;
+    }
+
     if ($app.fullscreenScanner.container) {
       $app.fullscreenScanner.container.classList.add('active');
     }
@@ -3254,6 +3269,17 @@ async function init() {
     // 企業名のフォントサイズを調整
     adjustBoothCompanyNameSizes();
 
+    // 初期化完了フラグを設定（カメラクラッシュ防止の重要な処理）
+    state.isInitialized = true;
+    console.log('[init] Initialization completed successfully');
+
+    // スキャンボタンを有効化
+    const scanButton = document.getElementById('scan-card');
+    if (scanButton) {
+      scanButton.disabled = false;
+      console.log('[init] Scan button enabled');
+    }
+
     // #appを表示（初期化完了後）
     const app = document.getElementById('app');
     if (app) {
@@ -3273,6 +3299,13 @@ async function init() {
     }
   } catch (error) {
     console.error('init でエラーが発生しました:', error);
+
+    // エラー時もスキャンボタンを有効化（ただし初期化フラグはfalseのまま）
+    const scanButton = document.getElementById('scan-card');
+    if (scanButton) {
+      scanButton.disabled = false;
+      console.warn('[init] Scan button enabled despite initialization error');
+    }
 
     // エラー時も#appを表示
     const app = document.getElementById('app');
