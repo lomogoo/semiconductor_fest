@@ -2005,10 +2005,15 @@ async function updatePercentile() {
 
 // ========== 進捗・ページ描画系 ==========
 function renderAll() {
-  renderProgress();
-  updateActivePage();
-  if (state.activePage === 'map') {
-    layoutBoothIcons();
+  try {
+    renderProgress();
+    updateActivePage();
+    if (state.activePage === 'map') {
+      layoutBoothIcons();
+    }
+  } catch (error) {
+    console.error('renderAll でエラーが発生しました:', error);
+    // エラーが発生してもアプリを続行
   }
 }
 
@@ -2095,48 +2100,81 @@ function updateAcquiredBadges() {
 }
 
 function updateActivePage() {
-  $app.pages.forEach(p => {
-    const isActive = p.id === `page-${state.activePage}`;
-    p.classList.toggle('active', isActive);
-    p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-  });
+  try {
+    if ($app.pages) {
+      $app.pages.forEach(p => {
+        if (!p) return;
+        const isActive = p.id === `page-${state.activePage}`;
+        p.classList.toggle('active', isActive);
+        p.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+    }
 
-  let activeBtn = null;
-  $app.navButtons.forEach(btn => {
-    const isActive = btn.dataset.page === state.activePage;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-current', isActive ? 'page' : 'false');
-    if (isActive) activeBtn = btn;
-  });
+    let activeBtn = null;
+    if ($app.navButtons) {
+      $app.navButtons.forEach(btn => {
+        if (!btn) return;
+        const isActive = btn.dataset.page === state.activePage;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-current', isActive ? 'page' : 'false');
+        if (isActive) activeBtn = btn;
+      });
+    }
 
-  if (activeBtn) {
-    const btnW = activeBtn.offsetWidth;
-    const indW = Math.max(56, Math.round(btnW * 0.66));
-    const left = activeBtn.offsetLeft + (btnW - indW) / 2;
-    $app.navIndicator.style.width = `${indW}px`;
-    $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
-  }
+    if (activeBtn && $app.navIndicator) {
+      const btnW = activeBtn.offsetWidth;
+      const indW = Math.max(56, Math.round(btnW * 0.66));
+      const left = activeBtn.offsetLeft + (btnW - indW) / 2;
+      $app.navIndicator.style.width = `${indW}px`;
+      $app.navIndicator.style.transform = `translate(${left}px, -50%)`;
+    }
 
-  const pageTitles = { home: 'ホーム', map: 'マップ' };
-  $app.headerTitle.textContent = pageTitles[state.activePage];
+    const pageTitles = { home: 'ホーム', map: 'マップ' };
+    if ($app.headerTitle) {
+      $app.headerTitle.textContent = pageTitles[state.activePage];
+    }
 
-  if (state.activePage === 'map') {
-    layoutBoothIcons();
+    if (state.activePage === 'map') {
+      layoutBoothIcons();
+    }
+  } catch (error) {
+    console.error('updateActivePage でエラーが発生しました:', error);
+    // エラーが発生してもアプリを続行
   }
 }
 
 // ========== ブース 詳細シート ==========
 function openBoothSheet(booth) {
-  $app.boothSheet.title.textContent = booth.name;
-  $app.boothSheet.desc.textContent = booth.desc;
-
-  $app.boothSheet.el.classList.add('is-open');
-  $app.boothSheet.backdrop.classList.add('is-open');
+  try {
+    if (!booth) return;
+    if ($app.boothSheet.title) {
+      $app.boothSheet.title.textContent = booth.name;
+    }
+    if ($app.boothSheet.desc) {
+      $app.boothSheet.desc.textContent = booth.desc;
+    }
+    if ($app.boothSheet.el) {
+      $app.boothSheet.el.classList.add('is-open');
+    }
+    if ($app.boothSheet.backdrop) {
+      $app.boothSheet.backdrop.classList.add('is-open');
+    }
+  } catch (error) {
+    console.error('openBoothSheet でエラーが発生しました:', error);
+  }
 }
 
 function closeBoothSheet() {
-  $app.boothSheet.el.classList.remove('is-open');
-  $app.boothSheet.backdrop.classList.remove('is-open');
+  try {
+    if ($app.boothSheet.el) {
+      $app.boothSheet.el.classList.remove('is-open');
+    }
+    if ($app.boothSheet.backdrop) {
+      $app.boothSheet.backdrop.classList.remove('is-open');
+    }
+  } catch (error) {
+    console.error('closeBoothSheet でエラーが発生しました:', error);
+  }
 }
 
 // ========== スキャナ関連 ==========
@@ -2147,18 +2185,32 @@ let scanning = false;
 let codeReader = null;
 
 async function openFullscreenScanner() {
-  $app.fullscreenScanner.container.classList.add('active');
-  await startCamera();
+  try {
+    if ($app.fullscreenScanner.container) {
+      $app.fullscreenScanner.container.classList.add('active');
+    }
+    await startCamera();
+  } catch (error) {
+    console.error('openFullscreenScanner でエラーが発生しました:', error);
+  }
 }
 
 function closeFullscreenScanner() {
-  stopCamera();
-  $app.fullscreenScanner.container.classList.remove('active');
+  try {
+    stopCamera();
+    if ($app.fullscreenScanner.container) {
+      $app.fullscreenScanner.container.classList.remove('active');
+    }
+  } catch (error) {
+    console.error('closeFullscreenScanner でエラーが発生しました:', error);
+  }
 }
 
 async function startCamera() {
   try {
-    $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
+    if ($app.fullscreenScanner.status) {
+      $app.fullscreenScanner.status.textContent = 'カメラを起動中…';
+    }
 
     if (!codeReader) {
       codeReader = new ZXing.BrowserQRCodeReader();
@@ -2173,35 +2225,47 @@ async function startCamera() {
     };
 
     scanStream = await navigator.mediaDevices.getUserMedia(constraints);
-    $app.fullscreenScanner.video.srcObject = scanStream;
-    await $app.fullscreenScanner.video.play();
+    if ($app.fullscreenScanner.video) {
+      $app.fullscreenScanner.video.srcObject = scanStream;
+      await $app.fullscreenScanner.video.play();
+    }
 
     try {
       const [track] = scanStream.getVideoTracks();
       const caps = track.getCapabilities?.();
       if (caps && 'torch' in caps) {
         trackWithTorch = track;
-        $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+        if ($app.fullscreenScanner.torchBtn) {
+          $app.fullscreenScanner.torchBtn.classList.remove('opacity-50', 'pointer-events-none');
+        }
       } else {
-        $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+        if ($app.fullscreenScanner.torchBtn) {
+          $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+        }
       }
     } catch (e) {
       console.warn('Torch not available');
-      $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+      if ($app.fullscreenScanner.torchBtn) {
+        $app.fullscreenScanner.torchBtn.classList.add('opacity-50', 'pointer-events-none');
+      }
     }
 
     scanning = true;
-    $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+    if ($app.fullscreenScanner.status) {
+      $app.fullscreenScanner.status.textContent = 'QRコードを枠内に写してください';
+    }
 
     scanQRCode();
   } catch (err) {
     console.error(err);
-    $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+    if ($app.fullscreenScanner.status) {
+      $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
+    }
   }
 }
 
 async function scanQRCode() {
-  if (!scanning || !$app.fullscreenScanner.video.srcObject) return;
+  if (!scanning || !$app.fullscreenScanner.video || !$app.fullscreenScanner.video.srcObject) return;
 
   try {
     const result = await codeReader.decodeOnceFromVideoDevice(undefined, 'fullscreen-video');
@@ -2238,22 +2302,26 @@ async function stopCamera() {
     scanStream = null;
   }
 
-  if ($app.fullscreenScanner.video.srcObject) {
+  if ($app.fullscreenScanner.video && $app.fullscreenScanner.video.srcObject) {
     $app.fullscreenScanner.video.srcObject = null;
   }
 
   trackWithTorch = null;
-  $app.fullscreenScanner.torchBtn.dataset.on = '0';
-  $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
+  if ($app.fullscreenScanner.torchBtn) {
+    $app.fullscreenScanner.torchBtn.dataset.on = '0';
+    $app.fullscreenScanner.torchBtn.classList.remove('bg-amber-200');
+  }
 }
 
 async function toggleTorch() {
-  if (!trackWithTorch) return;
+  if (!trackWithTorch || !$app.fullscreenScanner.torchBtn) return;
   const on = $app.fullscreenScanner.torchBtn.dataset.on === '1';
   try {
     await trackWithTorch.applyConstraints({ advanced: [{ torch: !on }] });
-    $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
-    $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
+    if ($app.fullscreenScanner.torchBtn) {
+      $app.fullscreenScanner.torchBtn.dataset.on = on ? '0' : '1';
+      $app.fullscreenScanner.torchBtn.classList.toggle('bg-amber-200');
+    }
   } catch (e) {
     console.warn('Torch not available', e);
   }
@@ -2733,12 +2801,13 @@ function setupSurveyInteractivity() {
 
 // ========== init() ==========
 async function init() {
-  // URLパラメータ (ネイティブカメラ or 深いリンク)
-  const urlParams = new URLSearchParams(window.location.search);
-  const stampId = urlParams.get('stamp');
+  try {
+    // URLパラメータ (ネイティブカメラ or 深いリンク)
+    const urlParams = new URLSearchParams(window.location.search);
+    const stampId = urlParams.get('stamp');
 
-  // 匿名ユーザー準備 & サーバー側と同期 (ユーザー作成もここでやる)
-  await ensureAuth();
+    // 匿名ユーザー準備 & サーバー側と同期 (ユーザー作成もここでやる)
+    await ensureAuth();
 
   // 最初の最新状態を取得（ポイント/スタンプ一覧/percentileなど）
   await syncPointsFromServer();
@@ -2921,8 +2990,17 @@ async function init() {
   // Update survey action button based on survey and badge claim status
   updateSurveyActionButton();
 
-  // 企業名のフォントサイズを調整
-  adjustBoothCompanyNameSizes();
+    // 企業名のフォントサイズを調整
+    adjustBoothCompanyNameSizes();
+  } catch (error) {
+    console.error('init でエラーが発生しました:', error);
+    // エラーが発生した場合でも基本的な表示を試みる
+    try {
+      renderAll();
+    } catch (renderError) {
+      console.error('renderAll でもエラーが発生しました:', renderError);
+    }
+  }
 }
 // DOM構築後に初期化を1回だけ呼ぶ
 document.addEventListener('DOMContentLoaded', init);
