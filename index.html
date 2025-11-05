@@ -224,6 +224,59 @@
 
     .toast { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); z-index: 100; }
 
+    /* エラーログ表示 */
+    #error-log-container {
+      position: fixed;
+      bottom: 88px;
+      right: 12px;
+      max-width: 400px;
+      max-height: 60vh;
+      overflow-y: auto;
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .error-log-item {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      font-size: 12px;
+      line-height: 1.4;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .error-log-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    .error-log-item .error-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .error-log-item .error-message {
+      opacity: 0.95;
+      word-break: break-word;
+    }
+    .error-log-item .error-timestamp {
+      margin-top: 4px;
+      opacity: 0.7;
+      font-size: 10px;
+    }
+    @media (max-width: 640px) {
+      #error-log-container {
+        right: 8px;
+        left: 8px;
+        max-width: none;
+      }
+    }
+
     .auth-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(4px); z-index: 80; display:none; }
     .auth-backdrop.show { display:block; }
     .auth-modal { position: fixed; inset: 0; z-index: 90; display:none; align-items: center; justify-content: center; overflow-y: auto; }
@@ -1416,6 +1469,9 @@ li .acquired-check {
       <div class="px-4 py-2 rounded-2xl bg-sky-600 text-white shadow-lg"></div>
     </div>
 
+    <!-- エラーログ表示エリア -->
+    <div id="error-log-container"></div>
+
     <div class="fixed bottom-0 left-0 right-0 z-40 p-3">
       <nav class="h-16 grid grid-cols-2 items-center floating-nav rounded-3xl">
         <div id="nav-indicator"></div>
@@ -1462,12 +1518,24 @@ async function callEdgeFunction(functionName, body = {}, timeout = 10000) {
       clearTimeout(timeoutId);
       if (fetchError.name === 'AbortError') {
         console.error(`[callEdgeFunction] ${functionName} timed out after ${timeout}ms`);
+        showError(
+          'API タイムアウト',
+          `${functionName} が${timeout/1000}秒でタイムアウトしました。ネットワークが遅い可能性があります。`,
+          { functionName, timeout, body }
+        );
         throw new Error(`Request timeout: ${functionName}`);
       }
       throw fetchError;
     }
   } catch (error) {
     console.error(`[callEdgeFunction] ${functionName} failed:`, error);
+    if (!error.message.includes('timeout')) {
+      showError(
+        'API エラー',
+        `${functionName}: ${error.message}`,
+        { functionName, error: error.toString(), body }
+      );
+    }
     throw error;
   }
 }
@@ -2035,6 +2103,11 @@ async function ensureAuth() {
     }
   } catch (err) {
     console.error('[ensureAuth] Failed to sync user from server:', err);
+    showError(
+      'ユーザー認証エラー',
+      'サーバーとの同期に失敗しました。ローカルデータで動作を継続します。',
+      { error: err.toString(), uuid, registrationType }
+    );
     // タイムアウトやネットワークエラーでもアプリは動作を継続（オフライン対応）
     // ローカルストレージから前回のデータを復元
     const savedUser = loadLocalUser();
@@ -2089,6 +2162,11 @@ async function syncPointsFromServer() {
     updateSurveyActionButton();
   } catch (err) {
     console.error('[syncPointsFromServer] Failed to sync points:', err);
+    showError(
+      'データ同期エラー',
+      'サーバーからのデータ取得に失敗しました。ローカルデータで表示を継続します。',
+      { error: err.toString(), userId: state.user?.id }
+    );
     // タイムアウトやネットワークエラーでも、ローカルデータで表示を継続
     // ローカルストレージのデータを使って表示を更新
     try {
@@ -2096,6 +2174,11 @@ async function syncPointsFromServer() {
       renderAll();
     } catch (renderErr) {
       console.error('[syncPointsFromServer] Render failed:', renderErr);
+      showError(
+        'レンダリングエラー',
+        '画面の更新に失敗しました。',
+        { error: renderErr.toString() }
+      );
     }
   }
 }
@@ -2306,6 +2389,11 @@ async function openFullscreenScanner() {
     await startCamera();
   } catch (error) {
     console.error('openFullscreenScanner でエラーが発生しました:', error);
+    showError(
+      'スキャナー起動エラー',
+      'QRスキャナーの起動に失敗しました。',
+      { error: error.toString() }
+    );
   }
 }
 
@@ -2372,6 +2460,11 @@ async function startCamera() {
     scanQRCode();
   } catch (err) {
     console.error(err);
+    showError(
+      'カメラエラー',
+      'カメラにアクセスできません。ブラウザの設定でカメラ権限を許可してください。',
+      { error: err.toString(), useBackCamera }
+    );
     if ($app.fullscreenScanner.status) {
       $app.fullscreenScanner.status.textContent = 'カメラにアクセスできません。設定を確認してください。';
     }
@@ -2615,6 +2708,61 @@ function showToast(msg) {
     }, 1800);
   } catch (error) {
     console.error('showToast でエラーが発生しました:', error, 'Message:', msg);
+  }
+}
+
+// ========== エラーログ表示 ==========
+function showError(title, message, context = {}) {
+  try {
+    const container = document.getElementById('error-log-container');
+    if (!container) {
+      console.warn('Error log container not found');
+      return;
+    }
+
+    // タイムスタンプ生成
+    const timestamp = new Date().toLocaleTimeString('ja-JP');
+
+    // エラーアイテムを作成
+    const errorItem = document.createElement('div');
+    errorItem.className = 'error-log-item';
+    errorItem.innerHTML = `
+      <div class="error-title">🚨 ${title}</div>
+      <div class="error-message">${message}</div>
+      <div class="error-timestamp">${timestamp}</div>
+    `;
+
+    // クリックで詳細を表示してから削除
+    errorItem.addEventListener('click', () => {
+      if (Object.keys(context).length > 0) {
+        console.log('[Error Context]', context);
+        alert(`エラー詳細:\n${title}\n\n${message}\n\nコンソールに追加情報を出力しました。`);
+      }
+      errorItem.style.opacity = '0';
+      setTimeout(() => errorItem.remove(), 300);
+    });
+
+    // コンテナに追加
+    container.appendChild(errorItem);
+
+    // 自動削除（15秒後）
+    setTimeout(() => {
+      if (errorItem.parentElement) {
+        errorItem.style.opacity = '0';
+        setTimeout(() => errorItem.remove(), 300);
+      }
+    }, 15000);
+
+    // 最大5件まで保持
+    const items = container.querySelectorAll('.error-log-item');
+    if (items.length > 5) {
+      items[0].remove();
+    }
+
+    // コンソールにも出力
+    console.error(`[${title}]`, message, context);
+  } catch (error) {
+    console.error('showError でエラーが発生しました:', error);
   }
 }
 
@@ -3069,6 +3217,11 @@ async function init() {
     }
   } catch (error) {
     console.error('init でエラーが発生しました:', error);
+    showError(
+      '初期化エラー',
+      'アプリの初期化中にエラーが発生しました。基本的な機能は動作します。',
+      { error: error.toString(), stack: error.stack }
+    );
 
     // エラー時もローディング画面を消す
     const loadingScreen = document.getElementById('loading-screen');
@@ -3081,6 +3234,11 @@ async function init() {
       renderAll();
     } catch (renderError) {
       console.error('renderAll でもエラーが発生しました:', renderError);
+      showError(
+        'レンダリングエラー',
+        '画面の描画中にエラーが発生しました。',
+        { error: renderError.toString() }
+      );
     }
   }
 }
